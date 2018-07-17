@@ -1,49 +1,59 @@
 package main
 
 import (
-    "flag"
     "os"
     "fmt"
+    "path/filepath"
+    "github.com/cmcpasserby/unity-loader/internal"
+    "log"
+    "os/exec"
 )
 
 func main() {
-    askCommand := flag.NewFlagSet("Question", flag.ExitOnError)
-    questionFlag := askCommand.String("question", "", "Question that you are asking for")
+    if len(os.Args[1:]) > 1 {
+        switch os.Args[1] {
+        case "run":
+            runUnity(os.Args[2])
+        case "version":
+            printVersion(os.Args[2])
+        default:
+            fmt.Printf("%q is not a valid command.\n", os.Args[1])
+        }
+    } else {
+        runUnity(os.Args[1])
+    }
+}
 
-    sendCommand := flag.NewFlagSet("send", flag.ExitOnError)
-    recipientFlag := sendCommand.String("recipient", "", "Recipient of your message")
-    messageFlag := sendCommand.String("message", "", "Text message")
-
-    switch os.Args[1] {
-    case "ask":
-        askCommand.Parse(os.Args[2:])
-    case "send":
-        sendCommand.Parse(os.Args[2:])
-    default:
-        fmt.Printf("%q is not a valid command.\n", os.Args[1])
-        os.Exit(2)
+func runUnity(path string) {
+    versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
+    if _, err := os.Stat(versionFile); os.IsNotExist(err) {
+        fmt.Printf("%q is not a valid unity project", path)
     }
 
-    if askCommand.Parsed() {
-        if *questionFlag == "" {
-            fmt.Println("Please supply the question using -question.")
-            return
-        }
-        fmt.Printf("You asked: %q\n", *questionFlag)
+    version, err := unityUtils.GetUnityVersion(versionFile)
+    if err != nil {
+        log.Fatal(err)
     }
 
-    if sendCommand.Parsed() {
-        if *recipientFlag == "" {
-            fmt.Println("Please supply the recipient using -recipient option.")
-            return
-        }
-
-        if *messageFlag == "" {
-            fmt.Println("Please supply the message using the -message option.")
-            return
-        }
-
-        fmt.Printf("Your message is sent to %q.\n", *recipientFlag)
-        fmt.Printf("Message: %q.\n", *messageFlag)
+    app, err := unityUtils.GetExecutable(version)
+    if err != nil {
+        log.Fatal(err)
     }
+
+    fmt.Printf("Opening Unity Version: %q", version)
+    exec.Command("open", app, "--args -projectPath", path)
+}
+
+func printVersion(path string) {
+    versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
+    if _, err := os.Stat(versionFile); os.IsNotExist(err) {
+        fmt.Printf("%q is not a valid unity project", path)
+    }
+
+    version, err := unityUtils.GetUnityVersion(versionFile)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("version: %q", version)
 }

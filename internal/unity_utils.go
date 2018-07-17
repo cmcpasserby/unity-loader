@@ -33,6 +33,7 @@ func GetExecutable(version string) (string, error) {
         log.Fatal(err)
     }
 
+    var execPath string
     for _, path := range unityPaths {
         plistPath := filepath.Join(path, "Contents/info.plist")
         file, _ := os.Open(plistPath)
@@ -44,10 +45,16 @@ func GetExecutable(version string) (string, error) {
             log.Fatal(err)
         }
 
-        return appInfo.CFBundleVersion, nil
-
+        if appInfo.CFBundleVersion == version {
+            execPath = path
+        }
         file.Close()
     }
+
+    if execPath != "" {
+        return execPath, nil
+    }
+
     return "", errors.New(fmt.Sprintf("unity version %q not found", version))
 }
 
