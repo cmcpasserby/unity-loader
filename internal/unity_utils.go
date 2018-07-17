@@ -55,7 +55,7 @@ func GetExecutable(version string) (string, error) {
         return execPath, nil
     }
 
-    return "", errors.New(fmt.Sprintf("unity version %q not found", version))
+    return "", errors.New(fmt.Sprintf("unity version %s not found", version))
 }
 
 type appInfoDict struct {

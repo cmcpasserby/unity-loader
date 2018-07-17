@@ -27,7 +27,7 @@ func main() {
 func runUnity(path string) {
     versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
     if _, err := os.Stat(versionFile); os.IsNotExist(err) {
-        fmt.Printf("%q is not a valid unity project", path)
+        fmt.Printf("%q is not a valid unity project\n", path)
     }
 
     version, err := unityUtils.GetUnityVersion(versionFile)
@@ -40,14 +40,14 @@ func runUnity(path string) {
         log.Fatal(err)
     }
 
-    fmt.Printf("Opening Unity Version: %q", version)
+    fmt.Printf("Opening Unity Version: %s", version)
     exec.Command("open", app, "--args -projectPath", path)
 }
 
 func printVersion(path string) {
     versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
     if _, err := os.Stat(versionFile); os.IsNotExist(err) {
-        fmt.Printf("%q is not a valid unity project", path)
+        fmt.Printf("%q is not a valid unity project\n", path)
     }
 
     version, err := unityUtils.GetUnityVersion(versionFile)
@@ -55,5 +55,5 @@ func printVersion(path string) {
         log.Fatal(err)
     }
 
-    fmt.Printf("version: %q", version)
+    fmt.Printf("version: %s\n", version)
 }
