@@ -34,11 +34,13 @@ func GetExecutable(version string) (string, error) {
     }
 
     var execPath string
+
     for _, path := range unityPaths {
         plistPath := filepath.Join(path, "Contents/info.plist")
         file, _ := os.Open(plistPath)
 
         var appInfo appInfoDict
+
         decoder := plist.NewDecoder(file)
         err := decoder.Decode(&appInfo)
         if err != nil {
@@ -47,6 +49,8 @@ func GetExecutable(version string) (string, error) {
 
         if appInfo.CFBundleVersion == version {
             execPath = path
+            file.Close()
+            break
         }
         file.Close()
     }

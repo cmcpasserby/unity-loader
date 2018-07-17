@@ -41,7 +41,7 @@ func runUnity(path string) {
     }
 
     fmt.Printf("Opening Unity Version: %s", version)
-    exec.Command("open", app, "--args -projectPath", path)
+    exec.Command("open", app)
 }
 
 func printVersion(path string) {
@@ -55,5 +55,7 @@ func printVersion(path string) {
         log.Fatal(err)
     }
 
-    fmt.Printf("version: %s\n", version)
+    app, err := unityUtils.GetExecutable(version)
+
+    fmt.Printf("version: %s, installed: %t\n", version, app != "")
 }
