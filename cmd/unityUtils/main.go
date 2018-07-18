@@ -5,8 +5,8 @@ import (
     "fmt"
     "path/filepath"
     "log"
-    "os/exec"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
+    "os/exec"
 )
 
 func main() {
@@ -35,13 +35,19 @@ func runUnity(path string) {
         log.Fatal(err)
     }
 
-    app, err := unity.GetExecutable(version)
+    appPath, err := unity.GetExecutable(version)
     if err != nil {
         log.Fatal(err)
     }
 
     fmt.Printf("Opening Unity Version: %s", version)
-    exec.Command("open", app)
+
+    app := exec.Command("open", "-a", appPath, "--args", "-projectPath", path)
+
+    err = app.Run()
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 
 func printVersion(path string) {
