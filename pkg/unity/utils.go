@@ -1,4 +1,4 @@
-package loader
+package unity
 
 import (
     "os"
@@ -10,6 +10,10 @@ import (
     "howett.net/plist"
     "fmt"
 )
+
+type appInfoDict struct {
+    CFBundleVersion string `plist:"CFBundleVersion"`
+}
 
 func GetUnityVersion(versionFile string) (string, error) {
     file, _ := os.Open(versionFile)
@@ -60,8 +64,4 @@ func GetExecutable(version string) (string, error) {
     }
 
     return "", errors.New(fmt.Sprintf("unity version %s not found", version))
-}
-
-type appInfoDict struct {
-    CFBundleVersion string `plist:"CFBundleVersion"`
 }
