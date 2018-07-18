@@ -30,12 +30,12 @@ func runUnity(path string) {
         fmt.Printf("%q is not a valid unity project\n", path)
     }
 
-    version, err := unity.GetUnityVersion(versionFile)
+    version, err := unity.GetVersionFromProject(versionFile)
     if err != nil {
         log.Fatal(err)
     }
 
-    appPath, err := unity.GetExecutable(version)
+    appPath, err := unity.GetExecutableFromVersion(version)
     if err != nil {
         log.Fatal(err)
     }
@@ -59,12 +59,12 @@ func printVersion(path string) {
         fmt.Printf("%q is not a valid unity project\n", path)
     }
 
-    version, err := unity.GetUnityVersion(versionFile)
+    version, err := unity.GetVersionFromProject(versionFile)
     if err != nil {
         log.Fatal(err)
     }
 
-    app, err := unity.GetExecutable(version)
+    app, err := unity.GetExecutableFromVersion(version)
 
     fmt.Printf("version: %s, installed: %t\n", version, app != "")
 }

@@ -15,7 +15,7 @@ type appInfoDict struct {
     CFBundleVersion string `plist:"CFBundleVersion"`
 }
 
-func GetUnityVersion(versionFile string) (string, error) {
+func GetVersionFromProject(versionFile string) (string, error) {
     file, _ := os.Open(versionFile)
     defer file.Close()
 
@@ -31,7 +31,7 @@ func GetUnityVersion(versionFile string) (string, error) {
     return "", errors.New("invalid ProjectVersion.txt")
 }
 
-func GetExecutable(version string) (string, error) {
+func GetExecutableFromVersion(version string) (string, error) {
     unityPaths, err := filepath.Glob("/Applications/**/Unity.app")
     if err != nil {
         log.Fatal(err)
