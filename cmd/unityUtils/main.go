@@ -40,9 +40,12 @@ func runUnity(path string) {
         log.Fatal(err)
     }
 
-    fmt.Printf("Opening Unity Version: %s", version)
+    absProjectPath, _ := filepath.Abs(path)
 
-    app := exec.Command("open", "-a", appPath, "--args", "-projectPath", path)
+
+    fmt.Printf("Opening Unity Version: %s\n", version)
+
+    app := exec.Command("open", "-a", appPath, "--args", "-projectPath", absProjectPath)
 
     err = app.Run()
     if err != nil {
