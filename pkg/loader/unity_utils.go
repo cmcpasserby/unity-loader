@@ -1,4 +1,4 @@
-package unityUtils
+package loader
 
 import (
     "os"

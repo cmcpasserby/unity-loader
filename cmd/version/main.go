@@ -1,10 +1,10 @@
-package version
+package main
 
 import (
     "path/filepath"
     "os"
     "fmt"
-    "github.com/cmcpasserby/unity-loader/internal"
+    "github.com/cmcpasserby/unity-loader/pkg/loader"
     "log"
 )
 
@@ -18,12 +18,12 @@ func printVersion(path string) {
         fmt.Printf("%q is not a valid unity project\n", path)
     }
 
-    version, err := unityUtils.GetUnityVersion(versionFile)
+    version, err := loader.GetUnityVersion(versionFile)
     if err != nil {
         log.Fatal(err)
     }
 
-    app, err := unityUtils.GetExecutable(version)
+    app, err := loader.GetExecutable(version)
 
     fmt.Printf("version: %s, installed: %t\n", version, app != "")
 }
