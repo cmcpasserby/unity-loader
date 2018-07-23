@@ -67,4 +67,6 @@ func printVersion(path string) {
     app, err := unity.GetExecutableFromVersion(version)
 
     fmt.Printf("version: %s, installed: %t\n", version, app != "")
+
+    unity.ParseVersions(unity.UnityDownloads, version)
 }
