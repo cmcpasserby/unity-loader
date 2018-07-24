@@ -7,6 +7,7 @@ import (
     "log"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "os/exec"
+    "bufio"
 )
 
 func main() {
@@ -16,6 +17,8 @@ func main() {
             runUnity(os.Args[2])
         case "version":
             printVersion(os.Args[2])
+        case "install":
+            install(os.Args[2])
         default:
             fmt.Printf("%q is not a valid command.\n", os.Args[1])
         }
@@ -42,7 +45,6 @@ func runUnity(path string) {
 
     absProjectPath, _ := filepath.Abs(path)
 
-
     fmt.Printf("Opening Unity Version: %s\n", version)
 
     app := exec.Command("open", "-a", appPath, "--args", "-projectPath", absProjectPath)
@@ -64,9 +66,17 @@ func printVersion(path string) {
         log.Fatal(err)
     }
 
-    app, err := unity.GetExecutableFromVersion(version)
+    _, err = unity.GetExecutableFromVersion(version)
+    fmt.Printf("version: %s, installed: %t\n", version, err == nil)
+}
 
-    fmt.Printf("version: %s, installed: %t\n", version, app != "")
-
-    unity.ParseVersions(unity.UnityDownloads, version)
+func install(version string) {
+    buf := bufio.NewReader(os.Stdin)
+    fmt.Printf("> ")
+    data, err := buf.ReadString('\n')
+    if err != nil {
+        fmt.Println(data)
+    } else {
+        fmt.Println(data)
+    }
 }
