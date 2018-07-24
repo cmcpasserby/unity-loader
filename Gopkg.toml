@@ -25,6 +25,10 @@
 #   unused-packages = true
 
 
+[[constraint]]
+  branch = "master"
+  name = "howett.net/plist"
+
 [prune]
   go-tests = true
   unused-packages = true
