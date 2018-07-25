@@ -15,6 +15,7 @@ func main() {
         fmt.Println("  run         run the passed in project with a auto detected version of unity")
         fmt.Println("  version     check what version of unity a project is using")
         fmt.Println("  list        list all installed unity versions")
+        return
     }
 
     switch os.Args[1] {
