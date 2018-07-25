@@ -5,14 +5,25 @@ import (
     "bufio"
     "strings"
     "errors"
-    "path/filepath"
-    "log"
-    "howett.net/plist"
     "fmt"
+    "path/filepath"
+    "howett.net/plist"
+    "os/exec"
 )
+
+type InstallInfo struct {
+    Version string
+    Path string
+}
 
 type appInfoDict struct {
     CFBundleVersion string `plist:"CFBundleVersion"`
+}
+
+func (info *InstallInfo) Run(project string) error {
+    absProject, _ := filepath.Abs(project)
+    app := exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject)
+    return app.Run()
 }
 
 func GetVersionFromProject(versionFile string) (string, error) {
@@ -31,13 +42,10 @@ func GetVersionFromProject(versionFile string) (string, error) {
     return "", errors.New("invalid ProjectVersion.txt")
 }
 
-func GetExecutableFromVersion(version string) (string, error) {
-    unityPaths, err := filepath.Glob("/Applications/**/Unity.app")
-    if err != nil {
-        log.Fatal(err)
-    }
+func GetInstalls() []InstallInfo {
+    unityPaths, _ := filepath.Glob("/Applications/**/Unity.app")
 
-    var execPath string
+    var installs []InstallInfo
 
     for _, path := range unityPaths {
         plistPath := filepath.Join(path, "Contents/info.plist")
@@ -46,22 +54,21 @@ func GetExecutableFromVersion(version string) (string, error) {
         var appInfo appInfoDict
 
         decoder := plist.NewDecoder(file)
-        err := decoder.Decode(&appInfo)
-        if err != nil {
-            log.Fatal(err)
-        }
+        decoder.Decode(&appInfo)
 
-        if appInfo.CFBundleVersion == version {
-            execPath = path
-            file.Close()
-            break
-        }
-        file.Close()
+        installData := InstallInfo{Version: appInfo.CFBundleVersion, Path: path}
+        installs = append(installs, installData)
     }
+    return installs
+}
 
-    if execPath != "" {
-        return execPath, nil
+func GetInstallFromVersion(version string) (InstallInfo, error) {
+    Installs := GetInstalls()
+
+    for _, install := range Installs {
+        if version == install.Version {
+            return install, nil
+        }
     }
-
-    return "", errors.New(fmt.Sprintf("unity version %s not found", version))
+    return InstallInfo{}, errors.New(fmt.Sprintf("unity version %s not found", version))
 }

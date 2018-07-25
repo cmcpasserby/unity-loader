@@ -6,28 +6,27 @@ import (
     "path/filepath"
     "log"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
-    "os/exec"
-    "bufio"
 )
 
 func main() {
-    if len(os.Args[1:]) == 1 {
-        runUnity(os.Args[1])
-        return
+    if len(os.Args) == 1 {
+        fmt.Println("usage: unity-loader <command>, [project_path]")
+        fmt.Println("commands are: ")
+        fmt.Println("  run         run the passed in project with a auto detected version of unity")
+        fmt.Println("  version     check what version of unity a project is using")
+        fmt.Println("  list        list all installed unity versions")
     }
 
-    if len(os.Args[1:]) == 2 {
-        switch os.Args[1] {
-        case "run":
-            runUnity(os.Args[2])
-        case "version":
-            printVersion(os.Args[2])
-        default:
-            log.Fatalf("%q is not a valid command.\n", os.Args[1])
-        }
-        return
+    switch os.Args[1] {
+    case "run":
+        runUnity(os.Args[2])
+    case "version":
+        printVersion(os.Args[2])
+    case "list":
+        listVersions()
+    default:
+        log.Fatalf("%q is not a valid command.\n", os.Args[1])
     }
-    log.Fatalf("Received a invalid number of arguemants got %d expected 1 to 2\n", len(os.Args[1:]))
 }
 
 func runUnity(path string) {
@@ -41,22 +40,15 @@ func runUnity(path string) {
         log.Fatal(err)
     }
 
-    appPath, err := unity.GetExecutableFromVersion(version)
+    appInstall, err := unity.GetInstallFromVersion(version)
     if err != nil {
-        fmt.Printf("Unity version %q not found\nDo you want to download and install? (yes|no): ", version)
-        buf := bufio.NewReader(os.Stdin)
-        data, _ := buf.ReadString('\n')
-        fmt.Println(data)
-        return
+        log.Fatalf("Unity version %q not found", version)
     }
 
-    absProjectPath, _ := filepath.Abs(path)
-    fmt.Printf("Opening Unity Version: %s\n", version)
-
-    app := exec.Command("open", "-a", appPath, "--args", "-projectPath", absProjectPath)
-    err = app.Run()
+    fmt.Printf("Opening project %q in version: %s\n", path, version)
+    err = appInstall.Run(path)
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("Could not execute unity from %q", appInstall.Path)
     }
 }
 
@@ -71,6 +63,12 @@ func printVersion(path string) {
         log.Fatal(err)
     }
 
-    _, err = unity.GetExecutableFromVersion(version)
+    _, err = unity.GetInstallFromVersion(version)
     fmt.Printf("version: %s, installed: %t\n", version, err == nil)
+}
+
+func listVersions() {
+    for _, data := range unity.GetInstalls() {
+        fmt.Printf("Version: %s Path: %q\n", data.Version, data.Path)
+    }
 }
