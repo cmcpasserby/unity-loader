@@ -8,13 +8,17 @@ import (
     "regexp"
 )
 
-const UnityDownloads = "https://unity3d.com/get-unity/download/archive"
-const UnityLtsDownloads = "https://unity3d.com/unity/qa/lts-releases"
-const UnityPatches = "https://unity3d.com/unity/qa/patch-releases"
-const UnityBetas = "https://unity3d.com/unity/beta-download"
+const (
+    UnityDownloads = "https://unity3d.com/get-unity/download/archive"
+    UnityLtsDownloads = "https://unity3d.com/unity/qa/lts-releases"
+    UnityPatches = "https://unity3d.com/unity/qa/patch-releases"
+    UnityBetas = "https://unity3d.com/unity/beta-download"
+)
 
-const downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`
-const VersionRE = `^(\d+)?(?:\.(\d+)(?:\.(\d+))?)?(?:(\w)(?:(\d+))?)?$`
+const (
+    downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`
+    versionRE = `^(\d+)?(?:\.(\d+)(?:\.(\d+))?)?(?:(\w)(?:(\d+))?)?$`
+)
 
 func ParseVersions(url string, version string) {
     downloadRe := regexp.MustCompile(downloadMatchRe)
