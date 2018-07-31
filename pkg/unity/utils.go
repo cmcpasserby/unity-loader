@@ -16,14 +16,14 @@ type InstallInfo struct {
     Path string
 }
 
-type appInfoDict struct {
-    CFBundleVersion string `plist:"CFBundleVersion"`
-}
-
 func (info *InstallInfo) Run(project string) error {
     absProject, _ := filepath.Abs(project)
     app := exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject)
     return app.Run()
+}
+
+type appInfoDict struct {
+    CFBundleVersion string `plist:"CFBundleVersion"`
 }
 
 func GetVersionFromProject(versionFile string) (string, error) {
