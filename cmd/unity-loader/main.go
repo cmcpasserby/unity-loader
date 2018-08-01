@@ -28,12 +28,12 @@ func main() {
     }
 }
 
-func printHelp(cmds *map[string]*unity.Command)  {
-    fmt.Println("usage: unity-loader <command>, [project_path]")
+func printHelp(commands *map[string]unity.Command)  {
+    fmt.Println("usage: unity-loader <commands>, [project_path]")
     fmt.Println()
     fmt.Println("commands are:")
 
-    for _, cmd := range *cmds {
+    for _, cmd := range *commands {
         fmt.Printf("  %-12s%s\n", cmd.Name, cmd.HelpText)
     }
 }

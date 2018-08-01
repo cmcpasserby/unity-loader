@@ -10,18 +10,12 @@ import (
 type Command struct {
     Name string
     HelpText string
-    Action CommandAction
+    Action func(...string) error
 }
 
-type CommandAction func(...string) error
+var Commands = map[string]Command {
 
-func NewCommand(name string, helpText string, action CommandAction) *Command {
-    return &Command{Name:name, HelpText:helpText, Action:action}
-}
-
-var Commands = map[string]*Command {
-
-    "run": NewCommand(
+    "run": {
         "run",
         "run the passed in project with a auto detected version of unity",
         func(args ...string) error {
@@ -48,9 +42,9 @@ var Commands = map[string]*Command {
                 log.Fatalf("Could not execute unity from %q", appInstall.Path)
             }
             return nil
-        }),
+        }},
 
-    "version": NewCommand(
+    "version": {
         "version",
         "check what version of unity a project is using",
         func(args ...string) error {
@@ -70,9 +64,9 @@ var Commands = map[string]*Command {
             fmt.Printf("version: %s, installed: %t\n", version, err == nil)
 
             return nil
-        }),
+        }},
 
-    "list": NewCommand(
+    "list": {
         "list",
         "list all installed unity versions",
         func(args ...string) error {
@@ -80,5 +74,5 @@ var Commands = map[string]*Command {
                 fmt.Printf("Version: %s Path: %q", data.Version, data.Path)
             }
             return nil
-        }),
+        }},
 }
