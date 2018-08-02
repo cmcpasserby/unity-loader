@@ -42,7 +42,8 @@ var Commands = map[string]Command {
                 log.Fatalf("Could not execute unity from %q", appInstall.Path)
             }
             return nil
-        }},
+        },
+    },
 
     "version": {
         "version",
@@ -64,7 +65,8 @@ var Commands = map[string]Command {
             fmt.Printf("version: %s, installed: %t\n", version, err == nil)
 
             return nil
-        }},
+        },
+    },
 
     "list": {
         "list",
@@ -74,5 +76,6 @@ var Commands = map[string]Command {
                 fmt.Printf("Version: %s Path: %q", data.Version, data.Path)
             }
             return nil
-        }},
+        },
+    },
 }

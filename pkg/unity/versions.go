@@ -4,8 +4,8 @@ import (
     "net/http"
     "log"
     "io/ioutil"
-    "fmt"
     "regexp"
+    "fmt"
 )
 
 const (
@@ -17,12 +17,19 @@ const (
 
 const (
     downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`
-    versionRE = `^(\d+)?(?:\.(\d+)(?:\.(\d+))?)?(?:(\w)(?:(\d+))?)?$`
+    versionMatchRe = `(\d+\.\d+\.\d+\w\d+)`
+    hashMatchRe = `[0-9a-f]{12}`
 )
+
+
+type VersionData struct {
+    VersionString string
+    Packages []string
+}
 
 func ParseVersions(url string, version string) {
     downloadRe := regexp.MustCompile(downloadMatchRe)
-    // versionRe := regexp.MustCompile(VersionRE)
+    versionRe := regexp.MustCompile(versionMatchRe)
 
     response, err := http.Get(url)
     if err != nil {
@@ -34,7 +41,16 @@ func ParseVersions(url string, version string) {
     contents, _ := ioutil.ReadAll(response.Body)
     matches := downloadRe.FindAllString(string(contents), -1)
 
+    packages := make([]string, 0, 5)
     for _, m := range matches {
-        fmt.Println(m)
+        ver := versionRe.FindString(m)
+
+        if ver == version {
+            packages = append(packages, m)
+        }
+    }
+
+    for _, url := range packages {
+        fmt.Println(url)
     }
 }
