@@ -16,19 +16,46 @@ const (
 )
 
 const (
-    macEditorInstaller = "http://netstorage.unity3d.com/unity/%s/MacEditorInstaller/Unity.pkg"
-)
-
-const (
     downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.pkg)`
     versionMatchRe = `(\d+\.\d+\.\d+\w\d+)`
     uuidMatchRe = `[0-9a-f]{12}`
 )
 
-
 type VersionData struct {
     VersionString string
     VersionUuid string
+}
+
+func (v VersionData) GetEditorUrl() string {
+    return fmt.Sprintf("http://netstorage.unity3d.com/unity/%s/MacEditorInstaller/Unity.pkg", v.VersionUuid)
+}
+
+func (v VersionData) GetAndroidSupportUrl() string {
+    return fmt.Sprintf(
+        "http://netstorage.unity3d.com/unity/%s/MacEditorTargetInstaller/UnitySetup-Android-Support-for-Editor-%s.pkg",
+        v.VersionUuid,
+        v.VersionString)
+}
+
+func (v VersionData) GetIosSupportUrl() string {
+    return fmt.Sprintf(
+        "http://netstorage.unity3d.com/unity/%s/MacEditorTargetInstaller/UnitySetup-iOS-Support-for-Editor-%s.pkg",
+        v.VersionUuid,
+        v.VersionString)
+}
+
+func (v VersionData) GetWebGlSupportUrl() string {
+    return fmt.Sprintf(
+        "http://netstorage.unity3d.com/unity/%s/MacEditorTargetInstaller/UnitySetup-WebGL-Support-for-Editor-%s.pkg",
+        v.VersionUuid,
+        v.VersionString)
+}
+
+func (v VersionData) GetWindowsSupportUrl() string {
+    return fmt.Sprintf(
+        "http://netstorage.unity3d.com/unity/%s/MacEditorTargetInstaller/UnitySetup-Windows-Support-for-Editor-%s.pkg",
+        v.VersionUuid,
+        v.VersionString)
 }
 
 func ParseVersions(url string) (map[string]VersionData, error) {
@@ -51,16 +78,12 @@ func ParseVersions(url string) (map[string]VersionData, error) {
         ver := versionRe.FindString(url)
 
         if _, ok := versions[ver]; !ok {
-            versions[ver] = VersionData{ver,uuidRe.FindString(url)}
+            versions[ver] = VersionData{
+                VersionString: ver,
+                VersionUuid:uuidRe.FindString(url),
+            }
         }
     }
-
-    keys := make([]string, 0, len(versions))
-    for k := range versions {
-        keys = append(keys, k)
-    }
-
-    fmt.Printf(macEditorInstaller + "\n", versions["2018.1.9f1"].VersionUuid)
 
     return versions, nil
 }
