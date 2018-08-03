@@ -16,41 +16,51 @@ const (
 )
 
 const (
-    downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`
+    macEditorInstaller = "http://netstorage.unity3d.com/unity/%s/MacEditorInstaller/Unity.pkg"
+)
+
+const (
+    downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.pkg)`
     versionMatchRe = `(\d+\.\d+\.\d+\w\d+)`
-    hashMatchRe = `[0-9a-f]{12}`
+    uuidMatchRe = `[0-9a-f]{12}`
 )
 
 
 type VersionData struct {
     VersionString string
-    Packages []string
+    VersionUuid string
 }
 
-func ParseVersions(url string, version string) {
+func ParseVersions(url string) (map[string]VersionData, error) {
     downloadRe := regexp.MustCompile(downloadMatchRe)
     versionRe := regexp.MustCompile(versionMatchRe)
+    uuidRe := regexp.MustCompile(uuidMatchRe)
 
     response, err := http.Get(url)
     if err != nil {
         log.Fatal(err)
-        return
     }
     defer response.Body.Close()
 
     contents, _ := ioutil.ReadAll(response.Body)
     matches := downloadRe.FindAllString(string(contents), -1)
 
-    packages := make([]string, 0, 5)
-    for _, m := range matches {
-        ver := versionRe.FindString(m)
+    versions := map[string]VersionData{}
 
-        if ver == version {
-            packages = append(packages, m)
+    for _, url := range matches {
+        ver := versionRe.FindString(url)
+
+        if _, ok := versions[ver]; !ok {
+            versions[ver] = VersionData{ver,uuidRe.FindString(url)}
         }
     }
 
-    for _, url := range packages {
-        fmt.Println(url)
+    keys := make([]string, 0, len(versions))
+    for k := range versions {
+        keys = append(keys, k)
     }
+
+    fmt.Printf(macEditorInstaller + "\n", versions["2018.1.9f1"].VersionUuid)
+
+    return versions, nil
 }

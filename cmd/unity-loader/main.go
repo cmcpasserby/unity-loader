@@ -28,7 +28,7 @@ func main() {
     }
 }
 
-func printHelp(commands *map[string]unity.Command)  {
+func printHelp(commands *map[string]unity.Command) {
     fmt.Println("usage: unity-loader <commands>, [project_path]")
     fmt.Println()
     fmt.Println("commands are:")
