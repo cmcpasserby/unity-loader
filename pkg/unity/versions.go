@@ -62,6 +62,9 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
-    fmt.Println(packages["Unity"].Title)
+    for key := range packages {
+        fmt.Println(key)
+    }
+
     return nil
 }

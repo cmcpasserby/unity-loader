@@ -23,6 +23,8 @@ type Package struct {
     InstalledSize int64 `ini:"installedsize"`
     Version string `ini:"version"`
     Md5 string `ini:"md5"`
+    Hidden bool `ini:"hidden"`
+    Extension string `ini:"extension"`
 }
 
 func getPackages(ver VersionData) (map[string]Package, error) {

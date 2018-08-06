@@ -6,7 +6,7 @@ import (
     "os"
     "fmt"
     "log"
-)
+    )
 
 type Command struct {
     Name string
@@ -88,6 +88,25 @@ var Commands = map[string]Command {
             err := unity.Install(version)
             if err != nil {
                 log.Fatal("ERROR: ", err)
+            }
+            return nil
+        },
+    },
+
+    "repair": {
+        "repair",
+        "fix paths to unity installs",
+        func(args ...string) error {
+            fmt.Println("repairing unity install paths")
+            for _, install := range unity.GetInstalls() {
+                oldPath := filepath.Dir(install.Path)
+                newName := fmt.Sprintf("Unity %s", install.Version)
+                newPath := filepath.Join("/Applications/", newName)
+
+                if oldPath == newPath {continue}
+                fmt.Printf("moveing %q to %q\n", oldPath, newPath)
+                err := os.Rename(oldPath, newPath)
+                if err != nil {return err}
             }
             return nil
         },
