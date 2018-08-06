@@ -74,7 +74,7 @@ var Commands = map[string]Command {
         "list all installed unity versions",
         func(args ...string) error {
             for _, data := range unity.GetInstalls() {
-                fmt.Printf("Version: %s Path: %q", data.Version, data.Path)
+                fmt.Printf("Version: %s Path: %q\n", data.Version, data.Path)
             }
             return nil
         },
@@ -84,8 +84,11 @@ var Commands = map[string]Command {
         "install",
         "installed the specified version of unity",
         func(args ...string) error {
-            versions, _ := unity.ParseVersions(unity.UnityDownloads)
-            fmt.Println(versions["2017.3.1f1"].GetAndroidSupportUrl())
+            version := args[0]
+            err := unity.Install(version)
+            if err != nil {
+                log.Fatal("ERROR: ", err)
+            }
             return nil
         },
     },

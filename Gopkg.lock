@@ -2,14 +2,27 @@
 
 
 [[projects]]
+  digest = "1:fe8a03a8222d5b913f256972933d26d24ad7c8286692a42943bc01633cc8fce3"
+  name = "gopkg.in/ini.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "358ee7663966325963d4e8b2e1fbd570c5195153"
+  version = "v1.38.1"
+
+[[projects]]
   branch = "master"
+  digest = "1:cefe687c5b27365f87dff523c85266408415c62a2915cc6148e9c26861274984"
   name = "howett.net/plist"
   packages = ["."]
+  pruneopts = "UT"
   revision = "500bd5b9081b5957ac10389f86e069869f00c348"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "085009fc7178863ff6ddc3cde7d84249aee1508445462ad262b27f6705b59945"
+  input-imports = [
+    "gopkg.in/ini.v1",
+    "howett.net/plist",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
