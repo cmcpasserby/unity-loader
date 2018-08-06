@@ -79,14 +79,4 @@ var Commands = map[string]Command {
             return nil
         },
     },
-
-    "install": {
-        "install",
-        "installed the specified version of unity",
-        func(args ...string) error {
-            versions, _ := unity.ParseVersions(unity.UnityDownloads)
-            fmt.Println(versions["2017.3.1f1"].GetAndroidSupportUrl())
-            return nil
-        },
-    },
 }
