@@ -1,6 +1,7 @@
-package unity
+package main
 
 import (
+    "github.com/cmcpasserby/unity-loader/pkg/unity"
     "path/filepath"
     "os"
     "fmt"
@@ -26,12 +27,12 @@ var Commands = map[string]Command {
                 fmt.Printf("%q is not a valid unity project\n", path)
             }
 
-            version, err := GetVersionFromProject(versionFile)
+            version, err := unity.GetVersionFromProject(versionFile)
             if err != nil {
                 log.Fatal(err)
             }
 
-            appInstall, err := GetInstallFromVersion(version)
+            appInstall, err := unity.GetInstallFromVersion(version)
             if err != nil {
                 log.Fatalf("Unity version %q not found", version)
             }
@@ -56,12 +57,12 @@ var Commands = map[string]Command {
                 fmt.Printf("%q is not a valid unity project\n", path)
             }
 
-            version, err := GetVersionFromProject(versionFile)
+            version, err := unity.GetVersionFromProject(versionFile)
             if err != nil {
                 log.Fatal(err)
             }
 
-            _, err = GetInstallFromVersion(version)
+            _, err = unity.GetInstallFromVersion(version)
             fmt.Printf("version: %s, installed: %t\n", version, err == nil)
 
             return nil
@@ -72,9 +73,19 @@ var Commands = map[string]Command {
         "list",
         "list all installed unity versions",
         func(args ...string) error {
-            for _, data := range GetInstalls() {
+            for _, data := range unity.GetInstalls() {
                 fmt.Printf("Version: %s Path: %q", data.Version, data.Path)
             }
+            return nil
+        },
+    },
+
+    "install": {
+        "install",
+        "installed the specified version of unity",
+        func(args ...string) error {
+            versions, _ := unity.ParseVersions(unity.UnityDownloads)
+            fmt.Println(versions["2017.3.1f1"].GetAndroidSupportUrl())
             return nil
         },
     },
