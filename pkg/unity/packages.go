@@ -7,11 +7,13 @@ import (
     "fmt"
 )
 
-var configUrls = [...]string {
-    "https://netstorage.unity3d.com/unity/%s/unity-%s-osx.ini",
-    "https://download.unity3d.com/download_unity/%s/unity-%s-osx.ini",
-    "https://beta.unity3d.com/download/%s/unity-%s-osx.ini",
-    "https://files.unity3d.com/bootstrapper/%s/unity-%s-osx.ini",
+const configName = "unity-%s-osx.ini"
+
+var baseUrls = [...]string {
+    "https://netstorage.unity3d.com/unity/%s/",
+    "https://download.unity3d.com/download_unity/%s/",
+    "https://beta.unity3d.com/download/%s/",
+    "https://files.unity3d.com/bootstrapper/%s/",
 }
 
 type Package struct {
@@ -31,8 +33,8 @@ func getPackages(ver VersionData) (map[string]Package, error) {
     var response *http.Response
     var err error
 
-    for _, url := range configUrls {
-        response, err = http.Get(fmt.Sprintf(url, ver.VersionUuid, ver.VersionString))
+    for _, url := range buildConfigUrls(ver) {
+        response, err = http.Get(url)
         if err == nil {break}
     }
     defer response.Body.Close()
@@ -50,4 +52,14 @@ func getPackages(ver VersionData) (map[string]Package, error) {
         packages[name] = *pkg
     }
     return packages, nil
+}
+
+func buildConfigUrls(ver VersionData) []string {
+    fileName := fmt.Sprintf(configName, ver.VersionString)
+    paths := make([]string, 0, len(baseUrls))
+
+    for _, baseUrl := range baseUrls {
+        paths = append(paths, fmt.Sprintf(baseUrl, ver.VersionUuid) + fileName)
+    }
+    return paths
 }
