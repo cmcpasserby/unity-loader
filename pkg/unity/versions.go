@@ -8,7 +8,7 @@ import (
 )
 
 const (
-    downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|.pkg)`
+    downloadMatchRe = `(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`
     versionMatchRe = `(\d+\.\d+\.\d+\w\d+)`
     uuidMatchRe = `[0-9a-f]{12}`
 )
