@@ -62,8 +62,8 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
-    for key := range packages {
-        fmt.Println(key)
+    for _, value := range packages {
+        fmt.Printf("Name: %s, Url: %s\n", value.Title, value.GetDownloadUrl())
     }
 
     return nil
