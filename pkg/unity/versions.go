@@ -5,6 +5,9 @@ import (
     "io/ioutil"
     "regexp"
     "fmt"
+    "os"
+    "log"
+    "time"
 )
 
 const (
@@ -67,10 +70,40 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
-    go download(packages["Unity"])
+    download(packages["Unity"])
 
     return nil
 }
 
 func download(pkg *Package) {
+}
+
+func downloadProgress(done chan int64, path string, total int64) {
+    stop := false
+
+    for {
+        select {
+        case <- done:
+            stop = true
+        default:
+            file, err := os.Open(path)
+            if err != nil {log.Fatal(err)}
+
+            fi, err := file.Stat()
+            if err != nil {log.Fatal(err)}
+
+            size := fi.Size()
+
+            if size == 0 {
+                size = 1
+            }
+
+            percent := float64(size) / float64(total) * 100
+
+            fmt.Printf("%.0f", percent)
+            fmt.Println("%")
+        }
+        if stop {return}
+        time.Sleep(time.Second)
+    }
 }
