@@ -20,6 +20,10 @@ var Commands = map[string]Command {
         "run",
         "run the passed in project with a auto detected version of unity",
         func(args ...string) error {
+            if len(args) == 0 {
+                log.Fatal("invalid arguments run requires a project path")
+            }
+
             path := args[0]
 
             versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
@@ -50,6 +54,10 @@ var Commands = map[string]Command {
         "version",
         "check what version of unity a project is using",
         func(args ...string) error {
+            if len(args) == 0 {
+                log.Fatal("invalid arguments version requires a project path")
+            }
+
             path := args[0]
 
             versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
@@ -84,6 +92,10 @@ var Commands = map[string]Command {
         "install",
         "installed the specified version of unity",
         func(args ...string) error {
+            if len(args) == 0 {
+                log.Fatal("no version specified")
+            }
+
             version := args[0]
             err := unity.Install(version)
             if err != nil {
