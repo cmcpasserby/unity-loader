@@ -5,7 +5,6 @@ import (
     "io/ioutil"
     "gopkg.in/ini.v1"
     "fmt"
-    "path/filepath"
 )
 
 var ignoredSections = [...]string {
@@ -30,7 +29,7 @@ type UrlData struct {
 
 func (url *UrlData) GetIniUrl() string {
     fileName := fmt.Sprintf(configName, url.Version.VersionString)
-    return fmt.Sprintf(url.Base, url.Version.VersionUuid) + fileName;
+    return fmt.Sprintf(url.Base, url.Version.VersionUuid) + fileName
 }
 
 type Package struct {
@@ -49,10 +48,10 @@ type Package struct {
 
 func (pkg *Package) GetDownloadUrl() string {
     base := fmt.Sprintf(pkg.Url.Base, pkg.Url.Version.VersionUuid)
-    return filepath.Join(base, pkg.Path)
+    return base + pkg.Path
 }
 
-func getPackages(ver VersionData) (map[string]Package, error) {
+func getPackages(ver VersionData) (map[string]*Package, error) {
     var response *http.Response
     var err error
     var currentUrl UrlData
@@ -72,26 +71,22 @@ func getPackages(ver VersionData) (map[string]Package, error) {
     cfg, err := ini.Load(contents)
     if err != nil {return nil, err}
 
-    packages := make(map[string]Package)
+    packages := make(map[string]*Package)
 
     testIgnored := func(item string) bool {
         for _, name := range ignoredSections {
-            if item == name {
-                return true
-            }
+            if item == name {return true}
         }
         return false
     }
 
     for _, name := range cfg.SectionStrings() {
-        if testIgnored(name) {
-            continue
-        }
+        if testIgnored(name) {continue}
 
         pkg := new(Package)
         cfg.Section(name).MapTo(pkg)
         pkg.Url = currentUrl
-        packages[name] = *pkg
+        packages[name] = pkg
     }
     return packages, nil
 }

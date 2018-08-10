@@ -55,6 +55,11 @@ func GetVersionData(ver string) (VersionData, error) {
     return VersionData{}, fmt.Errorf("unity Version %q not found", ver)
 }
 
+type Progress struct {
+    Value int
+    IsComplete bool
+}
+
 func Install(version string) error {
     versionData, err := GetVersionData(version)
     if err != nil {return err}
@@ -62,9 +67,10 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
-    for _, value := range packages {
-        fmt.Printf("Name: %s, Url: %s\n", value.Title, value.GetDownloadUrl())
-    }
+    go download(packages["Unity"])
 
     return nil
+}
+
+func download(pkg *Package) {
 }
