@@ -8,6 +8,8 @@ import (
     "log"
     "time"
     "net/http"
+    "path"
+    "io"
 )
 
 var downloadRe = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
@@ -81,9 +83,33 @@ func Install(version string) error {
 }
 
 func download(pkg *Package) error {
-    pkgDirectory, err := ioutil.TempDir("", "unitypacakges")
+    pkgDirectory, err := ioutil.TempDir("", "unitypacakges_")
     if err != nil {return err}
-    fmt.Printf(pkgDirectory)
+
+    url := pkg.GetDownloadUrl()
+    fileName := path.Base(url)
+    filePath :=  path.Join(pkgDirectory, fileName)
+
+    start := time.Now()
+
+    out, err := os.Create(filePath)
+    if err != nil {return err}
+    defer out.Close()
+
+    done := make(chan int64)
+
+    go downloadProgress(done, filePath, pkg.Size)
+
+    response, err := http.Get(pkg.GetDownloadUrl())
+    if err != nil {return err}
+    defer response.Body.Close()
+
+    n, err := io.Copy(out, response.Body)
+    if err != nil {return err}
+
+    done <- n
+
+    fmt.Printf("Download completed in %s", time.Since(start))
     return nil
 }
 
@@ -112,7 +138,11 @@ func downloadProgress(done chan int64, path string, total int64) {
             fmt.Printf("%.0f", percent)
             fmt.Println("%")
         }
-        if stop {return}
+        if stop {
+            fmt.Printf("100")
+            fmt.Println("%")
+            return
+        }
         time.Sleep(time.Second)
     }
 }
