@@ -6,7 +6,8 @@ import (
     "os"
     "fmt"
     "log"
-    )
+    "errors"
+)
 
 type Command struct {
     Name string
@@ -21,7 +22,7 @@ var Commands = map[string]Command {
         "run the passed in project with a auto detected version of unity",
         func(args ...string) error {
             if len(args) == 0 {
-                log.Fatal("invalid arguments run requires a project path")
+                return errors.New("invalid arguments run requires a project path")
             }
 
             path := args[0]
@@ -33,18 +34,18 @@ var Commands = map[string]Command {
 
             version, err := unity.GetVersionFromProject(versionFile)
             if err != nil {
-                log.Fatal(err)
+                return err
             }
 
             appInstall, err := unity.GetInstallFromVersion(version)
             if err != nil {
-                log.Fatalf("Unity version %q not found", version)
+                return err
             }
 
             fmt.Printf("Opening project %q in version: %s\n", path, version)
             err = appInstall.Run(path)
             if err != nil {
-                log.Fatalf("Could not execute unity from %q", appInstall.Path)
+                return fmt.Errorf("could not execute unity from %q", appInstall.Path)
             }
             return nil
         },
@@ -55,19 +56,19 @@ var Commands = map[string]Command {
         "check what version of unity a project is using",
         func(args ...string) error {
             if len(args) == 0 {
-                log.Fatal("invalid arguments version requires a project path")
+                return errors.New("invalid arguments, version requires a project path")
             }
 
             path := args[0]
 
             versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
             if _, err := os.Stat(versionFile); os.IsNotExist(err) {
-                fmt.Printf("%q is not a valid unity project\n", path)
+                return fmt.Errorf("%q is not a valid unity project\n", path)
             }
 
             version, err := unity.GetVersionFromProject(versionFile)
             if err != nil {
-                log.Fatal(err)
+                return err
             }
 
             _, err = unity.GetInstallFromVersion(version)
@@ -93,7 +94,7 @@ var Commands = map[string]Command {
         "installed the specified version of unity",
         func(args ...string) error {
             if len(args) == 0 {
-                log.Fatal("no version specified")
+                return errors.New("no version specified")
             }
 
             version := args[0]

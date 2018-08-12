@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "os"
+    "log"
 )
 
 func main() {
@@ -19,7 +20,10 @@ func main() {
     }
 
     if val, ok := Commands[os.Args[1]]; ok {
-        val.Action(os.Args[2:]...)
+        err := val.Action(os.Args[2:]...)
+        if err != nil{
+            log.Fatal(err)
+        }
     } else {
         fmt.Printf("%q is not a valid command\n", os.Args[1])
         fmt.Println()
