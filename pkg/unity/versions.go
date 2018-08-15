@@ -10,6 +10,7 @@ import (
     "net/http"
     "path"
     "io"
+    "os/exec"
 )
 
 var downloadRe = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
@@ -77,14 +78,19 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
-    download(packages["Unity"])
+    pkgPath, err := download(packages["Unity"])
+    if err != nil {return err}
+    fmt.Println(pkgPath)
+
+    err = installPkg(pkgPath)
+    if err != nil {return err}
 
     return nil
 }
 
-func download(pkg *Package) error {
+func download(pkg *Package) (string, error) {
     pkgDirectory, err := ioutil.TempDir("", "unitypacakges_")
-    if err != nil {return err}
+    if err != nil {return "", err}
 
     url := pkg.GetDownloadUrl()
     fileName := path.Base(url)
@@ -93,7 +99,7 @@ func download(pkg *Package) error {
     start := time.Now()
 
     out, err := os.Create(filePath)
-    if err != nil {return err}
+    if err != nil {return "", err}
     defer out.Close()
 
     done := make(chan int64)
@@ -101,16 +107,16 @@ func download(pkg *Package) error {
     go downloadProgress(done, filePath, pkg.Size)
 
     response, err := http.Get(pkg.GetDownloadUrl())
-    if err != nil {return err}
+    if err != nil {return "", err}
     defer response.Body.Close()
 
     n, err := io.Copy(out, response.Body)
-    if err != nil {return err}
+    if err != nil {return "", err}
 
     done <- n
 
-    fmt.Printf("Download completed in %s", time.Since(start))
-    return nil
+    fmt.Printf("Download completed in %s\n", time.Since(start))
+    return filePath, nil
 }
 
 func downloadProgress(done chan int64, path string, total int64) {
@@ -135,14 +141,18 @@ func downloadProgress(done chan int64, path string, total int64) {
 
             percent := float64(size) / float64(total) * 100
 
-            fmt.Printf("%.0f", percent)
-            fmt.Println("%")
+            fmt.Printf("\rDownloading Unity Editor %.0f%%", percent)
         }
         if stop {
-            fmt.Printf("100")
+            fmt.Printf("\r100")
             fmt.Println("%")
             return
         }
         time.Sleep(time.Second)
     }
+}
+
+func installPkg(filePath string) error {
+    process := exec.Command("sudo", "installer", "-package", filePath, "-target", "/")
+    return process.Run()
 }
