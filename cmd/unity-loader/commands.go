@@ -9,23 +9,27 @@ import (
     "errors"
 )
 
-type Command struct {
+type command struct {
     Name string
     HelpText string
     Action func(...string) error
 }
 
-var Commands = map[string]Command {
+var commandOrder = [...]string{"run", "version", "list", "install", "repair"}
+
+var commands = map[string]command {
 
     "run": {
         "run",
         "run the passed in project with a auto detected version of unity",
         func(args ...string) error {
-            if len(args) == 0 {
-                return errors.New("invalid arguments run requires a project path")
-            }
+            var path string
 
-            path := args[0]
+            if len(args) == 0 {
+                path, _ = os.Getwd()
+            } else {
+                path = args[0]
+            }
 
             versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
             if _, err := os.Stat(versionFile); os.IsNotExist(err) {
@@ -55,11 +59,13 @@ var Commands = map[string]Command {
         "version",
         "check what version of unity a project is using",
         func(args ...string) error {
-            if len(args) == 0 {
-                return errors.New("invalid arguments, version requires a project path")
-            }
+            var path string
 
-            path := args[0]
+            if len(args) == 0 {
+                path, _ = os.Getwd()
+            } else {
+                path = args[0]
+            }
 
             versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
             if _, err := os.Stat(versionFile); os.IsNotExist(err) {
