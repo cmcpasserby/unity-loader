@@ -1,19 +1,18 @@
-package unity
+package packages
 
 import (
-    // "fmt"
     "os"
     "path"
-
     "fmt"
+    "errors"
 )
 
 var tempDir string
 
 func Install(version string) error {
-    // if os.Getuid() != 0 {
-    //     return errors.New("admin is required to install packages, try running with sudo")
-    // }
+    if os.Getuid() != 0 {
+        return errors.New("admin is required to install packages, try running with sudo")
+    }
 
     versionData, err := GetVersionData(version)
     if err != nil {return err}
