@@ -4,16 +4,16 @@ import (
     // "fmt"
     "os"
     "path"
-    // "errors"
-    "errors"
+
+    "fmt"
 )
 
 var tempDir string
 
 func Install(version string) error {
-    if os.Getuid() != 0 {
-        return errors.New("admin is required to install packages, try running with sudo")
-    }
+    // if os.Getuid() != 0 {
+    //     return errors.New("admin is required to install packages, try running with sudo")
+    // }
 
     versionData, err := GetVersionData(version)
     if err != nil {return err}
@@ -21,6 +21,8 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
     defer cleanUp()
+
+    fmt.Println(len(packages))
 
     return nil
 }

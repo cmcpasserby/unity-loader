@@ -67,8 +67,13 @@ func getPackages(ver VersionData) (map[string]*Package, error) {
         return false
     }
 
-    for _, name := range cfg.SectionStrings() {
+    sectionNames := cfg.SectionStrings()
+    packageOrder := make([]string, 0, len(sectionNames))
+
+    for _, name := range sectionNames {
         if testIgnored(name) {continue}
+
+        packageOrder = append(packageOrder, name)
 
         pkg := new(Package)
         cfg.Section(name).MapTo(pkg)
