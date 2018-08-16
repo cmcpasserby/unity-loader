@@ -38,35 +38,6 @@ var baseUrls = [...]string {
     "https://files.unity3d.com/bootstrapper/%s/",
 }
 
-type UrlData struct {
-    Base string
-    Version VersionData
-}
-
-func (url *UrlData) GetIniUrl() string {
-    fileName := fmt.Sprintf(configName, url.Version.VersionString)
-    return fmt.Sprintf(url.Base, url.Version.VersionUuid) + fileName
-}
-
-type Package struct {
-    Title string `ini:"title"`
-    Description string `ini:"description"`
-    Path string `ini:"url"`
-    Install bool `ini:"install"`
-    Size int64 `ini:"size"`
-    InstalledSize int64 `ini:"installedsize"`
-    Version string `ini:"version"`
-    Md5 string `ini:"md5"`
-    Hidden bool `ini:"hidden"`
-    Extension string `ini:"extension"`
-    Url UrlData
-}
-
-func (pkg *Package) GetDownloadUrl() string {
-    base := fmt.Sprintf(pkg.Url.Base, pkg.Url.Version.VersionUuid)
-    return base + pkg.Path
-}
-
 func getPackages(ver VersionData) (map[string]*Package, error) {
     var response *http.Response
     var err error
