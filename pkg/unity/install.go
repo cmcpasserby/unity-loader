@@ -2,84 +2,36 @@ package unity
 
 import (
     "io/ioutil"
-    "regexp"
     "fmt"
     "os"
-    "log"
     "time"
     "net/http"
     "path"
     "io"
     "os/exec"
+    "errors"
+    "log"
 )
 
-var downloadRe = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
-var versionRe = regexp.MustCompile(`(\d+\.\d+\.\d+\w\d+)`)
-var uuidRe = regexp.MustCompile(`[0-9a-f]{12}`)
-
-var archiveUrls = [...]string {
-    "https://unity3d.com/get-unity/download/archive",
-    "https://unity3d.com/unity/qa/lts-releases",
-    "https://unity3d.com/unity/qa/patch-releases",
-    "https://unity3d.com/unity/beta-download",
-}
-
-type VersionData struct {
-    VersionString string
-    VersionUuid string
-}
-
-func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
-    response, err := http.Get(url)
-    if err != nil {
-        ch <- nil
-        return
-    }
-    defer response.Body.Close()
-
-    contents, _ := ioutil.ReadAll(response.Body)
-    matches := downloadRe.FindAllString(string(contents), -1)
-
-    for _, m := range matches {
-        verStr := versionRe.FindString(m)
-        if verStr == ver {
-            verUuid := uuidRe.FindString(m)
-            ch <- &VersionData{verStr, verUuid}
-            return
-        }
-    }
-    ch <- nil
-}
-
-func GetVersionData(ver string) (VersionData, error) {
-    if !versionRe.MatchString(ver) {
-        return VersionData{}, fmt.Errorf("unity version %q is not a valid unity version", ver)
-    }
-
-    ch := make(chan *VersionData)
-
-    for _, url := range archiveUrls {
-        go getVersionsFromUrl(url, ver, ch)
-    }
-
-    for res := range ch {
-        if res != nil {
-            return *res, nil
-        }
-    }
-
-    return VersionData{}, fmt.Errorf("unity Version %q not found", ver)
-}
+var tempDir string
 
 func Install(version string) error {
+    if os.Getuid() != 0 {
+        return errors.New("admin is required to install packages, try running with sudo")
+    }
+
     versionData, err := GetVersionData(version)
     if err != nil {return err}
 
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
+    defer cleanUp()
+
     pkgPath, err := download(packages["Unity"])
-    if err != nil {return err}
+    if err != nil {
+        return err
+    }
     fmt.Println(pkgPath)
 
     err = installPkg(pkgPath)
@@ -91,6 +43,8 @@ func Install(version string) error {
 func download(pkg *Package) (string, error) {
     pkgDirectory, err := ioutil.TempDir("", "unitypacakges_")
     if err != nil {return "", err}
+
+    tempDir = pkgDirectory
 
     url := pkg.GetDownloadUrl()
     fileName := path.Base(url)
@@ -117,6 +71,28 @@ func download(pkg *Package) (string, error) {
 
     fmt.Printf("Download completed in %s\n", time.Since(start))
     return filePath, nil
+}
+
+func installPkg(filePath string) error {
+    process := exec.Command("installer", "-package", filePath, "-target", "/")
+    return process.Run()
+}
+
+func cleanUp() {
+    if tempDir == "" {
+        return
+    }
+
+    dirRead, _ := os.Open(tempDir)
+    dirFiles, _ := dirRead.Readdir(0)
+
+    for i := range dirFiles {
+        f := dirFiles[i]
+        path := path.Join(tempDir, f.Name())
+        os.Remove(path)
+    }
+
+    os.Remove(tempDir)
 }
 
 func downloadProgress(done chan int64, path string, total int64) {
@@ -152,7 +128,3 @@ func downloadProgress(done chan int64, path string, total int64) {
     }
 }
 
-func installPkg(filePath string) error {
-    process := exec.Command("sudo", "installer", "-package", filePath, "-target", "/")
-    return process.Run()
-}

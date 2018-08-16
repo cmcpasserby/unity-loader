@@ -5,8 +5,24 @@ import (
     "io/ioutil"
     "gopkg.in/ini.v1"
     "fmt"
+    "regexp"
 )
 
+var downloadRe = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
+var versionRe = regexp.MustCompile(`(\d+\.\d+\.\d+\w\d+)`)
+var uuidRe = regexp.MustCompile(`[0-9a-f]{12}`)
+
+var archiveUrls = [...]string {
+    "https://unity3d.com/get-unity/download/archive",
+    "https://unity3d.com/unity/qa/lts-releases",
+    "https://unity3d.com/unity/qa/patch-releases",
+    "https://unity3d.com/unity/beta-download",
+}
+
+type VersionData struct {
+    VersionString string
+    VersionUuid string
+}
 var ignoredSections = [...]string {
     "DEFAULT",
     "VisualStudio",
@@ -97,4 +113,46 @@ func buildConfigUrls(ver VersionData) []UrlData {
         urls = append(urls, UrlData{Base:baseUrl, Version: ver})
     }
     return urls
+}
+
+func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
+    response, err := http.Get(url)
+    if err != nil {
+        ch <- nil
+        return
+    }
+    defer response.Body.Close()
+
+    contents, _ := ioutil.ReadAll(response.Body)
+    matches := downloadRe.FindAllString(string(contents), -1)
+
+    for _, m := range matches {
+        verStr := versionRe.FindString(m)
+        if verStr == ver {
+            verUuid := uuidRe.FindString(m)
+            ch <- &VersionData{verStr, verUuid}
+            return
+        }
+    }
+    ch <- nil
+}
+
+func GetVersionData(ver string) (VersionData, error) {
+    if !versionRe.MatchString(ver) {
+        return VersionData{}, fmt.Errorf("unity version %q is not a valid unity version", ver)
+    }
+
+    ch := make(chan *VersionData)
+
+    for _, url := range archiveUrls {
+        go getVersionsFromUrl(url, ver, ch)
+    }
+
+    for res := range ch {
+        if res != nil {
+            return *res, nil
+        }
+    }
+
+    return VersionData{}, fmt.Errorf("unity Version %q not found", ver)
 }
