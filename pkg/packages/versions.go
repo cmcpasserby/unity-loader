@@ -38,7 +38,7 @@ var baseUrls = [...]string {
     "https://files.unity3d.com/bootstrapper/%s/",
 }
 
-func getPackages(ver VersionData) (map[string]*Package, []string, error) {
+func getPackages(ver VersionData) ([]*Package, error) {
     var response *http.Response
     var err error
     var currentUrl UrlData
@@ -53,12 +53,10 @@ func getPackages(ver VersionData) (map[string]*Package, []string, error) {
     defer response.Body.Close()
 
     contents, err := ioutil.ReadAll(response.Body)
-    if err != nil {return nil, nil,  err}
+    if err != nil {return nil, err}
 
     cfg, err := ini.Load(contents)
-    if err != nil {return nil, nil, err}
-
-    packages := make(map[string]*Package)
+    if err != nil {return nil, err}
 
     testIgnored := func(item string) bool {
         for _, name := range ignoredSections {
@@ -68,19 +66,17 @@ func getPackages(ver VersionData) (map[string]*Package, []string, error) {
     }
 
     sectionNames := cfg.SectionStrings()
-    packageOrder := make([]string, 0, len(sectionNames))
+    packages := make([]*Package, 0, len(sectionNames))
 
     for _, name := range sectionNames {
         if testIgnored(name) {continue}
 
-        packageOrder = append(packageOrder, name)
-
         pkg := new(Package)
         cfg.Section(name).MapTo(pkg)
         pkg.Url = currentUrl
-        packages[name] = pkg
+        packages = append(packages, pkg)
     }
-    return packages, packageOrder, nil
+    return packages, nil
 }
 
 func buildConfigUrls(ver VersionData) []UrlData {
