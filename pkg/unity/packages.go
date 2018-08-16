@@ -38,7 +38,7 @@ var baseUrls = [...]string {
     "https://files.unity3d.com/bootstrapper/%s/",
 }
 
-func getPackages(ver VersionData) (map[string]*Package, error) {
+func getPackages(ver VersionData) (map[string]*Package, []string, error) {
     var response *http.Response
     var err error
     var currentUrl UrlData
@@ -53,10 +53,10 @@ func getPackages(ver VersionData) (map[string]*Package, error) {
     defer response.Body.Close()
 
     contents, err := ioutil.ReadAll(response.Body)
-    if err != nil {return nil, err}
+    if err != nil {return nil, nil,  err}
 
     cfg, err := ini.Load(contents)
-    if err != nil {return nil, err}
+    if err != nil {return nil, nil, err}
 
     packages := make(map[string]*Package)
 
@@ -80,7 +80,7 @@ func getPackages(ver VersionData) (map[string]*Package, error) {
         pkg.Url = currentUrl
         packages[name] = pkg
     }
-    return packages, nil
+    return packages, packageOrder, nil
 }
 
 func buildConfigUrls(ver VersionData) []UrlData {

@@ -18,7 +18,7 @@ func Install(version string) error {
     versionData, err := GetVersionData(version)
     if err != nil {return err}
 
-    packages, err := getPackages(versionData)
+    packages, order, err := getPackages(versionData)
     if err != nil {return err}
     defer cleanUp()
 
