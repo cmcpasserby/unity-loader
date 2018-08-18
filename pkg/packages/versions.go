@@ -72,8 +72,10 @@ func getPackages(ver VersionData) ([]*Package, error) {
         if testIgnored(name) {continue}
 
         pkg := new(Package)
-        cfg.Section(name).MapTo(pkg)
+
+        cfg.Section(name).MapTo(&pkg.Data)
         pkg.Url = currentUrl
+
         packages = append(packages, pkg)
     }
     return packages, nil

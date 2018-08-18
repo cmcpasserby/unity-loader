@@ -21,8 +21,9 @@ func Install(version string) error {
     if err != nil {return err}
     defer cleanUp()
 
+    fmt.Println(len(packages))
     for _, pkg := range packages {
-        fmt.Printf(pkg.Data.Title)
+        fmt.Println(pkg)
     }
 
     return nil
@@ -38,8 +39,8 @@ func cleanUp() {
 
     for i := range dirFiles {
         f := dirFiles[i]
-        path := path.Join(tempDir, f.Name())
-        os.Remove(path)
+        fp := path.Join(tempDir, f.Name())
+        os.Remove(fp)
     }
 
     os.Remove(tempDir)
