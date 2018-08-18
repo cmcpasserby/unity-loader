@@ -59,8 +59,6 @@ func (pkg *Package) DownloadPkg() error {
     fileName := path.Base(url)
     filePath := path.Join(pkgDirectory, fileName)
 
-    fmt.Println(filePath)
-
     start := time.Now()
 
     out, err := os.Create(filePath)
@@ -130,6 +128,7 @@ func (pkg *Package) downloadProgress(done chan int64) {
             file, err := os.Open(pkg.filePath)
             if err != nil {log.Fatal(err)}
 
+
             fi, err := file.Stat()
             if err != nil {log.Fatal(err)}
 
@@ -139,8 +138,8 @@ func (pkg *Package) downloadProgress(done chan int64) {
                 size = 1
             }
 
-            percent := float64(size) / float64(pkg.Data.Size)
-            fmt.Printf("\rDownloading Unity Editor %.0f%%", percent)
+            percent := (float64(size) / float64(pkg.Data.Size)) * 100
+            fmt.Printf("\rDownloading %s, %.0f%%", pkg.Data.Title, percent)
         }
         if stop {
             fmt.Printf("\r100")
