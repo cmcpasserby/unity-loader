@@ -11,6 +11,8 @@ import (
     "os/exec"
     "errors"
     "log"
+    "crypto/md5"
+    "encoding/hex"
 )
 
 
@@ -49,7 +51,7 @@ func (pkg *Package) GetDownloadUrl() string {
     return base + pkg.Data.Path
 }
 
-func (pkg *Package) DownloadPkg() (error) {
+func (pkg *Package) DownloadPkg() error {
     pkgDirectory, err := ioutil.TempDir("", "unitypackages_")
     if err != nil {return err}
 
@@ -57,11 +59,15 @@ func (pkg *Package) DownloadPkg() (error) {
     fileName := path.Base(url)
     filePath := path.Join(pkgDirectory, fileName)
 
+    fmt.Println(filePath)
+
     start := time.Now()
 
     out, err := os.Create(filePath)
     if err != nil {return err}
     defer out.Close()
+
+    pkg.filePath = filePath
 
     done := make(chan int64)
     go pkg.downloadProgress(done)
@@ -75,10 +81,27 @@ func (pkg *Package) DownloadPkg() (error) {
 
     done <- n
 
-    pkg.filePath = filePath
-
     fmt.Printf("Download completed in %s\n", time.Since(start))
     return nil
+}
+
+func (pkg *Package) ValidatePkg() (bool, error) {
+    if pkg.filePath == "" {
+        return false, errors.New("no downloaded package to install")
+    }
+
+    file, err := os.Open(pkg.filePath)
+    if err != nil {return false, err}
+    defer file.Close()
+
+    hash := md5.New()
+    _, err = io.Copy(hash, file)
+    if err != nil {return false, err}
+
+    sum := hash.Sum(nil)
+    isValid := hex.EncodeToString(sum) == pkg.Data.Md5
+
+    return isValid, nil
 }
 
 func (pkg *Package) InstallPkg() error {

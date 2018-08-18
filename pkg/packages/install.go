@@ -3,16 +3,15 @@ package packages
 import (
     "os"
     "path"
-    "errors"
     "fmt"
 )
 
 var tempDir string
 
 func Install(version string) error {
-    if os.Getuid() != 0 {
-        return errors.New("admin is required to install packages, try running with sudo")
-    }
+    // if os.Getuid() != 0 {
+    //     return errors.New("admin is required to install packages, try running with sudo")
+    // }
 
     versionData, err := GetVersionData(version)
     if err != nil {return err}
@@ -21,10 +20,14 @@ func Install(version string) error {
     if err != nil {return err}
     defer cleanUp()
 
-    fmt.Println(len(packages))
-    for _, pkg := range packages {
-        fmt.Println(pkg)
-    }
+    pkg := packages[0]
+
+    err = pkg.DownloadPkg()
+    if err != nil {return err}
+
+    isValid, err := pkg.ValidatePkg()
+    if err != nil {return err}
+    fmt.Printf("is valid: %v", isValid)
 
     return nil
 }
