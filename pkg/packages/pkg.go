@@ -79,15 +79,16 @@ func (pkg *Package) DownloadPkg() error {
 
     done <- n
 
-    fmt.Printf("Download completed in %s\n", time.Since(start))
+    fmt.Printf("\rDownload of %q completed in %s\n", pkg.Data.Title, time.Since(start))
     return nil
 }
 
 func (pkg *Package) ValidatePkg() (bool, error) {
     if pkg.filePath == "" {
-        return false, errors.New("no downloaded package to install")
+        return false, errors.New("no downloaded package to validate")
     }
 
+    fmt.Printf("Validating pacakge %q...", pkg.Data.Title)
     file, err := os.Open(pkg.filePath)
     if err != nil {return false, err}
     defer file.Close()
@@ -98,6 +99,13 @@ func (pkg *Package) ValidatePkg() (bool, error) {
 
     sum := hash.Sum(nil)
     isValid := hex.EncodeToString(sum) == pkg.Data.Md5
+
+    if isValid {
+        fmt.Printf("\rPackage %q is valid\n", pkg.Data.Title)
+    } else {
+
+        fmt.Printf("\rPackage %q is not valid\n", pkg.Data.Title)
+    }
 
     return isValid, nil
 }
@@ -115,6 +123,12 @@ func (pkg *Package) InstallPkg() error {
     pkg.filePath = ""
 
     return nil
+}
+
+func (pkg *Package) CleanupPkg() error {
+    if pkg.filePath == "" {return nil}
+    pkgPath := path.Dir(pkg.filePath)
+    return os.RemoveAll(pkgPath)
 }
 
 func (pkg *Package) downloadProgress(done chan int64) {
@@ -139,11 +153,10 @@ func (pkg *Package) downloadProgress(done chan int64) {
             }
 
             percent := (float64(size) / float64(pkg.Data.Size)) * 100
-            fmt.Printf("\rDownloading %s, %.0f%%", pkg.Data.Title, percent)
+            fmt.Printf("\rDownloading %q, %.0f%%", pkg.Data.Title, percent)
         }
         if stop {
-            fmt.Printf("\r100")
-            fmt.Println("%")
+            fmt.Printf("\rDownloaded %q", pkg.Data.Title)
             return
         }
         time.Sleep(time.Second)
