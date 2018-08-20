@@ -38,7 +38,7 @@ var baseUrls = [...]string {
     "https://files.unity3d.com/bootstrapper/%s/",
 }
 
-func getPackages(ver VersionData) ([]*Package, error) {
+func GetPackages(ver VersionData) ([]*Package, error) {
     var response *http.Response
     var err error
     var currentUrl UrlData

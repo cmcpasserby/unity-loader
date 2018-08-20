@@ -164,7 +164,7 @@ func (pkg *Package) downloadProgress(done chan int64) {
     }
 }
 
-func filter(pkgs []*Package, f func(*Package) bool) []*Package {
+func Filter(pkgs []*Package, f func(*Package) bool) []*Package {
     newPkgs := make([]*Package, 0)
     for _, pkg := range pkgs {
         if f(pkg) {

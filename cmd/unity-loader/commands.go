@@ -2,7 +2,6 @@ package main
 
 import (
     "github.com/cmcpasserby/unity-loader/pkg/unity"
-    "github.com/cmcpasserby/unity-loader/pkg/packages"
     "path/filepath"
     "os"
     "fmt"
@@ -105,7 +104,7 @@ var commands = map[string]command {
             }
 
             version := args[0]
-            err := packages.Install(version)
+            err := Install(version)
             if err != nil {
                 log.Fatal("ERROR: ", err)
             }
