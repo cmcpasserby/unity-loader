@@ -38,6 +38,7 @@ type PkgData struct {
     Md5 string `ini:"md5"`
     Hidden bool `ini:"hidden"`
     Extension string `ini:"extension"`
+    RequiresUnity bool `ini:"requires_unity"`
 }
 
 type Package struct {
@@ -161,4 +162,14 @@ func (pkg *Package) downloadProgress(done chan int64) {
         }
         time.Sleep(time.Second)
     }
+}
+
+func filter(pkgs []*Package, f func(*Package) bool) []*Package {
+    newPkgs := make([]*Package, 0)
+    for _, pkg := range pkgs {
+        if f(pkg) {
+            newPkgs = append(newPkgs, pkg)
+        }
+    }
+    return newPkgs
 }

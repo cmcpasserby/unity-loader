@@ -1,5 +1,7 @@
 package packages
 
+import "fmt"
+
 func Install(version string) error {
     // if os.Getuid() != 0 {
     //     return errors.New("admin is required to install packages, try running with sudo")
@@ -11,16 +13,20 @@ func Install(version string) error {
     packages, err := getPackages(versionData)
     if err != nil {return err}
 
-    pkg := packages[0]
+    packages = filter(packages, func(pkg *Package) bool {return !pkg.Data.Hidden})
 
-    err = pkg.DownloadPkg()
-    if err != nil {return err}
+    for _, pkg := range packages {
+        fmt.Println(pkg.Data.Description)
+    }
 
-    _, err = pkg.ValidatePkg()
-    if err != nil {return err}
-
-    err = pkg.CleanupPkg()
-    if err != nil {return err}
+    // err = pkg.DownloadPkg()
+    // if err != nil {return err}
+    //
+    // _, err = pkg.ValidatePkg()
+    // if err != nil {return err}
+    //
+    // err = pkg.CleanupPkg()
+    // if err != nil {return err}
 
     return nil
 }
