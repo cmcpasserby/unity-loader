@@ -2,7 +2,6 @@ package packages
 
 import (
     "fmt"
-    "io/ioutil"
     "path"
     "time"
     "os"
@@ -52,13 +51,10 @@ func (pkg *Package) GetDownloadUrl() string {
     return base + pkg.Data.Path
 }
 
-func (pkg *Package) DownloadPkg() error {
-    pkgDirectory, err := ioutil.TempDir("", "unitypackages_")
-    if err != nil {return err}
-
+func (pkg *Package) Download(tempDir string) error {
     url := pkg.GetDownloadUrl()
     fileName := path.Base(url)
-    filePath := path.Join(pkgDirectory, fileName)
+    filePath := path.Join(tempDir, fileName)
 
     start := time.Now()
 
@@ -84,7 +80,7 @@ func (pkg *Package) DownloadPkg() error {
     return nil
 }
 
-func (pkg *Package) ValidatePkg() (bool, error) {
+func (pkg *Package) Validate() (bool, error) {
     if pkg.filePath == "" {
         return false, errors.New("no downloaded package to validate")
     }
@@ -101,20 +97,22 @@ func (pkg *Package) ValidatePkg() (bool, error) {
     sum := hash.Sum(nil)
     isValid := hex.EncodeToString(sum) == pkg.Data.Md5
 
+    fmt.Print("\033[2K") // clears current line
     if isValid {
         fmt.Printf("\rPackage %q is valid\n", pkg.Data.Title)
     } else {
-
         fmt.Printf("\rPackage %q is not valid\n", pkg.Data.Title)
     }
 
     return isValid, nil
 }
 
-func (pkg *Package) InstallPkg() error {
+func (pkg *Package) Install() error {
     if pkg.filePath == "" {
         return errors.New("no downloaded package to install")
     }
+
+    fmt.Printf("Installing pacakge %q...", pkg.Data.Title)
 
     process := exec.Command("installer", "-package", pkg.filePath, "-target", "/")
     err := process.Run()
@@ -123,13 +121,9 @@ func (pkg *Package) InstallPkg() error {
     os.Remove(pkg.filePath)
     pkg.filePath = ""
 
+    fmt.Print("\033[2K") // clears current line
+    fmt.Printf("\rInstalled pacakge %q\n", pkg.Data.Title)
     return nil
-}
-
-func (pkg *Package) CleanupPkg() error {
-    if pkg.filePath == "" {return nil}
-    pkgPath := path.Dir(pkg.filePath)
-    return os.RemoveAll(pkgPath)
 }
 
 func (pkg *Package) downloadProgress(done chan int64) {
