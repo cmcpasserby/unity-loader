@@ -33,7 +33,7 @@ func main() {
 
 func printHelp() {
     fmt.Println(
-`Tool for loading unity projects with their respective unity versions and installing hte proper version if required
+`Tool for loading unity projects with their respective unity versions and installing the proper version if required
 
 usage:
   unity-loader <command>, [project_path]
