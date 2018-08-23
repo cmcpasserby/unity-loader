@@ -2,10 +2,10 @@ package unity
 
 import "fmt"
 
-type VersionNotFound struct {
+type VersionNotFoundError struct {
     version string
 }
 
-func (err VersionNotFound) Error() string {
+func (err VersionNotFoundError) Error() string {
     return fmt.Sprintf("unity version %s not found", err.version)
 }
