@@ -5,7 +5,6 @@ import (
     "bufio"
     "strings"
     "errors"
-    "fmt"
     "path/filepath"
     "howett.net/plist"
     "os/exec"
@@ -70,5 +69,5 @@ func GetInstallFromVersion(version string) (InstallInfo, error) {
             return install, nil
         }
     }
-    return InstallInfo{}, errors.New(fmt.Sprintf("unity version %s not found", version))
+    return InstallInfo{}, &VersionNotFound{version}
 }
