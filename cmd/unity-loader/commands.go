@@ -21,7 +21,7 @@ var commands = map[string]command {
 
     "run": {
         "run",
-        "run the passed in project with a auto detected version of unity",
+        "run the passed in project with an auto detected version of unity",
         func(args ...string) error {
             var path string
 
