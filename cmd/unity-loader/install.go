@@ -1,12 +1,12 @@
 package main
 
 import (
-    "github.com/cmcpasserby/unity-loader/pkg/packages"
-    "gopkg.in/AlecAivazis/survey.v1"
-    "os"
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/packages"
+    "gopkg.in/AlecAivazis/survey.v1"
     "io/ioutil"
+    "os"
     "path/filepath"
 )
 

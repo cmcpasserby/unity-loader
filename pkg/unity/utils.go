@@ -1,13 +1,13 @@
 package unity
 
 import (
-    "os"
     "bufio"
-    "strings"
     "errors"
-    "path/filepath"
     "howett.net/plist"
+    "os"
     "os/exec"
+    "path/filepath"
+    "strings"
 )
 
 type InstallInfo struct {

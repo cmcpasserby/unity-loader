@@ -1,13 +1,13 @@
 package main
 
 import (
-    "github.com/cmcpasserby/unity-loader/pkg/unity"
-    "path/filepath"
-    "os"
-    "fmt"
-    "log"
     "errors"
+    "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
+    "log"
+    "os"
+    "path/filepath"
 )
 
 type command struct {
