@@ -43,7 +43,11 @@ var commands = map[string]command {
 
             appInstall, err := unity.GetInstallFromVersion(version)
             if err != nil {
-                return err
+                if _, ok := err.(unity.VersionNotFoundError); ok {
+                    Install(version)
+                } else {
+                    return err
+                }
             }
 
             fmt.Printf("Opening project %q in version: %s\n", path, version)

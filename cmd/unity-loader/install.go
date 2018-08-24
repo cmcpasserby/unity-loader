@@ -7,6 +7,7 @@ import (
     "errors"
     "fmt"
     "io/ioutil"
+    "path/filepath"
 )
 
 func Install(version string) error {
@@ -62,11 +63,20 @@ func Install(version string) error {
         isValid, err := pkg.Validate()
         if err != nil {return err}
         if !isValid {
-            return fmt.Errorf("%q was not a valid package, installing again\n", pkg.Data.Title)
+            return fmt.Errorf("%q was not a valid package, try installing again\n", pkg.Data.Title)
         }
 
         err = pkg.Install()
         if err != nil {return err}
+    }
+
+    appPath := "/Applications/Unity/"
+    if _, err := os.Stat(appPath); os.IsExist(err) {
+        newName := fmt.Sprintf("Unity %s", version)
+        newPath := filepath.Join("/Applications/", newName)
+        err = os.Rename(appPath, newPath)
+        if err != nil {return err}
+        fmt.Printf("Installed Unity %s to %q\n", version, newPath)
     }
 
     return nil
