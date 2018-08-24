@@ -4,7 +4,6 @@ import (
     "net/http"
     "io/ioutil"
     "gopkg.in/ini.v1"
-    "fmt"
     "regexp"
 )
 
@@ -113,7 +112,7 @@ func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
 
 func GetVersionData(ver string) (VersionData, error) {
     if !versionRe.MatchString(ver) {
-        return VersionData{}, fmt.Errorf("unity version %q is not a valid unity version", ver)
+        return VersionData{}, InvalidVersionError{ver}
     }
 
     ch := make(chan *VersionData)
@@ -128,5 +127,5 @@ func GetVersionData(ver string) (VersionData, error) {
         }
     }
 
-    return VersionData{}, fmt.Errorf("unity Version %q not found", ver)
+    return VersionData{}, VersionNotFoundError{ver}
 }

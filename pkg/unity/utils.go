@@ -69,5 +69,5 @@ func GetInstallFromVersion(version string) (InstallInfo, error) {
             return install, nil
         }
     }
-    return InstallInfo{}, &VersionNotFoundError{version}
+    return InstallInfo{}, VersionNotFoundError{version}
 }
