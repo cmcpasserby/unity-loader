@@ -7,6 +7,7 @@ import (
     "fmt"
     "log"
     "errors"
+    "gopkg.in/AlecAivazis/survey.v1"
 )
 
 type command struct {
@@ -44,7 +45,15 @@ var commands = map[string]command {
             appInstall, err := unity.GetInstallFromVersion(version)
             if err != nil {
                 if _, ok := err.(unity.VersionNotFoundError); ok {
-                    Install(version)
+                    fmt.Printf("Unity %s not installed\n", version)
+                    installUnity := false
+                    prompt := &survey.Confirm{
+                        Message: fmt.Sprintf("Do you want to install Unity %s?", version),
+                    }
+                    survey.AskOne(prompt, &installUnity, nil)
+                    if installUnity {
+                        Install(version)
+                    }
                 } else {
                     return err
                 }

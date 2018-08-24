@@ -71,7 +71,7 @@ func Install(version string) error {
     }
 
     appPath := "/Applications/Unity/"
-    if _, err := os.Stat(appPath); os.IsExist(err) {
+    if _, err := os.Stat(appPath); err == nil {
         newName := fmt.Sprintf("Unity %s", version)
         newPath := filepath.Join("/Applications/", newName)
         err = os.Rename(appPath, newPath)
