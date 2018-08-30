@@ -4,11 +4,13 @@ import (
     "errors"
     "fmt"
     "github.com/cmcpasserby/unity-loader/pkg/packages"
+    "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
     "io/ioutil"
     "os"
-    "path/filepath"
 )
+
+const baseInstallPath = "/Applications/Unity/Unity.app"
 
 func Install(version string) error {
     if os.Getuid() != 0 {
@@ -52,6 +54,12 @@ func Install(version string) error {
         }
     }
 
+    // if a unity install exists in the base path move it before a new install starts
+    if _, err := os.Stat(baseInstallPath); err != nil {
+        installInfo := unity.GetInstallFromPath(baseInstallPath)
+        unity.RepairInstallPath(installInfo)
+    }
+
     tempDir, err := ioutil.TempDir("", "unitypackage_")
     if err != nil {return err}
     defer cleanUp(tempDir)
@@ -70,13 +78,10 @@ func Install(version string) error {
         if err != nil {return err}
     }
 
-    appPath := "/Applications/Unity/"
-    if _, err := os.Stat(appPath); err == nil {
-        newName := fmt.Sprintf("Unity %s", version)
-        newPath := filepath.Join("/Applications/", newName)
-        err = os.Rename(appPath, newPath)
-        if err != nil {return err}
-        fmt.Printf("Installed Unity %s to %q\n", version, newPath)
+    // after a install do no leave it in the base install path, but move to versioned folder
+    if _, err := os.Stat(baseInstallPath); err != nil {
+        installInfo := unity.GetInstallFromPath(baseInstallPath)
+        unity.RepairInstallPath(installInfo)
     }
 
     return nil

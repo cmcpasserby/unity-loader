@@ -131,13 +131,7 @@ var commands = map[string]command {
         func(args ...string) error {
             fmt.Println("repairing unity install paths")
             for _, install := range unity.GetInstalls() {
-                oldPath := filepath.Dir(install.Path)
-                newName := fmt.Sprintf("Unity %s", install.Version)
-                newPath := filepath.Join("/Applications/", newName)
-
-                if oldPath == newPath {continue}
-                fmt.Printf("moveing %q to %q\n", oldPath, newPath)
-                err := os.Rename(oldPath, newPath)
+                err := unity.RepairInstallPath(install)
                 if err != nil {return err}
             }
             return nil
