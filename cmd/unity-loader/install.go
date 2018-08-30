@@ -1,7 +1,6 @@
 package main
 
 import (
-    "errors"
     "fmt"
     "github.com/cmcpasserby/unity-loader/pkg/packages"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
@@ -11,11 +10,15 @@ import (
 )
 
 const baseInstallPath = "/Applications/Unity/Unity.app"
+var sudoPw = ""
 
 func Install(version string) error {
-    if os.Getuid() != 0 {
-        return errors.New("admin is required to install pkgs, try running with sudo")
+    // todo setup logic for a proper root check after getting the pw
+    pwPrompt := &survey.Password {
+        Message: "enter admin password",
     }
+    fmt.Println("admin access is required")
+    survey.AskOne(pwPrompt, &sudoPw, nil)
 
     versionData, err := packages.GetVersionData(version)
     if err != nil {return err}
@@ -55,7 +58,7 @@ func Install(version string) error {
     }
 
     // if a unity install exists in the base path move it before a new install starts
-    if _, err := os.Stat(baseInstallPath); err != nil {
+    if _, err := os.Stat(baseInstallPath); err == nil {
         installInfo := unity.GetInstallFromPath(baseInstallPath)
         unity.RepairInstallPath(installInfo)
     }
@@ -79,7 +82,7 @@ func Install(version string) error {
     }
 
     // after a install do no leave it in the base install path, but move to versioned folder
-    if _, err := os.Stat(baseInstallPath); err != nil {
+    if _, err := os.Stat(baseInstallPath); err == nil {
         installInfo := unity.GetInstallFromPath(baseInstallPath)
         unity.RepairInstallPath(installInfo)
     }
