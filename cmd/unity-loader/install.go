@@ -10,15 +10,15 @@ import (
 )
 
 const baseInstallPath = "/Applications/Unity/Unity.app"
-var sudoPw = ""
 
 func Install(version string) error {
     // todo setup logic for a proper root check after getting the pw
+    sudoPassword := ""
     pwPrompt := &survey.Password {
         Message: "enter admin password",
     }
     fmt.Println("admin access is required")
-    survey.AskOne(pwPrompt, &sudoPw, nil)
+    survey.AskOne(pwPrompt, &sudoPassword, nil)
 
     versionData, err := packages.GetVersionData(version)
     if err != nil {return err}
