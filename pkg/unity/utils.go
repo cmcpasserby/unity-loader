@@ -1,13 +1,14 @@
 package unity
 
 import (
-    "os"
     "bufio"
-    "strings"
     "errors"
-    "path/filepath"
+    "fmt"
     "howett.net/plist"
+    "os"
     "os/exec"
+    "path/filepath"
+    "strings"
 )
 
 type InstallInfo struct {
@@ -44,21 +45,25 @@ func GetVersionFromProject(versionFile string) (string, error) {
 func GetInstalls() []InstallInfo {
     unityPaths, _ := filepath.Glob("/Applications/**/Unity.app")
 
-    var installs []InstallInfo
-
+    installs := make([]InstallInfo, 0, len(unityPaths))
     for _, path := range unityPaths {
-        plistPath := filepath.Join(path, "Contents/info.plist")
-        file, _ := os.Open(plistPath)
-
-        var appInfo appInfoDict
-
-        decoder := plist.NewDecoder(file)
-        decoder.Decode(&appInfo)
-
-        installData := InstallInfo{Version: appInfo.CFBundleVersion, Path: path}
+        installData := GetInstallFromPath(path)
         installs = append(installs, installData)
     }
     return installs
+}
+
+func GetInstallFromPath(path string) InstallInfo {
+    plistPath := filepath.Join(path, "Contents/info.plist")
+    file, _ := os.Open(plistPath)
+
+    var appInfo appInfoDict
+
+    decoder := plist.NewDecoder(file)
+    decoder.Decode(&appInfo)
+
+    installData := InstallInfo{Version: appInfo.CFBundleVersion, Path: path}
+    return installData
 }
 
 func GetInstallFromVersion(version string) (InstallInfo, error) {
@@ -70,4 +75,20 @@ func GetInstallFromVersion(version string) (InstallInfo, error) {
         }
     }
     return InstallInfo{}, VersionNotFoundError{version}
+}
+
+func RepairInstallPath(install InstallInfo) error {
+    oldPath := filepath.Dir(install.Path)
+    newName := fmt.Sprintf("Unity %s", install.Version)
+    newPath := filepath.Join("/Applications/", newName)
+
+    if oldPath == newPath {
+        return nil
+    }
+
+    fmt.Printf("moving %q to %q\n", oldPath, newPath)
+    err := os.Rename(oldPath, newPath)
+    if err != nil {return err}
+
+    return nil
 }

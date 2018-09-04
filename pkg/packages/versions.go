@@ -1,9 +1,9 @@
 package packages
 
 import (
-    "net/http"
-    "io/ioutil"
     "gopkg.in/ini.v1"
+    "io/ioutil"
+    "net/http"
     "regexp"
 )
 

@@ -1,18 +1,29 @@
 package main
 
 import (
-    "github.com/cmcpasserby/unity-loader/pkg/packages"
-    "gopkg.in/AlecAivazis/survey.v1"
-    "os"
-    "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/packages"
+    "github.com/cmcpasserby/unity-loader/pkg/unity"
+    "github.com/pkg/errors"
+    "gopkg.in/AlecAivazis/survey.v1"
+    "io"
     "io/ioutil"
-    "path/filepath"
+    "os"
+    "os/exec"
 )
 
+const baseInstallPath = "/Applications/Unity/Unity.app"
+
 func Install(version string) error {
-    if os.Getuid() != 0 {
-        return errors.New("admin is required to install pkgs, try running with sudo")
+    sudoPassword := ""
+    pwPrompt := &survey.Password {
+        Message: "enter admin password",
+    }
+    fmt.Println("admin access is required")
+    survey.AskOne(pwPrompt, &sudoPassword, nil)
+
+    if !checkRoot(sudoPassword) {
+        return errors.New("invalid admin password\n")
     }
 
     versionData, err := packages.GetVersionData(version)
@@ -52,6 +63,12 @@ func Install(version string) error {
         }
     }
 
+    // if a unity install exists in the base path move it before a new install starts
+    if _, err := os.Stat(baseInstallPath); err == nil {
+        installInfo := unity.GetInstallFromPath(baseInstallPath)
+        unity.RepairInstallPath(installInfo)
+    }
+
     tempDir, err := ioutil.TempDir("", "unitypackage_")
     if err != nil {return err}
     defer cleanUp(tempDir)
@@ -66,20 +83,32 @@ func Install(version string) error {
             return fmt.Errorf("%q was not a valid package, try installing again\n", pkg.Data.Title)
         }
 
-        err = pkg.Install()
+        err = pkg.Install(sudoPassword)
         if err != nil {return err}
     }
 
-    appPath := "/Applications/Unity/"
-    if _, err := os.Stat(appPath); err == nil {
-        newName := fmt.Sprintf("Unity %s", version)
-        newPath := filepath.Join("/Applications/", newName)
-        err = os.Rename(appPath, newPath)
-        if err != nil {return err}
-        fmt.Printf("Installed Unity %s to %q\n", version, newPath)
+    // after a install do no leave it in the base install path, but move to versioned folder
+    if _, err := os.Stat(baseInstallPath); err == nil {
+        installInfo := unity.GetInstallFromPath(baseInstallPath)
+        unity.RepairInstallPath(installInfo)
     }
 
     return nil
+}
+
+func checkRoot(password string) bool {
+    resetCmd := exec.Command("sudo", "-k")
+    resetCmd.Run()
+
+    sudoCmd := exec.Command("sudo", "-S", "whoami")
+    sudoIn, _ := sudoCmd.StdinPipe()
+    // todo find a better method then input a pw for all attempts
+    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
+    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
+    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
+
+    err := sudoCmd.Run()
+    return err == nil
 }
 
 func cleanUp(tempDir string) {
