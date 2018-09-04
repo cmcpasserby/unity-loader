@@ -4,21 +4,27 @@ import (
     "fmt"
     "github.com/cmcpasserby/unity-loader/pkg/packages"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
+    "github.com/pkg/errors"
     "gopkg.in/AlecAivazis/survey.v1"
+    "io"
     "io/ioutil"
     "os"
+    "os/exec"
 )
 
 const baseInstallPath = "/Applications/Unity/Unity.app"
 
 func Install(version string) error {
-    // todo setup logic for a proper root check after getting the pw
     sudoPassword := ""
     pwPrompt := &survey.Password {
         Message: "enter admin password",
     }
     fmt.Println("admin access is required")
     survey.AskOne(pwPrompt, &sudoPassword, nil)
+
+    if !checkRoot(sudoPassword) {
+        return errors.New("invalid admin password\n")
+    }
 
     versionData, err := packages.GetVersionData(version)
     if err != nil {return err}
@@ -77,7 +83,7 @@ func Install(version string) error {
             return fmt.Errorf("%q was not a valid package, try installing again\n", pkg.Data.Title)
         }
 
-        err = pkg.Install()
+        err = pkg.Install(sudoPassword)
         if err != nil {return err}
     }
 
@@ -88,6 +94,21 @@ func Install(version string) error {
     }
 
     return nil
+}
+
+func checkRoot(password string) bool {
+    resetCmd := exec.Command("sudo", "-k")
+    resetCmd.Run()
+
+    sudoCmd := exec.Command("sudo", "-S", "whoami")
+    sudoIn, _ := sudoCmd.StdinPipe()
+    // todo find a better method then input a pw for all attempts
+    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
+    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
+    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
+
+    err := sudoCmd.Run()
+    return err == nil
 }
 
 func cleanUp(tempDir string) {

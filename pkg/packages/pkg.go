@@ -107,14 +107,17 @@ func (pkg *Package) Validate() (bool, error) {
     return isValid, nil
 }
 
-func (pkg *Package) Install() error {
+func (pkg *Package) Install(password string) error {
     if pkg.filePath == "" {
         return errors.New("no downloaded package to install")
     }
 
     fmt.Printf("Installing pacakge %q...", pkg.Data.Title)
 
-    process := exec.Command("installer", "-package", pkg.filePath, "-target", "/")
+    process := exec.Command("sudo", "-S", "installer", "-package", pkg.filePath, "-target", "/")
+    processIn, _ := process.StdinPipe()
+    io.WriteString(processIn, fmt.Sprintf("%s\n", password))
+
     err := process.Run()
     if err != nil {return err}
 
