@@ -127,7 +127,7 @@ func (pkg *Package) Install(password string) error {
     return nil
 }
 
-func (pkg *Package) downloadProgress(done chan int64) {
+func (pkg Package) downloadProgress(done chan int64) {
     stop := false
 
     bar := pb.New64(pkg.Data.Size)
