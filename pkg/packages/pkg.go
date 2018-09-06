@@ -5,12 +5,12 @@ import (
     "encoding/hex"
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "gopkg.in/cheggaaa/pb.v1"
     "io"
     "log"
     "net/http"
     "os"
-    "os/exec"
     "path"
     "time"
 )
@@ -105,18 +105,14 @@ func (pkg *Package) Validate() (bool, error) {
     return isValid, nil
 }
 
-func (pkg *Package) Install(password string) error {
+func (pkg *Package) Install(sudo *sudoer.Sudoer) error {
     if pkg.filePath == "" {
         return errors.New("no downloaded package to install")
     }
 
     fmt.Printf("Installing pacakge %q...", pkg.Data.Title)
 
-    process := exec.Command("sudo", "-S", "installer", "-package", pkg.filePath, "-target", "/")
-    processIn, _ := process.StdinPipe()
-    io.WriteString(processIn, fmt.Sprintf("%s\n", password))
-
-    err := process.Run()
+    err := sudo.RunAsRoot("installer", "-package", pkg.filePath, "-target", "/")
     if err != nil {return err}
 
     os.Remove(pkg.filePath)

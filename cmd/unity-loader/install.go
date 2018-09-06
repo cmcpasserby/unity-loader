@@ -4,6 +4,7 @@ import (
     "errors"
     "fmt"
     "github.com/cmcpasserby/unity-loader/pkg/packages"
+    "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
     "io"
@@ -18,14 +19,8 @@ func Install(version string) error {
     versionData, err := packages.GetVersionData(version)
     if err != nil {return err}
 
-    sudoPassword := ""
-    pwPrompt := &survey.Password {
-        Message: "enter admin password",
-    }
-    fmt.Println("admin access is required")
-    survey.AskOne(pwPrompt, &sudoPassword, nil)
-
-    if !checkRoot(sudoPassword) {
+    sudo := new(sudoer.Sudoer)
+    if !sudo.AskPass() {
         return errors.New("invalid admin password\n")
     }
 
@@ -83,7 +78,7 @@ func Install(version string) error {
             return fmt.Errorf("%q was not a valid package, try installing again\n", pkg.Data.Title)
         }
 
-        err = pkg.Install(sudoPassword)
+        err = pkg.Install(sudo)
         if err != nil {return err}
     }
 
