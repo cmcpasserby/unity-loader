@@ -121,11 +121,16 @@ func GetVersionData(ver string) (VersionData, error) {
         go getVersionsFromUrl(url, ver, ch)
     }
 
+    resultCount := 0
     for res := range ch {
+        resultCount += 1
         if res != nil {
             return *res, nil
         }
-    }
 
+        if resultCount >= len(archiveUrls) {
+            break
+        }
+    }
     return VersionData{}, VersionNotFoundError{ver}
 }

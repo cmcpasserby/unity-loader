@@ -1,10 +1,10 @@
 package main
 
 import (
+    "errors"
     "fmt"
     "github.com/cmcpasserby/unity-loader/pkg/packages"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
-    "github.com/pkg/errors"
     "gopkg.in/AlecAivazis/survey.v1"
     "io"
     "io/ioutil"
@@ -15,6 +15,9 @@ import (
 const baseInstallPath = "/Applications/Unity/Unity.app"
 
 func Install(version string) error {
+    versionData, err := packages.GetVersionData(version)
+    if err != nil {return err}
+
     sudoPassword := ""
     pwPrompt := &survey.Password {
         Message: "enter admin password",
@@ -25,9 +28,6 @@ func Install(version string) error {
     if !checkRoot(sudoPassword) {
         return errors.New("invalid admin password\n")
     }
-
-    versionData, err := packages.GetVersionData(version)
-    if err != nil {return err}
 
     pkgs, err := packages.GetPackages(versionData)
     if err != nil {return err}
