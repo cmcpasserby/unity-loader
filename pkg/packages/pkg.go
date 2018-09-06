@@ -5,6 +5,7 @@ import (
     "encoding/hex"
     "errors"
     "fmt"
+    "gopkg.in/cheggaaa/pb.v1"
     "io"
     "log"
     "net/http"
@@ -56,8 +57,6 @@ func (pkg *Package) Download(tempDir string) error {
     fileName := path.Base(url)
     filePath := path.Join(tempDir, fileName)
 
-    start := time.Now()
-
     out, err := os.Create(filePath)
     if err != nil {return err}
     defer out.Close()
@@ -76,7 +75,6 @@ func (pkg *Package) Download(tempDir string) error {
 
     done <- n
 
-    fmt.Printf("\rDownload of %q completed in %s\n", pkg.Data.Title, time.Since(start))
     return nil
 }
 
@@ -129,8 +127,14 @@ func (pkg *Package) Install(password string) error {
     return nil
 }
 
-func (pkg *Package) downloadProgress(done chan int64) {
+func (pkg Package) downloadProgress(done chan int64) {
     stop := false
+
+    bar := pb.New64(pkg.Data.Size)
+    bar.ShowSpeed = true
+    bar.Width = 80
+    bar.SetUnits(pb.U_BYTES)
+    bar.Start()
 
     for {
         select {
@@ -150,11 +154,10 @@ func (pkg *Package) downloadProgress(done chan int64) {
                 size = 1
             }
 
-            percent := (float64(size) / float64(pkg.Data.Size)) * 100
-            fmt.Printf("\rDownloading %q, %.0f%%", pkg.Data.Title, percent)
+            bar.Set64(size)
         }
         if stop {
-            fmt.Printf("\rDownloaded %q", pkg.Data.Title)
+            bar.FinishPrint(fmt.Sprintf("Downloaded %q", pkg.Data.Title))
             return
         }
         time.Sleep(time.Second)
