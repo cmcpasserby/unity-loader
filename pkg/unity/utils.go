@@ -7,6 +7,7 @@ import (
     "howett.net/plist"
     "os"
     "os/exec"
+    "path"
     "path/filepath"
     "strings"
 )
@@ -20,6 +21,11 @@ func (info *InstallInfo) Run(project string) error {
     absProject, _ := filepath.Abs(project)
     app := exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject)
     return app.Run()
+}
+
+func (info *InstallInfo) Uninstall() error {
+    parentPath := path.Dir(info.Path)
+    return os.RemoveAll(parentPath)
 }
 
 type appInfoDict struct {

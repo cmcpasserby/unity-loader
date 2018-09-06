@@ -125,6 +125,47 @@ var commands = map[string]command {
         },
     },
 
+    "uninstall": {
+        "uninstall",
+        "uninstall one or multiple versions of Unity",
+        func(args ...string) error {
+            versions := make([]string, 0)
+
+            if len(args) == 0 {
+                installs := unity.GetInstalls()
+                options := make([]string, 0, len(installs))
+                for _, install := range installs {
+                    options = append(options, install.Version)
+                }
+
+                prompt := &survey.MultiSelect{
+                    Message: "Select versions to uninstall",
+                    Options: options,
+                    PageSize:len(options),
+                }
+
+                survey.AskOne(prompt, &versions, nil)
+            } else {
+                versions = args
+            }
+
+            // todo do a permission check and get root if there is anything to remove
+
+            for _, ver := range versions {
+                install, err := unity.GetInstallFromVersion(ver)
+                if err != nil {
+                    return err
+                }
+                err = install.Uninstall()
+                if err != nil {
+                    return err
+                }
+            }
+
+            return nil
+        },
+    },
+
     "repair": {
         "repair",
         "fix paths to unity installs",
