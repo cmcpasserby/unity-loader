@@ -19,7 +19,7 @@ type command struct {
     Action func(...string) error
 }
 
-var commandOrder = [...]string{"run", "version", "list", "install", "repair"}
+var commandOrder = [...]string{"run", "version", "list", "install", "uninstall", "repair"}
 
 var commands = map[string]command {
 
