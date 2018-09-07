@@ -7,10 +7,8 @@ import (
     "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
-    "io"
     "io/ioutil"
     "os"
-    "os/exec"
 )
 
 const baseInstallPath = "/Applications/Unity/Unity.app"
@@ -89,21 +87,6 @@ func Install(version string) error {
     }
 
     return nil
-}
-
-func checkRoot(password string) bool {
-    resetCmd := exec.Command("sudo", "-k")
-    resetCmd.Run()
-
-    sudoCmd := exec.Command("sudo", "-S", "whoami")
-    sudoIn, _ := sudoCmd.StdinPipe()
-    // todo find a better method then input a pw for all attempts
-    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
-    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
-    io.WriteString(sudoIn, fmt.Sprintf("%s\n", password))
-
-    err := sudoCmd.Run()
-    return err == nil
 }
 
 func cleanUp(tempDir string) {

@@ -12,12 +12,11 @@ type Sudoer struct {
 }
 
 func (s *Sudoer) AskPass() bool {
-    password := ""
     pwPrompt := &survey.Password{
         Message: "enter admin password",
     }
     fmt.Println("admin access is required")
-    survey.AskOne(pwPrompt, &password, nil)
+    survey.AskOne(pwPrompt, &s.password, nil)
 
     return s.CheckRoot()
 }
@@ -28,6 +27,7 @@ func (s *Sudoer) CheckRoot() bool {
 
     sudoCmd := exec.Command("sudo", "-S", "whoami")
     sudoIn, _ := sudoCmd.StdinPipe()
+
     // todo find a better method then input a pw for all attempts
     io.WriteString(sudoIn, fmt.Sprintf("%s\n", s.password))
     io.WriteString(sudoIn, fmt.Sprintf("%s\n", s.password))

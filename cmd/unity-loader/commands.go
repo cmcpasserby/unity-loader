@@ -3,10 +3,12 @@ package main
 import (
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
     "log"
     "os"
+    "path"
     "path/filepath"
 )
 
@@ -149,17 +151,25 @@ var commands = map[string]command {
                 versions = args
             }
 
-            // todo do a permission check and get root if there is anything to remove
-
+            validInstalls := make([]unity.InstallInfo, 0, len(versions))
             for _, ver := range versions {
                 install, err := unity.GetInstallFromVersion(ver)
-                if err != nil {
-                    return err
-                }
-                err = install.Uninstall()
-                if err != nil {
-                    return err
-                }
+                if err != nil {continue}
+                validInstalls = append(validInstalls, install)
+            }
+
+            if len(validInstalls) == 0 {
+                return errors.New("nothing to uninstall")
+            }
+
+            sudo := new(sudoer.Sudoer)
+            if !sudo.AskPass() {
+                return errors.New("invalid admin password\n")
+            }
+
+            for _, install := range validInstalls {
+                fmt.Printf("Uninstalling Unity Version %s\n", install.Version)
+                sudo.RunAsRoot("rm", "-rf", path.Dir(install.Path))
             }
 
             return nil
