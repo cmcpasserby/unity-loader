@@ -1,15 +1,20 @@
 package packages
 
 import (
+    "fmt"
     "gopkg.in/ini.v1"
     "io/ioutil"
     "net/http"
     "regexp"
+    "strconv"
+    "strings"
 )
 
 var downloadRe = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
 var versionRe = regexp.MustCompile(`(\d+\.\d+\.\d+\w\d+)`)
 var uuidRe = regexp.MustCompile(`[0-9a-f]{12}`)
+
+var verTypeRe = regexp.MustCompile(`[pfba]`)
 
 var archiveUrls = [...]string {
     "https://unity3d.com/get-unity/download/archive",
@@ -19,9 +24,33 @@ var archiveUrls = [...]string {
 }
 
 type VersionData struct {
-    VersionString string
+    Major int
+    Minor int
+    Update int
+    VerType string
+    Patch int
     VersionUuid string
 }
+
+func (v *VersionData) ToString() string {
+    return fmt.Sprintf("%d.%d.%d%s%d", v.Major, v.Minor, v.Update, v.VerType, v.Patch)
+}
+
+func VersionDataFromString(input string, uuid string) VersionData {
+    separated := strings.Split(input, ".")
+
+    major, _ := strconv.Atoi(separated[0])
+    minor, _ := strconv.Atoi(separated[1])
+
+    final := verTypeRe.Split(separated[2], -1)
+
+    update, _ := strconv.Atoi(final[0])
+    verType := verTypeRe.FindString(separated[2])
+    patch, _ := strconv.Atoi(final[1])
+
+    return VersionData{major, minor, update, verType, patch, uuid}
+}
+
 var ignoredSections = [...]string {
     "DEFAULT",
     "VisualStudio",
@@ -103,7 +132,8 @@ func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
         verStr := versionRe.FindString(m)
         if verStr == ver {
             verUuid := uuidRe.FindString(m)
-            ch <- &VersionData{verStr, verUuid}
+            verData := VersionDataFromString(verStr, verUuid)
+            ch <- &verData
             return
         }
     }

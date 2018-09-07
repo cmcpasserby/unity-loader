@@ -22,7 +22,7 @@ type UrlData struct {
 }
 
 func (url *UrlData) GetIniUrl() string {
-    fileName := fmt.Sprintf(configName, url.Version.VersionString)
+    fileName := fmt.Sprintf(configName, url.Version.ToString())
     return fmt.Sprintf(url.Base, url.Version.VersionUuid) + fileName
 }
 
