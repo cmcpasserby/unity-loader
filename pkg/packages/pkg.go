@@ -127,8 +127,9 @@ func (pkg Package) downloadProgress(done chan int64) {
     stop := false
 
     bar := pb.New64(pkg.Data.Size)
+    bar.Prefix(pkg.Data.Title)
     bar.ShowSpeed = true
-    bar.Width = 80
+    bar.Width = 120
     bar.SetUnits(pb.U_BYTES)
     bar.Start()
 
@@ -139,7 +140,6 @@ func (pkg Package) downloadProgress(done chan int64) {
         default:
             file, err := os.Open(pkg.filePath)
             if err != nil {log.Fatal(err)}
-
 
             fi, err := file.Stat()
             if err != nil {log.Fatal(err)}
@@ -153,6 +153,7 @@ func (pkg Package) downloadProgress(done chan int64) {
             bar.Set64(size)
         }
         if stop {
+            bar.Set64(pkg.Data.Size)
             bar.FinishPrint(fmt.Sprintf("Downloaded %q", pkg.Data.Title))
             return
         }

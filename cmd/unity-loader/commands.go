@@ -10,6 +10,7 @@ import (
     "os"
     "path"
     "path/filepath"
+    "time"
 )
 
 type command struct {
@@ -55,6 +56,8 @@ var commands = map[string]command {
                     survey.AskOne(prompt, &installUnity, nil)
                     if installUnity {
                         Install(version)
+                        time.Sleep(time.Second)
+                        appInstall, _ = unity.GetInstallFromVersion(version)
                     }
                 } else {
                     return err
