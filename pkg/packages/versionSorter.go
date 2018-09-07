@@ -1,6 +1,6 @@
 package packages
 
-var releaseLetterSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
+var releaseTypeSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
 
 type ByVersionSorter []VersionData
 
@@ -9,9 +9,30 @@ func (s ByVersionSorter) Len() int {
 }
 
 func (s ByVersionSorter) Less(i, j int) bool {
+    a := s[i]
+    b := s[j]
+
+    if a.Major < b.Major {
+        return true
+    }
+
+    if a.Minor < b.Minor {
+        return true
+    }
+
+    if a.Update < b.Update {
+        return true
+    }
+
+    if releaseTypeSort[a.VerType] < releaseTypeSort[b.VerType] {
+        return true
+    }
+
+    if a.Patch < b.Patch {
+        return true
+    }
+
     return false
-    // a := s[i]
-    // b := s[j]
 }
 
 func (s ByVersionSorter) Swap(i, j int) {
