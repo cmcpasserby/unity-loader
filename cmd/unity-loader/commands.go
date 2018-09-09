@@ -107,7 +107,7 @@ var commands = map[string]command {
         "list all installed unity versions",
         func(args ...string) error {
             for _, data := range unity.GetInstalls() {
-                fmt.Printf("Version: %s Path: %q\n", data.Version, data.Path)
+                fmt.Printf("Version: %q Path: %q\n", data.Version, data.Path)
             }
             return nil
         },
@@ -140,7 +140,7 @@ var commands = map[string]command {
                 installs := unity.GetInstalls()
                 options := make([]string, 0, len(installs))
                 for _, install := range installs {
-                    options = append(options, install.Version)
+                    options = append(options, install.Version.String())
                 }
 
                 prompt := &survey.MultiSelect{
@@ -171,7 +171,7 @@ var commands = map[string]command {
             }
 
             for _, install := range validInstalls {
-                fmt.Printf("Uninstalling Unity Version %s\n", install.Version)
+                fmt.Printf("Uninstalling Unity Version %q\n", install.Version)
                 sudo.RunAsRoot("rm", "-rf", path.Dir(install.Path))
             }
 

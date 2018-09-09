@@ -30,14 +30,18 @@ type VersionData struct {
     Update int
     VerType string
     Patch int
+}
+
+type ExtendedVersionData struct {
+    VersionData
     VersionUuid string
 }
 
-func (v *VersionData) ToString() string {
+func (v *VersionData) String() string {
     return fmt.Sprintf("%d.%d.%d%s%d", v.Major, v.Minor, v.Update, v.VerType, v.Patch)
 }
 
-func VersionDataFromString(input string, uuid string) VersionData {
+func VersionDataFromString(input string) VersionData {
     separated := strings.Split(input, ".")
 
     major, _ := strconv.Atoi(separated[0])
@@ -49,7 +53,7 @@ func VersionDataFromString(input string, uuid string) VersionData {
     verType := verTypeRe.FindString(separated[2])
     patch, _ := strconv.Atoi(final[1])
 
-    return VersionData{major, minor, update, verType, patch, uuid}
+    return VersionData{major, minor, update, verType, patch}
 }
 
 var ignoredSections = [...]string {
@@ -67,7 +71,7 @@ var baseUrls = [...]string {
     "https://files.unity3d.com/bootstrapper/%s/",
 }
 
-func GetPackages(ver VersionData) ([]*Package, error) {
+func GetPackages(ver ExtendedVersionData) ([]*Package, error) {
     var response *http.Response
     var err error
     var currentUrl UrlData
@@ -110,7 +114,7 @@ func GetPackages(ver VersionData) ([]*Package, error) {
     return packages, nil
 }
 
-func buildConfigUrls(ver VersionData) []UrlData {
+func buildConfigUrls(ver ExtendedVersionData) []UrlData {
     urls := make([]UrlData, 0, len(baseUrls))
     for _, baseUrl := range baseUrls {
         urls = append(urls, UrlData{Base:baseUrl, Version: ver})
@@ -118,7 +122,7 @@ func buildConfigUrls(ver VersionData) []UrlData {
     return urls
 }
 
-func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
+func getVersionsFromUrl(url string, ver string, ch chan<- *ExtendedVersionData) {
     response, err := http.Get(url)
     if err != nil {
         ch <- nil
@@ -133,7 +137,7 @@ func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
         verStr := versionRe.FindString(m)
         if verStr == ver {
             verUuid := uuidRe.FindString(m)
-            verData := VersionDataFromString(verStr, verUuid)
+            verData := ExtendedVersionData{VersionDataFromString(verStr), verUuid}
             ch <- &verData
             return
         }
@@ -141,12 +145,12 @@ func getVersionsFromUrl(url string, ver string, ch chan<- *VersionData) {
     ch <- nil
 }
 
-func GetVersionData(ver string) (VersionData, error) {
+func GetVersionData(ver string) (ExtendedVersionData, error) {
     if !versionRe.MatchString(ver) {
-        return VersionData{}, InvalidVersionError{ver}
+        return ExtendedVersionData{}, InvalidVersionError{ver}
     }
 
-    ch := make(chan *VersionData)
+    ch := make(chan *ExtendedVersionData)
 
     for _, url := range archiveUrls {
         go getVersionsFromUrl(url, ver, ch)
@@ -163,5 +167,5 @@ func GetVersionData(ver string) (VersionData, error) {
             break
         }
     }
-    return VersionData{}, VersionNotFoundError{ver}
+    return ExtendedVersionData{}, VersionNotFoundError{ver}
 }

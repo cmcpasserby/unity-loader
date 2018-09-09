@@ -18,11 +18,11 @@ import (
 
 type UrlData struct {
     Base string
-    Version VersionData
+    Version ExtendedVersionData
 }
 
 func (url *UrlData) GetIniUrl() string {
-    fileName := fmt.Sprintf(configName, url.Version.ToString())
+    fileName := fmt.Sprintf(configName, url.Version.String())
     return fmt.Sprintf(url.Base, url.Version.VersionUuid) + fileName
 }
 
