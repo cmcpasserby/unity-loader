@@ -20,8 +20,9 @@ var archiveUrls = [...]string {
     "https://unity3d.com/get-unity/download/archive",
     "https://unity3d.com/unity/qa/lts-releases",
     "https://unity3d.com/unity/qa/patch-releases",
-    "https://unity3d.com/unity/beta-download",
 }
+
+const betaUrl = "https://unity3d.com/unity/beta-download"
 
 type VersionData struct {
     Major int
