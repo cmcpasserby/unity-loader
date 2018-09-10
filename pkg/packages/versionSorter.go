@@ -9,9 +9,14 @@ func (s ByVersionSorter) Len() int {
 }
 
 func (s ByVersionSorter) Less(i, j int) bool {
-    a := s[i]
-    b := s[j]
+    return VersionLess(s[i], s[j])
+}
 
+func (s ByVersionSorter) Swap(i, j int) {
+    s[i], s[j] = s[j], s[i]
+}
+
+func VersionLess(a, b VersionData) bool {
     if a.Major < b.Major {
         return true
     }
@@ -33,8 +38,4 @@ func (s ByVersionSorter) Less(i, j int) bool {
     }
 
     return false
-}
-
-func (s ByVersionSorter) Swap(i, j int) {
-    s[i], s[j] = s[j], s[i]
 }

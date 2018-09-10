@@ -3,6 +3,7 @@ package main
 import (
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/packages"
     "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
@@ -10,6 +11,7 @@ import (
     "os"
     "path"
     "path/filepath"
+    "sort"
     "time"
 )
 
@@ -107,7 +109,7 @@ var commands = map[string]command {
         "list all installed unity versions",
         func(args ...string) error {
             for _, data := range unity.GetInstalls() {
-                fmt.Printf("Version: %q Path: %q\n", data.Version, data.Path)
+                fmt.Printf("Version: %q Path: %q\n", data.Version.String(), data.Path)
             }
             return nil
         },
@@ -138,6 +140,11 @@ var commands = map[string]command {
 
             if len(args) == 0 {
                 installs := unity.GetInstalls()
+
+                sort.Slice(installs, func(i, j int) bool {
+                    return packages.VersionLess(installs[i].Version, installs[j].Version)
+                })
+
                 options := make([]string, 0, len(installs))
                 for _, install := range installs {
                     options = append(options, install.Version.String())
@@ -171,7 +178,7 @@ var commands = map[string]command {
             }
 
             for _, install := range validInstalls {
-                fmt.Printf("Uninstalling Unity Version %q\n", install.Version)
+                fmt.Printf("Uninstalling Unity Version %q\n", install.Version.String())
                 sudo.RunAsRoot("rm", "-rf", path.Dir(install.Path))
             }
 
