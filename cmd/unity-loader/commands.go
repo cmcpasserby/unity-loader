@@ -142,7 +142,7 @@ var commands = map[string]command {
                 installs := unity.GetInstalls()
 
                 sort.Slice(installs, func(i, j int) bool {
-                    return packages.VersionLess(installs[i].Version, installs[j].Version)
+                    return !packages.VersionLess(installs[i].Version, installs[j].Version)
                 })
 
                 options := make([]string, 0, len(installs))

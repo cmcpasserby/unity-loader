@@ -17,24 +17,26 @@ func (s ByVersionSorter) Swap(i, j int) {
 }
 
 func VersionLess(a, b VersionData) bool {
-    if a.Major < b.Major {
-        return true
+    if a.Major != b.Major {
+        return a.Major < b.Major
     }
 
-    if a.Minor < b.Minor {
-        return true
+    if a.Minor != b.Minor {
+        return a.Minor < b.Minor
     }
 
-    if a.Update < b.Update {
-        return true
+    if a.Update != b.Update {
+        return a.Update < b.Update
     }
 
-    if releaseTypeSort[a.VerType] < releaseTypeSort[b.VerType] {
-        return true
+    aType := releaseTypeSort[a.VerType]
+    bType := releaseTypeSort[b.VerType]
+    if aType != bType {
+        return aType < bType
     }
 
-    if a.Patch < b.Patch {
-        return true
+    if a.Patch != b.Patch {
+        return a.Patch < b.Patch
     }
 
     return false
