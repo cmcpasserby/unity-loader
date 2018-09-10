@@ -8,15 +8,15 @@ func TestVersionLess(t *testing.T) {
     b := VersionData{2018, 2, 7, "f", 1}
 
     if !VersionLess(a, b) {
-        t.Fail()
+        t.Error("major")
     }
 
     // test minor
-    a = VersionData{2018, 6, 4, "f", 1}
-    b = VersionData{2018, 2, 7, "f", 1}
+    a = VersionData{2018, 4, 4, "f", 1}
+    b = VersionData{2018, 6, 7, "f", 1}
 
     if !VersionLess(a, b) {
-        t.Fail()
+        t.Error("minor")
     }
 
     // test update
@@ -24,7 +24,7 @@ func TestVersionLess(t *testing.T) {
     b = VersionData{2018, 6, 7, "f", 1}
 
     if !VersionLess(a, b) {
-        t.Fail()
+        t.Error("update")
     }
 
     // test type
@@ -32,7 +32,7 @@ func TestVersionLess(t *testing.T) {
     b = VersionData{2018, 6, 7, "p", 1}
 
     if !VersionLess(a, b) {
-        t.Fail()
+        t.Error("type")
     }
 
     // test patch
@@ -40,6 +40,6 @@ func TestVersionLess(t *testing.T) {
     b = VersionData{2018, 6, 7, "f", 2}
 
     if !VersionLess(a, b) {
-        t.Fail()
+        t.Error("patch")
     }
 }
