@@ -9,6 +9,7 @@ import (
     "os"
     "os/exec"
     "path/filepath"
+    "sort"
     "strings"
 )
 
@@ -51,6 +52,11 @@ func GetInstalls() []InstallInfo {
         installData := GetInstallFromPath(path)
         installs = append(installs, installData)
     }
+
+    sort.Slice(installs, func(i, j int) bool {
+        return !packages.VersionLess(installs[i].Version, installs[j].Version)
+    })
+
     return installs
 }
 
