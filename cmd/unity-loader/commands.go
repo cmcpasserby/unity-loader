@@ -3,11 +3,14 @@ package main
 import (
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
     "log"
     "os"
+    "path"
     "path/filepath"
+    "time"
 )
 
 type command struct {
@@ -16,7 +19,7 @@ type command struct {
     Action func(...string) error
 }
 
-var commandOrder = [...]string{"run", "version", "list", "install", "repair"}
+var commandOrder = [...]string{"run", "version", "list", "install", "uninstall", "repair"}
 
 var commands = map[string]command {
 
@@ -53,6 +56,8 @@ var commands = map[string]command {
                     survey.AskOne(prompt, &installUnity, nil)
                     if installUnity {
                         Install(version)
+                        time.Sleep(time.Second)
+                        appInstall, _ = unity.GetInstallFromVersion(version)
                     }
                 } else {
                     return err
@@ -102,7 +107,7 @@ var commands = map[string]command {
         "list all installed unity versions",
         func(args ...string) error {
             for _, data := range unity.GetInstalls() {
-                fmt.Printf("Version: %s Path: %q\n", data.Version, data.Path)
+                fmt.Printf("Version: %q Path: %q\n", data.Version.String(), data.Path)
             }
             return nil
         },
@@ -121,6 +126,56 @@ var commands = map[string]command {
             if err != nil {
                 log.Fatal("ERROR: ", err)
             }
+            return nil
+        },
+    },
+
+    "uninstall": {
+        "uninstall",
+        "uninstall one or multiple versions of Unity",
+        func(args ...string) error {
+            versions := make([]string, 0)
+
+            if len(args) == 0 {
+                installs := unity.GetInstalls()
+
+                options := make([]string, 0, len(installs))
+                for _, install := range installs {
+                    options = append(options, install.Version.String())
+                }
+
+                prompt := &survey.MultiSelect{
+                    Message: "Select versions to uninstall",
+                    Options: options,
+                    PageSize:len(options),
+                }
+
+                survey.AskOne(prompt, &versions, nil)
+            } else {
+                versions = args
+            }
+
+            validInstalls := make([]unity.InstallInfo, 0, len(versions))
+            for _, ver := range versions {
+                install, err := unity.GetInstallFromVersion(ver)
+                if err != nil {continue}
+                validInstalls = append(validInstalls, install)
+            }
+
+            if len(validInstalls) == 0 {
+                return errors.New("nothing to uninstall")
+            }
+
+            sudo := new(sudoer.Sudoer)
+            if !sudo.AskPass() {
+                return errors.New("invalid admin password\n")
+            }
+
+            for _, install := range validInstalls {
+                fmt.Printf("Uninstalling Unity Version %q\n", install.Version.String())
+                sudo.RunAsRoot("rm", "-rf", path.Dir(install.Path))
+            }
+
             return nil
         },
     },

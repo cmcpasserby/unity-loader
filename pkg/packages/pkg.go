@@ -5,12 +5,12 @@ import (
     "encoding/hex"
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "gopkg.in/cheggaaa/pb.v1"
     "io"
     "log"
     "net/http"
     "os"
-    "os/exec"
     "path"
     "time"
 )
@@ -18,11 +18,11 @@ import (
 
 type UrlData struct {
     Base string
-    Version VersionData
+    Version ExtendedVersionData
 }
 
 func (url *UrlData) GetIniUrl() string {
-    fileName := fmt.Sprintf(configName, url.Version.VersionString)
+    fileName := fmt.Sprintf(configName, url.Version.String())
     return fmt.Sprintf(url.Base, url.Version.VersionUuid) + fileName
 }
 
@@ -105,18 +105,14 @@ func (pkg *Package) Validate() (bool, error) {
     return isValid, nil
 }
 
-func (pkg *Package) Install(password string) error {
+func (pkg *Package) Install(sudo *sudoer.Sudoer) error {
     if pkg.filePath == "" {
         return errors.New("no downloaded package to install")
     }
 
     fmt.Printf("Installing pacakge %q...", pkg.Data.Title)
 
-    process := exec.Command("sudo", "-S", "installer", "-package", pkg.filePath, "-target", "/")
-    processIn, _ := process.StdinPipe()
-    io.WriteString(processIn, fmt.Sprintf("%s\n", password))
-
-    err := process.Run()
+    err := sudo.RunAsRoot("installer", "-package", pkg.filePath, "-target", "/")
     if err != nil {return err}
 
     os.Remove(pkg.filePath)
@@ -131,8 +127,9 @@ func (pkg Package) downloadProgress(done chan int64) {
     stop := false
 
     bar := pb.New64(pkg.Data.Size)
+    bar.Prefix(pkg.Data.Title)
     bar.ShowSpeed = true
-    bar.Width = 80
+    bar.Width = 120
     bar.SetUnits(pb.U_BYTES)
     bar.Start()
 
@@ -143,7 +140,6 @@ func (pkg Package) downloadProgress(done chan int64) {
         default:
             file, err := os.Open(pkg.filePath)
             if err != nil {log.Fatal(err)}
-
 
             fi, err := file.Stat()
             if err != nil {log.Fatal(err)}
@@ -157,6 +153,7 @@ func (pkg Package) downloadProgress(done chan int64) {
             bar.Set64(size)
         }
         if stop {
+            bar.Set64(pkg.Data.Size)
             bar.FinishPrint(fmt.Sprintf("Downloaded %q", pkg.Data.Title))
             return
         }

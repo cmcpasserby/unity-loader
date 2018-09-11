@@ -4,15 +4,17 @@ import (
     "bufio"
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/packages"
     "howett.net/plist"
     "os"
     "os/exec"
     "path/filepath"
+    "sort"
     "strings"
 )
 
 type InstallInfo struct {
-    Version string
+    Version packages.VersionData
     Path string
 }
 
@@ -50,6 +52,11 @@ func GetInstalls() []InstallInfo {
         installData := GetInstallFromPath(path)
         installs = append(installs, installData)
     }
+
+    sort.Slice(installs, func(i, j int) bool {
+        return !packages.VersionLess(installs[i].Version, installs[j].Version)
+    })
+
     return installs
 }
 
@@ -62,7 +69,7 @@ func GetInstallFromPath(path string) InstallInfo {
     decoder := plist.NewDecoder(file)
     decoder.Decode(&appInfo)
 
-    installData := InstallInfo{Version: appInfo.CFBundleVersion, Path: path}
+    installData := InstallInfo{Version: packages.VersionDataFromString(appInfo.CFBundleVersion), Path: path}
     return installData
 }
 
@@ -70,7 +77,7 @@ func GetInstallFromVersion(version string) (InstallInfo, error) {
     Installs := GetInstalls()
 
     for _, install := range Installs {
-        if version == install.Version {
+        if version == install.Version.String() {
             return install, nil
         }
     }
@@ -79,7 +86,7 @@ func GetInstallFromVersion(version string) (InstallInfo, error) {
 
 func RepairInstallPath(install InstallInfo) error {
     oldPath := filepath.Dir(install.Path)
-    newName := fmt.Sprintf("Unity %s", install.Version)
+    newName := fmt.Sprintf("Unity %s", install.Version.String())
     newPath := filepath.Join("/Applications/", newName)
 
     if oldPath == newPath {
