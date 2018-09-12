@@ -3,6 +3,7 @@ package main
 import (
     "errors"
     "fmt"
+    "github.com/cmcpasserby/unity-loader/pkg/packages"
     "github.com/cmcpasserby/unity-loader/pkg/sudoer"
     "github.com/cmcpasserby/unity-loader/pkg/unity"
     "gopkg.in/AlecAivazis/survey.v1"
@@ -118,11 +119,27 @@ var commands = map[string]command {
         "installed the specified version of unity",
         func(args ...string) error {
             if len(args) == 0 {
-                return errors.New("no version specified")
+                versions, err := packages.GetAllVersions()
+                if err != nil {return err}
+
+                versionStrs := make([]string, 0, len(versions))
+                for _, ver := range versions {
+                    versionStrs = append(versionStrs, ver.String())
+                }
+
+                prompt := &survey.Select{
+                    Message: "Select version to install:",
+                    Options: versionStrs,
+                    PageSize: 10,
+                }
+
+                var result string
+                survey.AskOne(prompt, &result, nil)
+
+                return nil
             }
 
-            version := args[0]
-            err := Install(version)
+            err := Install(args[0])
             if err != nil {
                 log.Fatal("ERROR: ", err)
             }

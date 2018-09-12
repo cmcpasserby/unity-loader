@@ -6,6 +6,7 @@ import (
     "io/ioutil"
     "net/http"
     "regexp"
+    "sort"
     "strconv"
     "strings"
 )
@@ -168,4 +169,33 @@ func GetVersionData(ver string) (ExtendedVersionData, error) {
         }
     }
     return ExtendedVersionData{}, VersionNotFoundError{ver}
+}
+
+func GetAllVersions() ([]ExtendedVersionData, error) {
+    versions := make([]ExtendedVersionData, 0)
+
+    for _, url := range archiveUrls {
+        response, err := http.Get(url)
+        if err != nil {
+            return nil, err
+        }
+
+        contents, _ := ioutil.ReadAll(response.Body)
+        response.Body.Close()
+
+        matches := downloadRe.FindAllString(string(contents), -1)
+
+        for _, m := range matches {
+            verStr := versionRe.FindString(m)
+            verUuid := uuidRe.FindString(m)
+            verData := ExtendedVersionData{VersionDataFromString(verStr), verUuid}
+            versions = append(versions, verData)
+        }
+    }
+
+    sort.Slice(versions, func(i, j int) bool {
+        return !VersionLess(versions[i].VersionData, versions[j].VersionData)
+    })
+
+    return versions, nil
 }
