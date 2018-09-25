@@ -110,7 +110,7 @@ func (pkg *Package) Install(sudo *sudoer.Sudoer) error {
         return errors.New("no downloaded package to install")
     }
 
-    fmt.Printf("Installing pacakge %q...", pkg.Data.Title)
+    fmt.Printf("Installing package %q...", pkg.Data.Title)
 
     err := sudo.RunAsRoot("installer", "-package", pkg.filePath, "-target", "/")
     if err != nil {return err}
