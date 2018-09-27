@@ -36,9 +36,11 @@ var commands = map[string]command {
                 path = args[0]
             }
 
+            expandedPath, _ := filepath.Abs(path)
+
             versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
             if _, err := os.Stat(versionFile); os.IsNotExist(err) {
-                fmt.Printf("%q is not a valid unity project\n", path)
+                fmt.Printf("%q is not a valid unity project\n", expandedPath)
             }
 
             version, err := unity.GetVersionFromProject(versionFile)
@@ -65,7 +67,7 @@ var commands = map[string]command {
                 }
             }
 
-            fmt.Printf("Opening project %q in version: %s\n", path, version)
+            fmt.Printf("Opening project %q in version: %s\n", expandedPath, version)
             err = appInstall.Run(path)
             if err != nil {
                 return fmt.Errorf("could not execute unity from %q", appInstall.Path)
