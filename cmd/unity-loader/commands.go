@@ -138,6 +138,10 @@ var commands = map[string]command {
                 var result string
                 survey.AskOne(prompt, &result, nil)
 
+                err = Install(result)
+                if err != nil {
+                    log.Fatal("Error: ", err)
+                }
                 return nil
             }
 
