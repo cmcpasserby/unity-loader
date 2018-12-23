@@ -2,6 +2,7 @@ package settings
 
 import (
 	"github.com/BurntSushi/toml"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -30,7 +31,8 @@ func ParseDotFile() (*Settings, error) {
 	} else if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+
+	defer closeFile(f)
 
 	var data Settings
 
@@ -46,7 +48,7 @@ func createDotFile(path string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer closeFile(f)
 
 	data := Settings{}
 
@@ -62,4 +64,10 @@ func getPath() (string, error) {
 		return "", err
 	}
 	return path.Join(usr.HomeDir, settingsDir), nil
+}
+
+func closeFile(f *os.File) {
+	if err := f.Close(); err != nil {
+		log.Fatal(err)
+	}
 }

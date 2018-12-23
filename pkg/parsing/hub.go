@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -41,7 +42,12 @@ func GetHubVersions() (*Releases, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	var data Releases
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
