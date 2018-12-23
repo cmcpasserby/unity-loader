@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
+	"github.com/cmcpasserby/unity-loader/pkg/settings"
 )
 
 func update(args ...string) error {
@@ -10,6 +10,10 @@ func update(args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(data)
+
+	if err := settings.WriteCache(data); err != nil {
+		return err
+	}
+
 	return nil
 }

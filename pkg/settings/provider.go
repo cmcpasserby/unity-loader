@@ -16,7 +16,7 @@ type Settings struct {
 }
 
 func ParseDotFile() (*Settings, error) {
-	dotPath, err := getPath()
+	dotPath, err := GetPath()
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func createDotFile(path string) error {
 	return nil
 }
 
-func getPath() (string, error) {
+func GetPath() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", err
