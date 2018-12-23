@@ -7,21 +7,23 @@ import (
 	"path"
 )
 
-const dotFileName string = ".unityLoader/config.toml"
+const settingsDir = ".unityLoader"
+const configName = "config.toml"
 
 type Settings struct {
-	ProjectFolder string `toml:"ProjectFolder"`
+	ProjectDirectory string `toml:"ProjectDirectory"`
 }
 
 func ParseDotFile() (*Settings, error) {
-	dotPath, err := getFilePath()
+	dotPath, err := getPath()
 	if err != nil {
 		return nil, err
 	}
+	configPath := path.Join(dotPath, configName)
 
-	f, err := os.Open(dotPath)
+	f, err := os.Open(configPath)
 	if os.IsNotExist(err) {
-		if err := createDotFile(dotPath); err != nil {
+		if err := createDotFile(configPath); err != nil {
 			return nil, err
 		}
 		return &Settings{}, nil
@@ -39,24 +41,25 @@ func ParseDotFile() (*Settings, error) {
 	return &data, nil
 }
 
-func createDotFile(dotPath string) error {
-	f, err := os.Create(dotPath)
+func createDotFile(path string) error {
+	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
 	data := Settings{}
+
 	if err := toml.NewEncoder(f).Encode(data); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getFilePath() (string, error) {
+func getPath() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return "", err
 	}
-	return path.Join(usr.HomeDir, dotFileName), nil
+	return path.Join(usr.HomeDir, settingsDir), nil
 }
