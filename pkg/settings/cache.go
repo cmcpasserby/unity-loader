@@ -45,7 +45,22 @@ func ReadCache() (*Cache, error) {
 		return nil, err
 	}
 
-	// TODO does cache file exist
+	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
+		return nil, CacheNotFoundError{cachePath}
+	}
+
+	f, err := os.Open(cachePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var cache Cache
+
+	if err := json.NewDecoder(f).Decode(&cache); err != nil {
+		return nil, err
+	}
+
+	return &cache, nil
 }
 
 func getCachePath() (string, error) {

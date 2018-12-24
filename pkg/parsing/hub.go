@@ -8,6 +8,12 @@ import (
 
 const hubUrl = "https://public-cdn.cloud.unity3d.com/hub/prod/releases-darwin.json"
 
+type Package interface {
+	Download() (string, error)
+	Validate(path string) (bool, error)
+	Install(path string) error
+}
+
 type Releases struct {
 	Official []PkgDetails `json:"official"`
 	Beta     []PkgDetails `json:"beta"`
@@ -37,6 +43,21 @@ type PkgModule struct {
 	Checksum      string `json:"checksum"`
 }
 
+func (pkg *PkgDetails) Download() (string, error) {
+	return "", nil
+}
+
+func (pkg *PkgDetails) Validate(path string) (bool, error) {
+	return false, nil
+}
+
+func (pkg *PkgDetails) Install(path string) error {
+	return nil
+}
+
+func (pkg *PkgDetails) downloadProgress(done chan int64) {
+}
+
 func GetHubVersions() (*Releases, error) {
 	resp, err := http.Get(hubUrl)
 	if err != nil {
@@ -54,4 +75,22 @@ func GetHubVersions() (*Releases, error) {
 		return nil, err
 	}
 	return &data, nil
+}
+
+func (r Releases) Filter(f func(PkgDetails) bool) []PkgDetails {
+	result := make([]PkgDetails, 0)
+
+	for _, pkg := range r.Official {
+		if f(pkg) {
+			result = append(result, pkg)
+		}
+	}
+
+	for _, pkg := range r.Beta {
+		if f(pkg) {
+			result = append(result, pkg)
+		}
+	}
+
+	return result
 }

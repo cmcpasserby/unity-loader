@@ -10,6 +10,7 @@ import (
 
 const settingsDir = ".unityLoader"
 const configName = "config.toml"
+const packages = "packages"
 
 type Settings struct {
 	ProjectDirectory string `toml:"ProjectDirectory"`
@@ -64,6 +65,14 @@ func GetPath() (string, error) {
 		return "", err
 	}
 	return path.Join(usr.HomeDir, settingsDir), nil
+}
+
+func GetPkgPath() (string, error) {
+	dotPath, err := GetPath()
+	if err != nil {
+		return "", nil
+	}
+	return path.Join(dotPath, packages), nil
 }
 
 func closeFile(f *os.File) {
