@@ -29,6 +29,11 @@ var Commands = map[string]Command{
 		"update the package index",
 		update,
 	},
+	"install": {
+		"install",
+		"installed the specified version of unity",
+		install,
+	},
 	"uninstall": {
 		"uninstall",
 		"uninstall one or multiple versions of Unity",
