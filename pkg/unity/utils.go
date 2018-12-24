@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"howett.net/plist"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -26,6 +27,28 @@ func (info *InstallInfo) Run(project string) error {
 
 type appInfoDict struct {
 	CFBundleVersion string `plist:"CFBundleVersion"`
+}
+
+func GetProjectsInPath(projectPath string) ([]string, error) {
+	projects := make([]string, 0)
+
+	folders, err := ioutil.ReadDir(projectPath)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range folders {
+		if !f.IsDir() {
+			continue
+		}
+
+		projectVersionPath := filepath.Join(projectPath, f.Name(), "ProjectSettings", "ProjectVersion.txt")
+		if _, err := os.Stat(projectVersionPath); !os.IsNotExist(err) {
+			projects = append(projects, filepath.Join(projectPath, f.Name()))
+		}
+	}
+
+	return projects, nil
 }
 
 func GetVersionFromProject(path string) (string, error) {

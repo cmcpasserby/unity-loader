@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
+	"strings"
 )
 
 const settingsDir = ".unityLoader"
@@ -39,6 +41,14 @@ func ParseDotFile() (*Settings, error) {
 
 	if _, err := toml.DecodeReader(f, &data); err != nil {
 		return nil, err
+	}
+
+	if strings.HasPrefix(data.ProjectDirectory, "~") {
+		usr, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+		data.ProjectDirectory = filepath.Join(usr.HomeDir, data.ProjectDirectory[1:])
 	}
 
 	return &data, nil

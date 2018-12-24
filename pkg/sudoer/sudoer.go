@@ -16,10 +16,12 @@ func (s *Sudoer) AskPass() error {
 		Message: "enter admin password",
 	}
 	fmt.Println("admin access is required")
-	survey.AskOne(pwPrompt, &s.password, nil)
+	if err := survey.AskOne(pwPrompt, &s.password, nil); err != nil {
+		return err
+	}
 
 	if !s.CheckRoot() {
-		return InvalidPasswordError
+		return InvalidPasswordError{}
 	}
 
 	return nil
@@ -50,7 +52,9 @@ func (s *Sudoer) RunAsRoot(command string, args ...string) error {
 
 	process := exec.Command("sudo", sudoArgs...)
 	processIn, _ := process.StdinPipe()
-	io.WriteString(processIn, fmt.Sprintf("%s\n", s.password))
+	if _, err := io.WriteString(processIn, fmt.Sprintf("%s\n", s.password)); err != nil {
+		return err
+	}
 
 	err := process.Run()
 	if err != nil {
