@@ -1,5 +1,7 @@
 package sudoer
 
-import "errors"
+type InvalidPasswordError struct{}
 
-var InvalidPasswordError = errors.New("invalid password\n")
+func (err *InvalidPasswordError) Error() string {
+	return "invalid password\n"
+}

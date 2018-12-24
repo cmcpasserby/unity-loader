@@ -6,22 +6,42 @@ type Command struct {
 	Action   func(...string) error
 }
 
-var CommandOrder = [...]string{"run", "version", "list", "update"}
+var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "cleanup", "repair"}
 
 var Commands = map[string]Command{
-	"update": {
-		"update",
-		"update the package index",
-		update,
+	"run": {
+		"run",
+		"run the passed in project with an auto detected version of unity",
+		run,
+	},
+	"version": {
+		"version",
+		"check what version of unity a project is using",
+		version,
 	},
 	"list": {
 		"list",
 		"list all installed unity versions",
 		list,
 	},
-	"version": {
-		"version",
-		"check what version of unity a project is using",
-		version,
+	"update": {
+		"update",
+		"update the package index",
+		update,
+	},
+	"uninstall": {
+		"uninstall",
+		"uninstall one or multiple versions of Unity",
+		uninstall,
+	},
+	"cleanup": {
+		"cleanup",
+		"removes unused unity versons",
+		cleanup,
+	},
+	"repair": {
+		"repair",
+		"fix paths to unity installs",
+		repair,
 	},
 }
