@@ -1,6 +1,8 @@
 package settings
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"log"
 	"os"
@@ -14,8 +16,14 @@ const settingsDir = ".unityLoader"
 const configName = "config.toml"
 const packages = "packages"
 
+const configHelpString = `# config.toml
+#
+# help text
+`
+
 type Settings struct {
-	ProjectDirectory string `toml:"ProjectDirectory"`
+	ProjectDirectory string          `toml:"ProjectDirectory"`
+	ModuleDefaults   map[string]bool `toml:"ModuleDefaults"`
 }
 
 func ParseDotFile() (*Settings, error) {
@@ -61,11 +69,25 @@ func createDotFile(path string) error {
 	}
 	defer closeFile(f)
 
-	data := Settings{}
+	data := Settings{
+		ProjectDirectory: "",
+		ModuleDefaults:   map[string]bool{},
+	}
 
-	if err := toml.NewEncoder(f).Encode(data); err != nil {
+	b := new(bytes.Buffer)
+
+	if err := toml.NewEncoder(b).Encode(data); err != nil {
 		return err
 	}
+
+	if _, err := f.WriteString(fmt.Sprintf("%s\n", configHelpString)); err != nil {
+		return err
+	}
+
+	if _, err := f.Write(b.Bytes()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
