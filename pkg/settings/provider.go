@@ -104,7 +104,10 @@ func GetPkgPath() (string, error) {
 	if err != nil {
 		return "", nil
 	}
-	return path.Join(dotPath, packages), nil
+
+	pkgPath := filepath.Join(dotPath, packages)
+
+	return pkgPath, nil
 }
 
 func closeFile(f *os.File) {

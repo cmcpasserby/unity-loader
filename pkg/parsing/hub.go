@@ -40,6 +40,18 @@ type PkgDetails struct {
 	Modules       []PkgModule `json:"modules"`
 }
 
+func (pkg *PkgDetails) FilterModules(f func(mod PkgModule) bool) []PkgModule {
+	result := make([]PkgModule, 0, len(pkg.Modules))
+
+	for _, mod := range pkg.Modules {
+		if f(mod) {
+			result = append(result, mod)
+		}
+	}
+
+	return result
+}
+
 type PkgModule struct {
 	Id            string `json:"id"`
 	Name          string `json:"name"`
@@ -73,7 +85,7 @@ func GetHubVersions() (*Releases, error) {
 	return &data, nil
 }
 
-func (r *Releases) Filter(f func(PkgDetails) bool) []PkgDetails {
+func (r *Releases) Filter(f func(PkgDetails) bool) PkgDetailsSlice {
 	result := make([]PkgDetails, 0)
 
 	for _, pkg := range r.Official {
