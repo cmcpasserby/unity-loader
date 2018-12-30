@@ -96,7 +96,16 @@ func GetPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return path.Join(usr.HomeDir, settingsDir), nil
+
+	settingsPath := filepath.Join(usr.HomeDir, settingsDir)
+
+	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
+		if err := os.Mkdir(settingsPath, 0755); err != nil {
+			return "", err
+		}
+	}
+
+	return settingsPath, nil
 }
 
 func GetPkgPath() (string, error) {
@@ -106,6 +115,12 @@ func GetPkgPath() (string, error) {
 	}
 
 	pkgPath := filepath.Join(dotPath, packages)
+
+	if _, err := os.Stat(pkgPath); os.IsNotExist(err) {
+		if err := os.Mkdir(pkgPath, 0755); err != nil {
+			return "", err
+		}
+	}
 
 	return pkgPath, nil
 }
