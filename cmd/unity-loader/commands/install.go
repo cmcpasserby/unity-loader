@@ -1,13 +1,17 @@
 package commands
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"gopkg.in/cheggaaa/pb.v1"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -102,7 +106,7 @@ func installVersion(version string, cache *settings.Cache) error {
 		return err
 	}
 
-	isValid, err := validatePkg(&installInfo, unityPath)
+	isValid, err := validate(installInfo.Version, installInfo.Checksum, unityPath)
 	if err != nil {
 		return err
 	}
@@ -110,21 +114,35 @@ func installVersion(version string, cache *settings.Cache) error {
 		return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
 	}
 
+	modulePaths := make([]string, 0, len(selected))
+
 	for _, module := range selected {
-		fmt.Println(module.Id)
-		// TODO download selected modules
+		modPath, err := downloadModule(&module)
+		if err != nil {
+			return err
+		}
+
+		isValid, err := validate(module.Name, module.Checksum, modPath)
+		if err != nil {
+			return err
+		}
+
+		if !isValid {
+			return fmt.Errorf("%q was not a valid package, try installing again\n", module.Name)
+		}
+		modulePaths = append(modulePaths, modPath)
 	}
 
 	return nil
 }
 
-func downloadPkg(pkg *parsing.PkgDetails) (string, error) {
+func download(url, name string, size int) (string, error) {
 	pkgPath, err := settings.GetPkgPath()
 	if err != nil {
 		return "", err
 	}
 
-	downloadPath := filepath.Join(pkgPath, filepath.Base(pkg.DownloadUrl))
+	downloadPath := filepath.Join(pkgPath, filepath.Base(url))
 
 	out, err := os.Create(downloadPath)
 	if err != nil {
@@ -133,23 +151,38 @@ func downloadPkg(pkg *parsing.PkgDetails) (string, error) {
 	defer closeFile(out)
 
 	done := make(chan int64)
-	go downloadProgress(pkg.DownloadSize, pkg.Version, downloadPath, done)
-	// TODO start download
+	go downloadProgress(size, name, downloadPath, done)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer closeResponse(resp)
+
+	n, err := io.Copy(out, resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	done <- n
 
 	return downloadPath, nil
 }
 
-func validatePkg(pkg *parsing.PkgDetails, path string) (bool, error) {
-	return true, nil
+func downloadPkg(pkg *parsing.PkgDetails) (string, error) {
+	downloadPath, err := download(pkg.DownloadUrl, pkg.Version, pkg.DownloadSize)
+	if err != nil {
+		return "", err
+	}
+	return downloadPath, nil
 }
 
 func downloadModule(mod *parsing.PkgModule) (string, error) {
-}
-
-func validateModule(mod *parsing.PkgModule, path string) (bool, error) {
-}
-
-func download() error {
+	downloadPath, err := download(mod.DownloadUrl, mod.Name, mod.DownloadSize)
+	if err != nil {
+		return "", err
+	}
+	return downloadPath, nil
 }
 
 func downloadProgress(downloadSize int, name, path string, done chan int64) {
@@ -187,8 +220,43 @@ func downloadProgress(downloadSize int, name, path string, done chan int64) {
 	}
 }
 
+func validate(name, checksum, path string) (bool, error) {
+	fmt.Printf("Validating pacakge %q...", name)
+
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer closeFile(f)
+
+	hash := md5.New()
+
+	_, err = io.Copy(hash, f)
+	if err != nil {
+		return false, err
+	}
+
+	sum := hash.Sum(nil)
+	isValid := hex.EncodeToString(sum) == checksum
+
+	fmt.Print("\033[2K") // clears current line
+	if isValid {
+		fmt.Printf("\rPackage %q is valid\n", name)
+	} else {
+		fmt.Printf("\rPackage %q is not valid\n", name)
+	}
+
+	return isValid, nil
+}
+
 func cleanUp(downloadPath string) {
 	if err := os.RemoveAll(downloadPath); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func closeResponse(resp *http.Response) {
+	if err := resp.Body.Close(); err != nil {
 		log.Fatal(err)
 	}
 }
