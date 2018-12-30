@@ -17,6 +17,11 @@ type VersionData struct {
 	Patch   int
 }
 
+type ExtendedVersionData struct {
+	VersionData
+	VersionUuid string
+}
+
 func (v *VersionData) String() string {
 	return fmt.Sprintf("%d.%d.%d%s%d", v.Major, v.Minor, v.Update, v.VerType, v.Patch)
 }

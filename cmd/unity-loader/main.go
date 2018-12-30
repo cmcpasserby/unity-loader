@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/cmcpasserby/unity-loader/cmd/unity-loader/commands"
 	"log"
 	"os"
 )
-import "github.com/cmcpasserby/unity-loader/cmd/unity-loader/commands"
 
 func main() {
 	if len(os.Args) == 1 {
