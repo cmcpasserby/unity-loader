@@ -209,7 +209,7 @@ func downloadModule(mod *parsing.PkgModule) (string, error) {
 	return downloadPath, nil
 }
 
-func downloadProgress(downloadSize int, name, path string, done chan int64) {
+func downloadProgress(downloadSize int, name, path string, done <-chan int64) {
 	stop := false
 
 	bar := pb.New64(int64(downloadSize))
