@@ -5,24 +5,28 @@ import (
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
-	"path"
+	"os"
+	"path/filepath"
 )
 
 func cleanup(args ...string) error {
-	var paths []string
+	var path string
 
 	if len(args) >= 1 {
-		paths = args
+		path = args[0]
 	} else {
 		config, err := settings.ParseDotFile()
 		if err != nil {
 			return err
 		}
-		// TODO ensure project directory is defined
-		paths = []string{config.ProjectDirectory}
+		path = config.ProjectDirectory
 	}
 
-	projects, err := unity.GetProjectsInPath(paths[0])
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return err
+	}
+
+	projects, err := unity.GetProjectsInPath(path)
 	if err != nil {
 		return err
 	}
@@ -67,7 +71,7 @@ func cleanup(args ...string) error {
 
 	for _, install := range toRemove {
 		fmt.Printf("Uninstalling Unity Version %q\n", install.Version.String())
-		if err := sudo.RunAsRoot("rm", "-rf", path.Dir(install.Path)); err != nil {
+		if err := sudo.RunAsRoot("rm", "-rf", filepath.Dir(install.Path)); err != nil {
 			return fmt.Errorf("error uninstalling %q, Error: %q", install.Path, err)
 		}
 	}
