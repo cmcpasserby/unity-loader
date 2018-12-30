@@ -58,6 +58,11 @@ func install(args ...string) error {
 }
 
 func installVersion(version string, cache *settings.Cache) error {
+	config, err := settings.ParseDotFile()
+	if err != nil {
+		return err
+	}
+
 	sudo := new(sudoer.Sudoer)
 	if err := sudo.AskPass(); err != nil {
 		return err
@@ -74,8 +79,11 @@ func installVersion(version string, cache *settings.Cache) error {
 		moduleString := fmt.Sprintf("%s {%s}", module.Name, module.Id)
 
 		titles = append(titles, moduleString)
-		if module.Selected {
-			defaults = append(defaults, moduleString)
+
+		if value, ok := config.ModuleDefaults[module.Id]; ok {
+			if value {
+				defaults = append(defaults, moduleString)
+			}
 		}
 	}
 
@@ -215,8 +223,9 @@ func downloadProgress(downloadSize int, name, path string, done chan int64) {
 		if stop {
 			bar.Set64(int64(downloadSize))
 			bar.FinishPrint(fmt.Sprintf("Downloaded %q", name))
+			return
 		}
-		time.Sleep(time.Second * 10)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
