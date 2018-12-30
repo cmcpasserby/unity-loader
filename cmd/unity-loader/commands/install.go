@@ -3,6 +3,7 @@ package commands
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
@@ -20,6 +21,11 @@ import (
 )
 
 var moduleIdRe = regexp.MustCompile(`{(.*?)}`)
+
+type downloadedModule struct {
+	parsing.PkgModule
+	ModulePath string
+}
 
 func install(args ...string) error {
 	// TODO check cache timestamp and maybe update
@@ -122,7 +128,7 @@ func installVersion(version string, cache *settings.Cache) error {
 		return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
 	}
 
-	modulePaths := make([]string, 0, len(selected))
+	modulePaths := make([]downloadedModule, 0, len(selected))
 
 	for _, module := range selected {
 		modPath, err := downloadModule(&module)
@@ -138,7 +144,17 @@ func installVersion(version string, cache *settings.Cache) error {
 		if !isValid {
 			return fmt.Errorf("%q was not a valid package, try installing again\n", module.Name)
 		}
-		modulePaths = append(modulePaths, modPath)
+		modulePaths = append(modulePaths, downloadedModule{module, modPath})
+	}
+
+	if err := installPkg(installInfo.Version, unityPath, sudo); err != nil {
+		return err
+	}
+
+	for _, modPath := range modulePaths {
+		if err := installPkg(modPath.Name, modPath.ModulePath, sudo); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -256,6 +272,27 @@ func validate(name, checksum, path string) (bool, error) {
 	}
 
 	return isValid, nil
+}
+
+func installPkg(name, pkgPath string, sudo *sudoer.Sudoer) error {
+	if pkgPath == "" {
+		return errors.New("no downloaded package to install")
+	}
+
+	fmt.Printf("Installing package %q...", name)
+
+	err := sudo.RunAsRoot("installer", "-package", pkgPath, "-target", "/")
+	if err != nil {
+		return err
+	}
+
+	if err := os.Remove(pkgPath); err != nil {
+		return err
+	}
+
+	fmt.Print("\033[2K") // clears current line
+	fmt.Printf("\rInstalled pacakge %q\n", name)
+	return nil
 }
 
 func cleanUp(downloadPath string) {
