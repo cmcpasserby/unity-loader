@@ -41,7 +41,7 @@ var Commands = map[string]Command{
 	},
 	"cleanup": {
 		"cleanup",
-		"removes unused unity versons",
+		"removes unused unity versions",
 		cleanup,
 	},
 	"repair": {
