@@ -24,8 +24,9 @@ type IniData struct {
 }
 
 const (
-	archiveUrl = "https://unity3d.com/get-unity/download/archive"
-	configName = "unity-%s-osx.ini"
+	archiveUrl   = "https://unity3d.com/get-unity/download/archive"
+	configName   = "unity-%s-osx.ini"
+	unitySection = "Unity"
 )
 
 var (
@@ -47,7 +48,18 @@ var (
 	}
 )
 
-func GetArchiveVersions() (*Releases, error) {
+func GetArchiveVersions() error {
+	versions, err := getArchiveVersionData()
+	if err != nil {
+		return err
+	}
+
+	err = getInstallData(versions[0])
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func getArchiveVersionData() ([]unity.ExtendedVersionData, error) {

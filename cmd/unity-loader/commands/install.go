@@ -74,7 +74,7 @@ func installVersion(version string, cache *settings.Cache) error {
 		return err
 	}
 
-	installInfo := cache.Releases.First(func(details parsing.PkgDetails) bool {
+	installInfo := cache.Releases.First(func(details parsing.Pkg) bool {
 		return details.Version == version
 	})
 
@@ -193,7 +193,7 @@ func download(url, name string, size int) (string, error) {
 	return downloadPath, nil
 }
 
-func downloadPkg(pkg *parsing.PkgDetails) (string, error) {
+func downloadPkg(pkg *parsing.Pkg) (string, error) {
 	downloadPath, err := download(pkg.DownloadUrl, pkg.Version, pkg.DownloadSize)
 	if err != nil {
 		return "", err

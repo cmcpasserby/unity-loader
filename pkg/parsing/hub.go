@@ -2,69 +2,11 @@ package parsing
 
 import (
 	"encoding/json"
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"log"
 	"net/http"
 )
 
 const hubUrl = "https://public-cdn.cloud.unity3d.com/hub/prod/releases-darwin.json"
-
-type PkgDetailsSlice []PkgDetails
-
-func (pkg PkgDetailsSlice) Len() int {
-	return len(pkg)
-}
-
-func (pkg PkgDetailsSlice) Less(i, j int) bool {
-	a := unity.VersionDataFromString(pkg[i].Version)
-	b := unity.VersionDataFromString(pkg[j].Version)
-	return unity.VersionLess(a, b)
-}
-
-func (pkg PkgDetailsSlice) Swap(i, j int) {
-	pkg[i], pkg[j] = pkg[j], pkg[i]
-}
-
-type Releases struct {
-	Official PkgDetailsSlice `json:"official"`
-	Beta     PkgDetailsSlice `json:"beta"`
-}
-
-type PkgDetails struct {
-	Version       string      `json:"version"`
-	Lts           bool        `json:"lts"`
-	DownloadUrl   string      `json:"downloadUrl"`
-	DownloadSize  int         `json:"downloadSize"`
-	InstalledSize int         `json:"installedSize"`
-	Checksum      string      `json:"checksum"`
-	Modules       []PkgModule `json:"modules"`
-}
-
-func (pkg *PkgDetails) FilterModules(f func(mod PkgModule) bool) []PkgModule {
-	result := make([]PkgModule, 0, len(pkg.Modules))
-
-	for _, mod := range pkg.Modules {
-		if f(mod) {
-			result = append(result, mod)
-		}
-	}
-
-	return result
-}
-
-type PkgModule struct {
-	Id            string `json:"id"`
-	Name          string `json:"name"`
-	Description   string `json:"description"`
-	DownloadUrl   string `json:"downloadUrl"`
-	Category      string `json:"category"`
-	InstalledSize int    `json:"installedSize"`
-	DownloadSize  int    `json:"downloadSize"`
-	Visible       bool   `json:"visible"`
-	Selected      bool   `json:"selected"`
-	Destination   string `json:"destination"`
-	Checksum      string `json:"checksum"`
-}
 
 func GetHubVersions() (*Releases, error) {
 	resp, err := http.Get(hubUrl)
@@ -85,8 +27,8 @@ func GetHubVersions() (*Releases, error) {
 	return &data, nil
 }
 
-func (r *Releases) Filter(f func(PkgDetails) bool) PkgDetailsSlice {
-	result := make([]PkgDetails, 0)
+func (r *Releases) Filter(f func(Pkg) bool) PkgSlice {
+	result := make([]Pkg, 0)
 
 	for _, pkg := range r.Official {
 		if f(pkg) {
@@ -103,6 +45,6 @@ func (r *Releases) Filter(f func(PkgDetails) bool) PkgDetailsSlice {
 	return result
 }
 
-func (r *Releases) First(f func(PkgDetails) bool) PkgDetails {
+func (r *Releases) First(f func(Pkg) bool) Pkg {
 	return r.Filter(f)[0]
 }

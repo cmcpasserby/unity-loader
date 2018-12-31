@@ -6,6 +6,11 @@ import (
 )
 
 func update(args ...string) error {
+	// err := parsing.GetArchiveVersions()
+	// if err != nil {
+	// 	return err
+	// }
+
 	data, err := parsing.GetHubVersions()
 	if err != nil {
 		return err
