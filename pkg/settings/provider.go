@@ -12,9 +12,12 @@ import (
 	"strings"
 )
 
-const settingsDir = ".unityLoader"
-const configName = "config.toml"
-const packages = "packages"
+const (
+	settingsDir = ".unityLoader"
+	configName = "config.toml"
+	packages = "packages"
+)
+
 
 const configHelpString = `# config.toml
 #

@@ -33,7 +33,7 @@ func WriteCache(data *parsing.Releases) error {
 	defer closeFile(f)
 
 	enc := json.NewEncoder(f)
-	enc.SetIndent("", "    ")
+	enc.SetIndent("", "  ")
 	if err := enc.Encode(cache); err != nil {
 		return err
 	}

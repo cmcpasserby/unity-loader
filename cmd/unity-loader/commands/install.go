@@ -8,6 +8,7 @@ import (
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
+	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"gopkg.in/cheggaaa/pb.v1"
 	"io"
@@ -155,6 +156,14 @@ func installVersion(version string, cache *settings.Cache) error {
 		if err := installPkg(modPath.Name, modPath.ModulePath, sudo); err != nil {
 			return err
 		}
+	}
+
+	if installInfo, err := unity.GetInstallFromVersion(version); err != nil {
+		if err := unity.RepairInstallPath(installInfo); err != nil {
+			return err
+		}
+	} else {
+		return err
 	}
 
 	return nil
