@@ -24,12 +24,13 @@ import (
 var moduleIdRe = regexp.MustCompile(`{(.*?)}`)
 
 type downloadedModule struct {
-	parsing.PkgModule
+	*parsing.PkgModule
 	ModulePath string
 }
 
 func install(args ...string) error {
 	// TODO check cache timestamp and maybe update
+	// TODO Repair paths to ensure this will not overwrite a existing unity version
 
 	cache, err := settings.ReadCache()
 	if err != nil {
@@ -116,12 +117,14 @@ func installVersion(version string, cache *settings.Cache) error {
 		return false
 	})
 
+	defer cleanUp()
+
 	unityPath, err := downloadPkg(&installInfo)
 	if err != nil {
 		return err
 	}
 
-	isValid, err := validate(installInfo.Version, installInfo.Checksum, unityPath)
+	isValid, err := validate(&installInfo, unityPath)
 	if err != nil {
 		return err
 	}
@@ -137,7 +140,7 @@ func installVersion(version string, cache *settings.Cache) error {
 			return err
 		}
 
-		isValid, err := validate(module.Name, module.Checksum, modPath)
+		isValid, err := validate(&module, modPath)
 		if err != nil {
 			return err
 		}
@@ -145,20 +148,20 @@ func installVersion(version string, cache *settings.Cache) error {
 		if !isValid {
 			return fmt.Errorf("%q was not a valid package, try installing again\n", module.Name)
 		}
-		modulePaths = append(modulePaths, downloadedModule{module, modPath})
+		modulePaths = append(modulePaths, downloadedModule{&module, modPath})
 	}
 
-	if err := installPkg(installInfo.Version, unityPath, sudo); err != nil {
+	if err := installPkg(&installInfo, unityPath, sudo); err != nil {
 		return err
 	}
 
 	for _, modPath := range modulePaths {
-		if err := installPkg(modPath.Name, modPath.ModulePath, sudo); err != nil {
+		if err := installPkg(&modPath, modPath.ModulePath, sudo); err != nil {
 			return err
 		}
 	}
 
-	if installInfo, err := unity.GetInstallFromVersion(version); err != nil {
+	if installInfo, err := unity.GetInstallFromVersion(version); err == nil {
 		if err := unity.RepairInstallPath(installInfo); err != nil {
 			return err
 		}
@@ -254,57 +257,83 @@ func downloadProgress(downloadSize int, name, path string, done <-chan int64) {
 	}
 }
 
-func validate(name, checksum, path string) (bool, error) {
-	fmt.Printf("Validating pacakge %q...", name)
+func validate(pkg parsing.PkgGeneric, path string) (bool, error) {
+	fmt.Printf("Validating pacakge %q...", pkg.PkgName())
 
-	f, err := os.Open(path)
-	if err != nil {
-		return false, err
+	isValid := false
+
+	if pkg.Md5() == "" {
+		f, err := os.Open(path)
+		if err != nil {
+			return false, err
+		}
+		defer closeFile(f)
+
+		fi, err := f.Stat()
+		if err != nil {
+			return false, err
+		}
+
+		isValid = fi.Size() == int64(pkg.Size())
+	} else {
+		f, err := os.Open(path)
+		if err != nil {
+			return false, err
+		}
+		defer closeFile(f)
+
+		hash := md5.New()
+
+		_, err = io.Copy(hash, f)
+		if err != nil {
+			return false, err
+		}
+
+		sum := hash.Sum(nil)
+		isValid = hex.EncodeToString(sum) == pkg.Md5()
 	}
-	defer closeFile(f)
-
-	hash := md5.New()
-
-	_, err = io.Copy(hash, f)
-	if err != nil {
-		return false, err
-	}
-
-	sum := hash.Sum(nil)
-	isValid := hex.EncodeToString(sum) == checksum
 
 	fmt.Print("\033[2K") // clears current line
 	if isValid {
-		fmt.Printf("\rPackage %q is valid\n", name)
+		fmt.Printf("\rPackage %q is valid\n", pkg.PkgName())
 	} else {
-		fmt.Printf("\rPackage %q is not valid\n", name)
+		fmt.Printf("\rPackage %q is not valid\n", pkg.PkgName())
 	}
 
 	return isValid, nil
 }
 
-func installPkg(name, pkgPath string, sudo *sudoer.Sudoer) error {
+func installPkg(pkg parsing.PkgGeneric, pkgPath string, sudo *sudoer.Sudoer) error {
 	if pkgPath == "" {
 		return errors.New("no downloaded package to install")
 	}
 
-	fmt.Printf("Installing package %q...", name)
+	if pkg.IsPkgFile() {
+		fmt.Printf("Installing package %q...", pkg.PkgName())
 
-	err := sudo.RunAsRoot("installer", "-package", pkgPath, "-target", "/")
-	if err != nil {
-		return err
+		err := sudo.RunAsRoot("installer", "-package", pkgPath, "-target", "/")
+		if err != nil {
+			return err
+		}
+
+		if err := os.Remove(pkgPath); err != nil {
+			return err
+		}
+
+		fmt.Print("\033[2K") // clears current line
+		fmt.Printf("\rInstalled pacakge %q\n", pkg.PkgName())
+	} else {
+		// TODO work with zip installs
 	}
-
-	if err := os.Remove(pkgPath); err != nil {
-		return err
-	}
-
-	fmt.Print("\033[2K") // clears current line
-	fmt.Printf("\rInstalled pacakge %q\n", name)
 	return nil
 }
 
-func cleanUp(downloadPath string) {
+func cleanUp() {
+	downloadPath, err := settings.GetPkgPath() // todo will need to make this per unity version later on, as to not break multiple installs at once
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if err := os.RemoveAll(downloadPath); err != nil {
 		log.Fatal(err)
 	}

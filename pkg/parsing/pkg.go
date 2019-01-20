@@ -1,6 +1,9 @@
 package parsing
 
-import "github.com/cmcpasserby/unity-loader/pkg/unity"
+import (
+	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"strings"
+)
 
 type PkgSlice []Pkg
 
@@ -23,6 +26,14 @@ type Releases struct {
 	Beta     PkgSlice `json:"beta"`
 }
 
+type PkgGeneric interface {
+	PkgName() string
+	Md5() string
+	Size() int
+	IsModule() bool
+	IsPkgFile() bool
+}
+
 type Pkg struct {
 	Version       string      `json:"version"`
 	Lts           bool        `json:"lts"`
@@ -31,6 +42,26 @@ type Pkg struct {
 	InstalledSize int         `json:"installedSize"`
 	Checksum      string      `json:"checksum"`
 	Modules       []PkgModule `json:"modules"`
+}
+
+func (pkg *Pkg) PkgName() string {
+	return pkg.Version
+}
+
+func (pkg *Pkg) Md5() string {
+	return pkg.Checksum
+}
+
+func (pkg *Pkg) Size() int {
+	return pkg.DownloadSize
+}
+
+func (pkg *Pkg) IsModule() bool {
+	return false
+}
+
+func (pkg *Pkg) IsPkgFile() bool {
+	return true
 }
 
 func (pkg *Pkg) FilterModules(f func(mod PkgModule) bool) []PkgModule {
@@ -57,4 +88,24 @@ type PkgModule struct {
 	Selected      bool   `json:"selected"`
 	Destination   string `json:"destination"`
 	Checksum      string `json:"checksum"`
+}
+
+func (pkg *PkgModule) PkgName() string {
+	return pkg.Name
+}
+
+func (pkg *PkgModule) Md5() string {
+	return pkg.Checksum
+}
+
+func (pkg *PkgModule) Size() int {
+	return pkg.DownloadSize
+}
+
+func (pkg *PkgModule) IsModule() bool {
+	return true
+}
+
+func (pkg *PkgModule) IsPkgFile() bool {
+	return strings.HasSuffix(pkg.DownloadUrl, ".pkg")
 }
