@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -84,6 +85,10 @@ func installVersion(version string, cache *settings.Cache) error {
 	defaults := make([]string, 0, len(installInfo.Modules))
 
 	for _, module := range installInfo.Modules {
+		if !module.Visible {
+			continue
+		}
+
 		moduleString := fmt.Sprintf("%s {%s}", module.Name, module.Id)
 
 		titles = append(titles, moduleString)
@@ -155,11 +160,32 @@ func installVersion(version string, cache *settings.Cache) error {
 		return err
 	}
 
+	time.Sleep(500 * time.Millisecond)
+
+	installedInfo, err := unity.GetInstallFromVersion(version)
+	if err != nil {
+		// TODO maybe make this error more user friendly  for this use case
+		return err
+	}
+	baseUnityPath := filepath.Dir(installedInfo.Path)
+
 	for _, modPath := range modulePaths {
-		if err := installPkg(&modPath, modPath.ModulePath, sudo); err != nil {
-			return err
+		if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".pkg") {
+			if err := installPkg(&modPath, modPath.ModulePath, sudo); err != nil {
+				return err
+			}
+		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".zip") {
+			if err := installZip(&modPath, baseUnityPath,  sudo); err != nil {
+				return err
+			}
+		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".dmg") {
+			if err := installDmg(&modPath, baseUnityPath, sudo); err != nil {
+				return err
+			}
 		}
 	}
+
+	time.Sleep(500 * time.Millisecond)
 
 	if installInfo, err := unity.GetInstallFromVersion(version); err == nil {
 		if err := unity.RepairInstallPath(installInfo); err != nil {
@@ -308,23 +334,62 @@ func installPkg(pkg parsing.PkgGeneric, pkgPath string, sudo *sudoer.Sudoer) err
 		return errors.New("no downloaded package to install")
 	}
 
-	if pkg.IsPkgFile() {
-		fmt.Printf("Installing package %q...", pkg.PkgName())
+	fmt.Printf("Installing Unity %q...", pkg.PkgName())
 
-		err := sudo.RunAsRoot("installer", "-package", pkgPath, "-target", "/")
-		if err != nil {
-			return err
-		}
-
-		if err := os.Remove(pkgPath); err != nil {
-			return err
-		}
-
-		fmt.Print("\033[2K") // clears current line
-		fmt.Printf("\rInstalled pacakge %q\n", pkg.PkgName())
-	} else {
-		// TODO work with zip installs
+	err := sudo.RunAsRoot("installer", "-package", pkgPath, "-target", "/")
+	if err != nil {
+		return err
 	}
+
+	if err := os.Remove(pkgPath); err != nil {
+		return err
+	}
+
+	fmt.Print("\033[2K") // clears current line
+	fmt.Printf("\rInstalled Unity %q\n", pkg.PkgName())
+	return nil
+}
+
+func installZip(pkg *downloadedModule, unityPath string, sudo *sudoer.Sudoer) error {
+	typeString := strings.TrimSuffix(pkg.Category, "s")
+
+	fmt.Printf("Installing %s %q...", typeString, pkg.PkgName())
+
+	targetPath := strings.Replace(pkg.Destination, "{UNITY_PATH}", unityPath, 1)
+
+	err := sudo.RunAsRoot("unzip", pkg.ModulePath, "-d", targetPath)
+	if err != nil {
+		return err
+	}
+
+	if err := os.Remove(pkg.ModulePath); err != nil {
+		return err
+	}
+
+	fmt.Print("\033[2K") // clears current line
+	fmt.Printf("\rInstalled %s %q\n", typeString, pkg.PkgName())
+	return nil
+}
+
+func installDmg(pkg *downloadedModule, unityPath string, sudo *sudoer.Sudoer) error {
+	fmt.Println(`Ignoring "dmg" support not implemented yet`)
+	fmt.Printf("Path %q\n", pkg.ModulePath)
+	return nil
+}
+
+func installOther(pkg *downloadedModule, unityPath string, sudo *sudoer.Sudoer) error {
+	typeString := strings.TrimSuffix(pkg.Category, "s")
+
+	fmt.Printf("Installing %s %q...", typeString, pkg.PkgName())
+
+	targetPath := strings.Replace(pkg.Destination, "{UNITY_PATH}", unityPath, 1)
+
+	if err := sudo.RunAsRoot("cp", pkg.ModulePath, targetPath); err != nil {
+		return err
+	}
+
+	fmt.Print("\033[2K") // clears current line
+	fmt.Printf("\rInstalled %s %q\n", typeString, pkg.PkgName())
 	return nil
 }
 

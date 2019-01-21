@@ -2,7 +2,6 @@ package parsing
 
 import (
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
-	"strings"
 )
 
 type PkgSlice []Pkg
@@ -31,7 +30,6 @@ type PkgGeneric interface {
 	Md5() string
 	Size() int
 	IsModule() bool
-	IsPkgFile() bool
 }
 
 type Pkg struct {
@@ -58,10 +56,6 @@ func (pkg *Pkg) Size() int {
 
 func (pkg *Pkg) IsModule() bool {
 	return false
-}
-
-func (pkg *Pkg) IsPkgFile() bool {
-	return true
 }
 
 func (pkg *Pkg) FilterModules(f func(mod PkgModule) bool) []PkgModule {
@@ -104,8 +98,4 @@ func (pkg *PkgModule) Size() int {
 
 func (pkg *PkgModule) IsModule() bool {
 	return true
-}
-
-func (pkg *PkgModule) IsPkgFile() bool {
-	return strings.HasSuffix(pkg.DownloadUrl, ".pkg")
 }
