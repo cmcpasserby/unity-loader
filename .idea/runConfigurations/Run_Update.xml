@@ -3,6 +3,7 @@
     <module name="unity-loader" />
     <working_directory value="$PROJECT_DIR$/" />
     <go_parameters value="-i" />
+    <parameters value="update" />
     <kind value="DIRECTORY" />
     <filePath value="$PROJECT_DIR$/" />
     <package value="github.com/cmcpasserby/unity-loader" />
