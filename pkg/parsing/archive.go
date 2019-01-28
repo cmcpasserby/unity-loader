@@ -48,8 +48,8 @@ var (
 	}
 )
 
-func GetArchiveVersions() error {
-	versions, err := getArchiveVersionData()
+func GetArchiveVersions(filter func (version unity.VersionData) bool) error {
+	versions, err := getArchiveVersionData(filter)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func GetArchiveVersions() error {
 	return nil
 }
 
-func getArchiveVersionData() ([]unity.ExtendedVersionData, error) {
+func getArchiveVersionData(filter func (version unity.VersionData) bool) ([]unity.ExtendedVersionData, error) {
 	versions := make([]unity.ExtendedVersionData, 0)
 
 	resp, err := http.Get(archiveUrl)
@@ -85,7 +85,10 @@ func getArchiveVersionData() ([]unity.ExtendedVersionData, error) {
 			VersionData: unity.VersionDataFromString(verStr),
 			VersionUuid: verUuid,
 		}
-		versions = append(versions, verData)
+
+		if filter(verData.VersionData) {
+			versions = append(versions, verData)
+		}
 	}
 
 	return versions, nil
