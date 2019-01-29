@@ -1,6 +1,7 @@
 package parsing
 
 import (
+	"errors"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"gopkg.in/ini.v1"
@@ -54,10 +55,17 @@ func GetArchiveVersions(filter func (version unity.VersionData) bool) error {
 		return err
 	}
 
-	err = getInstallData(versions[0])
-	if err != nil {
-		return err
+	pkgs := make(PkgSlice, 0)
+
+	for _, ver := range versions {
+		if pkg, err := getInstallData(ver); err == nil {
+			pkgs = append(pkgs, pkg)
+		} else {
+			continue
+		}
 	}
+
+	fmt.Printf("%v\n", pkgs)
 
 	return nil
 }
@@ -94,10 +102,10 @@ func getArchiveVersionData(filter func (version unity.VersionData) bool) ([]unit
 	return versions, nil
 }
 
-func getInstallData(versionData unity.ExtendedVersionData) error {
+func getInstallData(versionData unity.ExtendedVersionData) (Pkg, error) {
 	fileName := fmt.Sprintf(configName, versionData.String())
 
-	var currentUrl string
+	var currentUrl string // save for building unity and module urls
 	var resp *http.Response
 	var err error
 
@@ -110,14 +118,14 @@ func getInstallData(versionData unity.ExtendedVersionData) error {
 	}
 
 	if resp == nil || err != nil {
-		return nil // TODO connection error
+		return Pkg{}, errors.New("connection error")
 	}
 
 	defer resp.Body.Close()
 
 	cfg, err := ini.Load(resp.Body)
 	if err != nil {
-		return err
+		return Pkg{}, err
 	}
 
 	testIgnored := func(item string) bool {
@@ -130,21 +138,43 @@ func getInstallData(versionData unity.ExtendedVersionData) error {
 	}
 
 	sectionNames := cfg.SectionStrings()
-	packages := make([]*IniData, 0, len(sectionNames))
+
+	pkg := Pkg{}
 
 	for _, section := range sectionNames {
 		if testIgnored(section) {
 			continue
 		}
 
-		pkg := new(IniData)
+		iniData := new(IniData)
 
-		if err := cfg.Section(section).MapTo(pkg); err != nil {
-			return err
+		if err := cfg.Section(section).MapTo(iniData); err != nil {
+			return Pkg{}, err
 		}
 
-		packages = append(packages, pkg)
+		if section == unitySection {
+			pkg.Version = iniData.Version
+			pkg.Lts = false
+			pkg.DownloadUrl = iniData.Path // TODO get url func
+			pkg.DownloadSize = int(iniData.Size)
+			pkg.InstalledSize = int(iniData.InstalledSize)
+			pkg.Checksum = iniData.Md5
+			pkg.Modules = make([]PkgModule, 0, len(sectionNames) - 1)
+		} else {
+			pkg.Modules = append(pkg.Modules, PkgModule{
+				Id: section,
+				Name: iniData.Title,
+				Description: iniData.Description,
+				DownloadUrl: iniData.Path,
+				Category: "Archive",
+				InstalledSize: int(iniData.InstalledSize),
+				DownloadSize: int(iniData.Size),
+				Checksum: iniData.Md5,
+				Destination: "{UNITY_PATH}",
+				Visible: !iniData.Hidden,
+				Selected: iniData.Install,
+			})
+		}
 	}
-
-	return nil
+	return pkg, nil
 }
