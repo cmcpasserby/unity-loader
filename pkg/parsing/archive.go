@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 type IniData struct {
@@ -153,7 +154,13 @@ func getInstallData(versionData unity.ExtendedVersionData) (Pkg, error) {
 		}
 
 		if section == unitySection {
-			pkg.Version = iniData.Version
+
+			version := iniData.Version
+			if version == "" {
+				version = strings.Replace(iniData.Title, "Unity ", "", -1)
+			}
+
+			pkg.Version = version
 			pkg.Lts = false
 			pkg.DownloadUrl = iniData.Path // TODO get url func
 			pkg.DownloadSize = int(iniData.Size)
