@@ -20,11 +20,6 @@ func (pkg PkgSlice) Swap(i, j int) {
 	pkg[i], pkg[j] = pkg[j], pkg[i]
 }
 
-type Releases struct {
-	Official PkgSlice `json:"official"`
-	Beta     PkgSlice `json:"beta"`
-}
-
 type PkgGeneric interface {
 	PkgName() string
 	Md5() string

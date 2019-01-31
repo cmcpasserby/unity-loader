@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+type Releases struct {
+	Official PkgSlice `json:"official"`
+	Beta     PkgSlice `json:"beta"`
+}
+
 const hubUrl = "https://public-cdn.cloud.unity3d.com/hub/prod/releases-darwin.json"
 
 func GetHubVersions() (*Releases, error) {
