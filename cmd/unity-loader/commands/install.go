@@ -30,12 +30,19 @@ type downloadedModule struct {
 }
 
 func install(args ...string) error {
-	// TODO check cache timestamp and maybe update
-	// TODO Repair paths to ensure this will not overwrite a existing unity version
+	if err := repairPaths(true); err != nil {
+		return err
+	}
 
 	cache, err := settings.ReadCache()
 	if err != nil {
 		return err
+	}
+
+	if time.Now().After(cache.Timestamp.Add(time.Hour * 24)) {
+		if err := update(); err != nil {
+			return err
+		}
 	}
 
 	if len(args) == 0 {
