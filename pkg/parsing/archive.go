@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
-	"strings"
 )
 
 type iniData struct {
@@ -88,6 +87,8 @@ func getArchiveVersionData(filter func (version unity.VersionData) bool) ([]unit
 	}
 
 	matches := downloadRe.FindAllString(string(contents), -1)
+	dupsMap := make(map[unity.VersionData]bool)
+
 
 	for _, match := range matches {
 		verStr := versionRe.FindString(match)
@@ -97,7 +98,8 @@ func getArchiveVersionData(filter func (version unity.VersionData) bool) ([]unit
 			VersionUuid: verUuid,
 		}
 
-		if filter(verData.VersionData) {
+		if _, value := dupsMap[verData.VersionData]; !value && filter(verData.VersionData) {
+			dupsMap[verData.VersionData] = true
 			versions = append(versions, verData)
 		}
 	}
@@ -156,13 +158,7 @@ func getInstallData(versionData unity.ExtendedVersionData) (Pkg, error) {
 		}
 
 		if section == unitySection {
-
-			version := iniData.Version
-			if version == "" {
-				version = strings.Replace(iniData.Title, "Unity ", "", -1)
-			}
-
-			pkg.Version = version
+			pkg.Version = versionData.String()
 			pkg.Lts = false
 			pkg.DownloadUrl = currentUrl + iniData.Path
 			pkg.DownloadSize = int(iniData.Size)
