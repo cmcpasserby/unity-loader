@@ -25,7 +25,7 @@ import (
 var moduleIdRe = regexp.MustCompile(`{(.*?)}`)
 
 type downloadedModule struct {
-	*parsing.PkgModule
+	parsing.PkgModule
 	ModulePath string
 }
 
@@ -153,7 +153,7 @@ func installVersion(version string, cache *settings.Cache) error {
 		if !isValid {
 			return fmt.Errorf("%q was not a valid package, try installing again\n", module.Name)
 		}
-		modulePaths = append(modulePaths, downloadedModule{&module, modPath})
+		modulePaths = append(modulePaths, downloadedModule{module, modPath})
 	}
 
 	if err := installPkg(&installInfo, unityPath, sudo); err != nil {
