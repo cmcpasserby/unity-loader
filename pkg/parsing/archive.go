@@ -36,8 +36,8 @@ var (
 	uuidRe     = regexp.MustCompile(`[0-9a-f]{12}`)
 
 	baseUrls = [...]string{
-		"https://netstorage.unity3d.com/unity/%s/",
 		"https://download.unity3d.com/download_unity/%s/",
+		"https://netstorage.unity3d.com/unity/%s/",
 		"https://beta.unity3d.com/download/%s/",
 		"https://files.unity3d.com/bootstrapper/%s/",
 	}
@@ -94,8 +94,8 @@ func getArchiveVersionData(filter func (version unity.VersionData) bool) ([]unit
 		verStr := versionRe.FindString(match)
 		verUuid := uuidRe.FindString(match)
 		verData := unity.ExtendedVersionData{
-			VersionData: unity.VersionDataFromString(verStr),
-			VersionUuid: verUuid,
+			VersionData:  unity.VersionDataFromString(verStr),
+			RevisionHash: verUuid,
 		}
 
 		if _, value := dupsMap[verData.VersionData]; !value && filter(verData.VersionData) {
@@ -115,7 +115,7 @@ func getInstallData(versionData unity.ExtendedVersionData) (Pkg, error) {
 	var err error
 
 	for _, baseUrl := range baseUrls {
-		currentUrl = fmt.Sprintf(baseUrl, versionData.VersionUuid)
+		currentUrl = fmt.Sprintf(baseUrl, versionData.RevisionHash)
 		resp, err = http.Get(currentUrl + fileName)
 		if err == nil && resp.StatusCode == 200 {
 			break

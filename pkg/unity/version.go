@@ -19,7 +19,7 @@ type VersionData struct {
 
 type ExtendedVersionData struct {
 	VersionData
-	VersionUuid string
+	RevisionHash string
 }
 
 func (v *VersionData) String() string {
