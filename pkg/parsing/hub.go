@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 )
 
 type Releases struct {
 	Official PkgSlice `json:"official"`
 	Beta     PkgSlice `json:"beta"`
 }
+
+var hubUrlRe = regexp.MustCompile(`(unityhub://(\d+\.\d+\.\d+\w\d+)/[0-9a-f]{12})`)
 
 const hubUrl = "https://public-cdn.cloud.unity3d.com/hub/prod/releases-darwin.json"
 

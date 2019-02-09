@@ -5,7 +5,6 @@ import (
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
-	"sort"
 )
 
 func update(args ...string) error {
@@ -15,11 +14,13 @@ func update(args ...string) error {
 		return err
 	}
 
-	sort.Sort(hubVersions.Official)
-	hubOldest := unity.VersionDataFromString(hubVersions.Official[0].Version)
-
 	pkgs, err := parsing.GetArchiveVersions(func (data unity.VersionData) bool {
-		return unity.VersionLess(data, hubOldest)
+		for _, hubVer := range hubVersions.Official {
+			if hubVer.Version == data.String() {
+				return false
+			}
+		}
+		return true
 	})
 	if err != nil {
 		return err

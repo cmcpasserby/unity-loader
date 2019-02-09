@@ -15,9 +15,13 @@ func main() {
 
 	if len(os.Args) == 2 {
 		if _, err := os.Stat(os.Args[1]); err == nil {
-			// TODO logic for no command, to default to run
-			return
+			if val, ok := commands.Commands["run"]; ok {
+				if err := val.Action(os.Args[1:]...); err != nil {
+					log.Fatal(err)
+				}
+			}
 		}
+		return
 	}
 
 	if val, ok := commands.Commands[os.Args[1]]; ok {

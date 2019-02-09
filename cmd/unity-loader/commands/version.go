@@ -21,7 +21,7 @@ func version(args ...string) error {
 	}
 
 	_, err = unity.GetInstallFromVersion(version)
-	fmt.Printf("version: %q installed: %t", version, err == nil)
+	fmt.Printf("version: %q installed: %t\n", version, err == nil)
 
 	return nil
 }

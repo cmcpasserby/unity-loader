@@ -36,7 +36,9 @@ func run(args ...string) error {
 				return err
 			}
 			if installUnity {
-				// TODO install unity with version, wait then refresh appInstall
+				if err := install(version); err != nil {
+					return err
+				}
 			}
 		}
 	}

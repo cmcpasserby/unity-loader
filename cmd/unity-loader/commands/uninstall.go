@@ -58,5 +58,7 @@ func uninstall(args ...string) error {
 		}
 	}
 
+	// TODO Display Freed up space
+
 	return nil
 }
