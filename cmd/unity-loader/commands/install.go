@@ -46,11 +46,11 @@ func install(args ...string) error {
 	}
 
 	if len(args) == 0 {
-		sort.Sort(sort.Reverse(cache.Releases.Official))
+		sort.Sort(sort.Reverse(cache.Releases))
 
-		versionStrs := make([]string, 0, len(cache.Releases.Official))
-		for _, ver := range cache.Releases.Official {
-			versionStrs = append(versionStrs, ver.Version)
+		versionStrs := make([]string, 0, len(cache.Releases))
+		for _, ver := range cache.Releases {
+			versionStrs = append(versionStrs, ver.String())
 		}
 
 		prompt := &survey.Select{
@@ -64,7 +64,11 @@ func install(args ...string) error {
 			return err
 		}
 
-		if err := installVersion(result, cache); err != nil {
+		selectedVersion := cache.Releases.First(func(details parsing.CacheVersion) bool {
+			return details.String() == result
+		})
+
+		if err := installVersion(selectedVersion); err != nil {
 			return err
 		}
 		return nil
@@ -73,7 +77,7 @@ func install(args ...string) error {
 	return nil
 }
 
-func installVersion(version string, cache *settings.Cache) error {
+func installVersion(version parsing.CacheVersion) error {
 	config, err := settings.ParseDotFile()
 	if err != nil {
 		return err
@@ -84,9 +88,10 @@ func installVersion(version string, cache *settings.Cache) error {
 		return err
 	}
 
-	installInfo := cache.Releases.First(func(details parsing.Pkg) bool {
-		return details.Version == version
-	})
+	installInfo, err := version.GetPkg()
+	if err != nil {
+		return err
+	}
 
 	titles := make([]string, 0, len(installInfo.Modules))
 	defaults := make([]string, 0, len(installInfo.Modules))
@@ -169,7 +174,7 @@ func installVersion(version string, cache *settings.Cache) error {
 
 	time.Sleep(500 * time.Millisecond)
 
-	installedInfo, err := unity.GetInstallFromVersion(version)
+	installedInfo, err := unity.GetInstallFromVersion(version.String())
 	if err != nil {
 		// TODO maybe make this error more user friendly  for this use case
 		return err
@@ -194,7 +199,7 @@ func installVersion(version string, cache *settings.Cache) error {
 
 	time.Sleep(500 * time.Millisecond)
 
-	if installInfo, err := unity.GetInstallFromVersion(version); err == nil {
+	if installInfo, err := unity.GetInstallFromVersion(version.String()); err == nil {
 		if err := unity.RepairInstallPath(installInfo); err != nil {
 			return err
 		}

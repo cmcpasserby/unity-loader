@@ -136,3 +136,19 @@ func (s CacheVersionSlice) Less(i, j int) bool {
 func (s CacheVersionSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
+
+func (s CacheVersionSlice) Filter(f func(CacheVersion) bool) CacheVersionSlice {
+	result := make(CacheVersionSlice, 0)
+
+	for _, ver := range s {
+		if f(ver) {
+			result = append(result, ver)
+		}
+	}
+
+	return result
+}
+
+func (s CacheVersionSlice) First(f func(CacheVersion) bool) CacheVersion {
+	return s.Filter(f)[0]
+}

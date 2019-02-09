@@ -11,8 +11,8 @@ import (
 const fileName = "cache.json"
 
 type Cache struct {
-	Timestamp time.Time        `json:"timestamp"`
-	Releases  parsing.CacheVersionSlice `json:"releases"`
+	Timestamp time.Time `json:"timestamp"`
+	Releases parsing.CacheVersionSlice `json:"releases"`
 }
 
 func (c *Cache) NeedsUpdate() bool {
