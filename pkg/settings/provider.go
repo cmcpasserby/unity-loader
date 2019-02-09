@@ -19,6 +19,7 @@ const (
 )
 
 
+// TODO complete help text
 const configHelpString = `# config.toml
 #
 # help text
