@@ -20,8 +20,8 @@ func main() {
 					log.Fatal(err)
 				}
 			}
+			return
 		}
-		return
 	}
 
 	if val, ok := commands.Commands[os.Args[1]]; ok {

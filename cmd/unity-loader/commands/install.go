@@ -39,7 +39,7 @@ func install(args ...string) error {
 		return err
 	}
 
-	if time.Now().After(cache.Timestamp.Add(time.Hour * 24)) {
+	if cache.NeedsUpdate() {
 		if err := update(); err != nil {
 			return err
 		}

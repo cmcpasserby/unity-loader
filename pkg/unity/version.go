@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-var verTypeRe = regexp.MustCompile(`[pfba]`)
+var (
+	verTypeRe = regexp.MustCompile(`[pfba]`)
+	releaseTypeSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
+)
 
 type VersionData struct {
 	Major   int
@@ -42,8 +45,6 @@ func VersionDataFromString(input string) VersionData {
 }
 
 // Version Sorting
-var releaseTypeSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
-
 type ByVersionSorter []VersionData
 
 func (s ByVersionSorter) Len() int {

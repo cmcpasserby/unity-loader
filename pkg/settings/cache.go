@@ -12,13 +12,17 @@ const fileName = "cache.json"
 
 type Cache struct {
 	Timestamp time.Time        `json:"timestamp"`
-	Releases  parsing.Releases `json:"releases"`
+	Releases  parsing.CacheVersionSlice `json:"releases"`
 }
 
-func WriteCache(data *parsing.Releases) error {
+func (c *Cache) NeedsUpdate() bool {
+	return time.Now().After(c.Timestamp.Add(time.Hour * 24))
+}
+
+func WriteCache(data parsing.CacheVersionSlice) error {
 	cache := Cache{
 		time.Now(),
-		*data,
+		data,
 	}
 
 	cachePath, err := getCachePath()
