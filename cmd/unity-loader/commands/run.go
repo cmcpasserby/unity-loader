@@ -9,6 +9,8 @@ import (
 )
 
 func run(args ...string) error {
+	// TODO add a --force flag to let you user define what version to open in
+
 	var path string
 
 	if len(args) == 0 {
