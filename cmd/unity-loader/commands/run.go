@@ -59,7 +59,7 @@ func installAndGetInfo(version string) (*unity.InstallInfo, error) {
 	}
 
 	if cache.NeedsUpdate() {
-		if err := update(); err != nil {
+		if err := cache.Update(); err != nil {
 			return nil, err
 		}
 	}

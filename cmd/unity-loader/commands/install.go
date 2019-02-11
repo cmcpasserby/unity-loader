@@ -40,7 +40,7 @@ func install(args ...string) error {
 	}
 
 	if cache.NeedsUpdate() {
-		if err := update(); err != nil {
+		if err := cache.Update(); err != nil {
 			return err
 		}
 	}

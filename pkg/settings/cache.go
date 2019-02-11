@@ -19,11 +19,14 @@ func (c *Cache) NeedsUpdate() bool {
 	return time.Now().After(c.Timestamp.Add(time.Hour * 24))
 }
 
-func WriteCache(data parsing.CacheVersionSlice) error {
-	cache := Cache{
-		time.Now(),
-		data,
+func (c *Cache) Update() error {
+	versions, err := parsing.GetVersions()
+	if err != nil {
+		return err
 	}
+
+	c.Timestamp = time.Now()
+	c.Releases = versions
 
 	cachePath, err := getCachePath()
 	if err != nil {
@@ -38,7 +41,8 @@ func WriteCache(data parsing.CacheVersionSlice) error {
 
 	enc := json.NewEncoder(f)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(cache); err != nil {
+
+	if err := enc.Encode(c); err != nil {
 		return err
 	}
 
@@ -52,7 +56,11 @@ func ReadCache() (*Cache, error) {
 	}
 
 	if _, err := os.Stat(cachePath); os.IsNotExist(err) {
-		return nil, CacheNotFoundError{cachePath}
+		cache := new(Cache)
+		if err := cache.Update(); err != nil {
+			return nil, err
+		}
+		return cache, nil
 	}
 
 	f, err := os.Open(cachePath)
