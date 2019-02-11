@@ -145,10 +145,22 @@ func (s CacheVersionSlice) Filter(f func(CacheVersion) bool) CacheVersionSlice {
 			result = append(result, ver)
 		}
 	}
-
 	return result
 }
 
-func (s CacheVersionSlice) First(f func(CacheVersion) bool) CacheVersion {
-	return s.Filter(f)[0]
+func (s CacheVersionSlice) First(f func(CacheVersion) bool) *CacheVersion {
+	versions := s.Filter(f)
+	if len(versions) == 0 {
+		return nil
+	}
+	return &versions[0]
+}
+
+func (s CacheVersionSlice) Any(f func(CacheVersion) bool) bool {
+	for _, ver := range s {
+		if f(ver) {
+			return true
+		}
+	}
+	return false
 }

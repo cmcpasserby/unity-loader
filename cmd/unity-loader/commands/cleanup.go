@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
@@ -10,16 +11,14 @@ import (
 )
 
 func cleanup(args ...string) error {
-	var path string
+	config, err := settings.ParseDotFile()
+	if err != nil {
+		return err
+	}
+	path := config.ProjectDirectory
 
-	if len(args) >= 1 {
-		path = args[0]
-	} else {
-		config, err := settings.ParseDotFile()
-		if err != nil {
-			return err
-		}
-		path = config.ProjectDirectory
+	if path == "" {
+		return errors.New("projects path is not defined in config.toml")
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {

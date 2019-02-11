@@ -68,7 +68,7 @@ func install(args ...string) error {
 			return details.String() == result
 		})
 
-		if err := installVersion(selectedVersion); err != nil {
+		if err := installVersion(*selectedVersion); err != nil {
 			return err
 		}
 		return nil

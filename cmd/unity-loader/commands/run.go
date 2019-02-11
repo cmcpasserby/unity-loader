@@ -1,7 +1,10 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
+	"github.com/cmcpasserby/unity-loader/pkg/parsing"
+	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"os"
@@ -29,26 +32,62 @@ func run(args ...string) error {
 	appInstall, err := unity.GetInstallFromVersion(version)
 	if err != nil {
 		if _, ok := err.(unity.VersionNotFoundError); ok {
-			fmt.Printf("Unity %s not installed\n", version)
-			installUnity := false
-			prompt := &survey.Confirm{
-				Message: fmt.Sprintf("Do you want to install Unity %s?", version),
-			}
-			if err := survey.AskOne(prompt, &installUnity, nil); err != nil {
+			if appInstall, err = installAndGetInfo(version); err != nil {
 				return err
 			}
-			if installUnity {
-				if err := install(version); err != nil {
-					return err
-				}
-			}
+		} else {
+			return err
 		}
 	}
 
-	fmt.Printf("Opening project %q in version: %s\n", expandedPath, version)
-	if err := appInstall.Run(path); err != nil {
-		return fmt.Errorf("could not execute unity from %q", appInstall.Path)
+	if err := runInstallVersion(appInstall, expandedPath); err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func runInstallVersion(installInfo *unity.InstallInfo, projectPath string) error {
+	fmt.Printf("Opening project %q in version: %s\n", projectPath, installInfo.Version.String())
+	return installInfo.Run(projectPath)
+}
+
+func installAndGetInfo(version string) (*unity.InstallInfo, error) {
+	cache, err := settings.ReadCache()
+	if err != nil {
+		return nil, err
+	}
+
+	if cache.NeedsUpdate() {
+		if err := update(); err != nil {
+			return nil, err
+		}
+	}
+
+	if cacheVersion := cache.Releases.First(func (ver parsing.CacheVersion) bool {return ver.String() == version}); cacheVersion != nil {
+		installUnity := false
+
+		prompt := &survey.Confirm{
+			Message: fmt.Sprintf("Do you want to install Unity %s", version),
+		}
+
+		if err := survey.AskOne(prompt, &installUnity, nil); err != nil {
+			return nil, err
+		}
+
+		if installUnity {
+			if err := installVersion(*cacheVersion); err != nil {
+				return nil, err
+			}
+
+			appInstall, err := unity.GetInstallFromVersion(version)
+			if err != nil {
+				return nil, err
+			}
+			return appInstall, nil
+		} else {
+			return nil, errors.New(fmt.Sprintf("unity %s not found or installed", version))
+		}
+	}
+	return nil, errors.New(fmt.Sprintf("unity %s not found for download", version))
 }
