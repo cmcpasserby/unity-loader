@@ -11,6 +11,9 @@ import (
 )
 
 func cleanup(args ...string) error {
+	// TODO also clean any temp files from the packages folder
+	// TODO display and calculate freed space
+
 	config, err := settings.ParseDotFile()
 	if err != nil {
 		return err
@@ -62,6 +65,8 @@ func cleanup(args ...string) error {
 	if len(toRemove) == 0 {
 		return nil
 	}
+
+	// TODO display versions that will be removed with a confirm
 
 	sudo := new(sudoer.Sudoer)
 	if err := sudo.AskPass(); err != nil {
