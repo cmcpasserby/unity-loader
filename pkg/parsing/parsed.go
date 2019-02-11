@@ -1,11 +1,13 @@
 package parsing
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"gopkg.in/ini.v1"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -122,6 +124,28 @@ func (v *CacheVersion) GetPkg() (Pkg, error) {
 
 	return pkg, nil
 }
+
+func (v *CacheVersion) MarshalJSON() ([]byte, error) {
+	return json.Marshal(fmt.Sprintf("%s:%s", v.String(), v.RevisionHash))
+}
+
+func (v *CacheVersion) UnmarshalJSON(data []byte) error {
+	var dataString string
+
+	if err := json.Unmarshal(data, &dataString); err != nil {
+		return err
+	}
+
+	split := strings.Split(dataString, ":")
+
+	v.ExtendedVersionData = unity.ExtendedVersionData{
+		VersionData: unity.VersionDataFromString(split[0]),
+		RevisionHash: split[1],
+	}
+
+	return nil
+}
+
 
 type CacheVersionSlice []CacheVersion
 
