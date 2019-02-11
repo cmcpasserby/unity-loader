@@ -6,6 +6,7 @@ import (
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
 	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"gopkg.in/AlecAivazis/survey.v1"
 	"os"
 	"path/filepath"
 )
@@ -66,17 +67,38 @@ func cleanup(args ...string) error {
 		return nil
 	}
 
-	// TODO display versions that will be removed with a confirm
+	promptTitles := make([]string, 0, len(toRemove))
+	for _, item := range toRemove {
+		promptTitles = append(promptTitles, item.Version.String())
+	}
+
+	prompt := &survey.MultiSelect{
+		Message: "select installs to remove",
+		Options: promptTitles,
+		Default: promptTitles,
+		PageSize: 10,
+	}
+
+	var promptResults []string
+	if err := survey.AskOne(prompt, &promptResults, nil); err != nil {
+		return err
+	}
 
 	sudo := new(sudoer.Sudoer)
 	if err := sudo.AskPass(); err != nil {
 		return err
 	}
 
-	for _, install := range toRemove {
-		fmt.Printf("Uninstalling Unity Version %q\n", install.Version.String())
-		if err := sudo.RunAsRoot("rm", "-rf", filepath.Dir(install.Path)); err != nil {
-			return fmt.Errorf("error uninstalling %q, Error: %q", install.Path, err)
+	for _, installVersion := range promptTitles {
+		fmt.Printf("Uninstalling Unity Version %q\n", installVersion)
+
+		installInfo, err := unity.GetInstallFromVersion(installVersion)
+		if err != nil {
+			return err
+		}
+
+		if err := sudo.RunAsRoot("rm", "-rf", filepath.Dir(installInfo.Path)); err != nil {
+			fmt.Printf("error uninstalling %q, error: %q", installInfo.Path, err)
 		}
 	}
 

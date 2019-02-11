@@ -6,7 +6,7 @@ type Command struct {
 	Action   func(...string) error
 }
 
-var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "cleanup", "repair"}
+var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair"}
 
 var Commands = map[string]Command{
 	"run": {
@@ -39,11 +39,11 @@ var Commands = map[string]Command{
 		"uninstall one or multiple versions of Unity",
 		uninstall,
 	},
-	"cleanup": {
-		"cleanup",
-		"removes unused unity versions",
-		cleanup,
-	},
+	// "cleanup": {
+	// 	"cleanup",
+	// 	"removes unused unity versions",
+	// 	cleanup,
+	// },
 	"repair": {
 		"repair",
 		"fix paths to unity installs",
