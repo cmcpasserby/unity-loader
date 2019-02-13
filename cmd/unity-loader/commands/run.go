@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
@@ -12,21 +13,51 @@ import (
 )
 
 func run(args ...string) error {
-	// TODO add a --force flag to let you user define what version to open in
+	flagSet := flag.NewFlagSet("run", flag.ExitOnError)
+	forceFlag := flagSet.Bool("force", false, "force a certain version to be used for running")
+
+	if err := flagSet.Parse(args); err != nil {
+		return err
+	}
 
 	var path string
 
-	if len(args) == 0 {
+	if len(flagSet.Args()) == 0 {
 		path, _ = os.Getwd()
 	} else {
-		path = args[0]
+		path = flagSet.Args()[0]
 	}
 
 	expandedPath, _ := filepath.Abs(path)
 
-	version, err := unity.GetVersionFromProject(path)
-	if err != nil {
-		return err
+	var version string
+	var err error
+
+	if forceFlag != nil && *forceFlag {
+		installs, err := unity.GetInstalls()
+		if err != nil {
+			return err
+		}
+
+		options := make([]string, 0, len(installs))
+		for _, install := range installs {
+			options = append(options, install.Version.String())
+		}
+
+		prompt := &survey.Select{
+			Message:  "Select Unity version to run project with",
+			Options:  options,
+			PageSize: 10,
+		}
+
+		if err := survey.AskOne(prompt, &version, nil); err != nil {
+			return err
+		}
+	} else {
+		version, err = unity.GetVersionFromProject(path)
+		if err != nil {
+			return err
+		}
 	}
 
 	appInstall, err := unity.GetInstallFromVersion(version)
@@ -64,7 +95,7 @@ func installAndGetInfo(version string) (*unity.InstallInfo, error) {
 		}
 	}
 
-	if cacheVersion := cache.Releases.First(func (ver parsing.CacheVersion) bool {return ver.String() == version}); cacheVersion != nil {
+	if cacheVersion := cache.Releases.First(func(ver parsing.CacheVersion) bool { return ver.String() == version }); cacheVersion != nil {
 		installUnity := false
 
 		prompt := &survey.Confirm{
