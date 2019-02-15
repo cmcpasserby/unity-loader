@@ -9,44 +9,58 @@ type Command struct {
 var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair"}
 
 var Commands = map[string]Command{
+
 	"run": {
 		"run",
 		"run the passed in project with an auto detected version of unity",
 		run,
 	},
+
 	"version": {
 		"version",
 		"check what version of unity a project is using",
 		version,
 	},
+
 	"list": {
 		"list",
 		"list all installed unity versions",
 		list,
 	},
+
 	"update": {
 		"update",
 		"update the package index",
 		update,
 	},
+
 	"install": {
 		"install",
 		"installed the specified version of unity",
 		install,
 	},
+
 	"uninstall": {
 		"uninstall",
 		"uninstall one or multiple versions of Unity",
 		uninstall,
 	},
+
 	// "cleanup": {
 	// 	"cleanup",
 	// 	"removes unused unity versions",
 	// 	cleanup,
 	// },
+
 	"repair": {
 		"repair",
 		"fix paths to unity installs",
 		repair,
+	},
+
+	"config": {
+		"config",
+		"open the config file",
+		config,
 	},
 }

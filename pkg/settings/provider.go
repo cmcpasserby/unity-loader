@@ -14,10 +14,9 @@ import (
 
 const (
 	settingsDir = ".unityLoader"
-	configName = "config.toml"
-	packages = "packages"
+	configName  = "config.toml"
+	packages    = "packages"
 )
-
 
 // TODO complete help text
 const configHelpString = `# config.toml
@@ -39,7 +38,7 @@ func ParseDotFile() (*Settings, error) {
 
 	f, err := os.Open(configPath)
 	if os.IsNotExist(err) {
-		if err := createDotFile(configPath); err != nil {
+		if err := CreateDotFile(configPath); err != nil {
 			return nil, err
 		}
 		return &Settings{}, nil
@@ -66,7 +65,7 @@ func ParseDotFile() (*Settings, error) {
 	return &data, nil
 }
 
-func createDotFile(path string) error {
+func CreateDotFile(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return err
