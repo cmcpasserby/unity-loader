@@ -6,7 +6,7 @@ type Command struct {
 	Action   func(...string) error
 }
 
-var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair"}
+var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair", "config"}
 
 var Commands = map[string]Command{
 
