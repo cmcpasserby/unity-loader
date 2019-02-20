@@ -25,8 +25,8 @@ const configHelpString = `# config.toml
 `
 
 type Settings struct {
-	ProjectDirectory string          `toml:"ProjectDirectory"`
-	ModuleDefaults   map[string]bool `toml:"ModuleDefaults"`
+	ProjectDirectory string   `toml:"ProjectDirectory"`
+	ModuleDefaults   []string `toml:"ModuleDefaults"`
 }
 
 func ParseDotFile() (*Settings, error) {
@@ -74,7 +74,7 @@ func CreateDotFile(path string) error {
 
 	data := Settings{
 		ProjectDirectory: "",
-		ModuleDefaults:   map[string]bool{},
+		ModuleDefaults:   make([]string, 0),
 	}
 
 	b := new(bytes.Buffer)

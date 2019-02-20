@@ -13,7 +13,7 @@ func config(args ...string) error {
 		return err
 	}
 
-	dotFilePath := path.Join(dotPath, ".config.toml")
+	dotFilePath := path.Join(dotPath, "config.toml")
 
 	if _, err := os.Stat(dotFilePath); os.IsNotExist(err) {
 		if err := settings.CreateDotFile(dotFilePath); err != nil {
