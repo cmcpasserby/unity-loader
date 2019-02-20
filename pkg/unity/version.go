@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	verTypeRe = regexp.MustCompile(`[pfba]`)
+	verTypeRe       = regexp.MustCompile(`[pfba]`)
 	releaseTypeSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
 )
 

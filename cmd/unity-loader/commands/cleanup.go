@@ -73,9 +73,9 @@ func cleanup(args ...string) error {
 	}
 
 	prompt := &survey.MultiSelect{
-		Message: "select installs to remove",
-		Options: promptTitles,
-		Default: promptTitles,
+		Message:  "select installs to remove",
+		Options:  promptTitles,
+		Default:  promptTitles,
 		PageSize: 10,
 	}
 
