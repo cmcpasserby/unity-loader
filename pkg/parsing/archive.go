@@ -7,13 +7,12 @@ import (
 	"regexp"
 )
 
-
-const archiveUrl   = "https://unity3d.com/get-unity/download/archive"
+const archiveUrl = "https://unity3d.com/get-unity/download/archive/"
 
 var (
-	unityHubRe = regexp.MustCompile(`(unityhub://(\d+\.\d+\.\d+\w\d+)/[0-9a-f]{12})`)
-	downloadRe = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
-	versionRe  = regexp.MustCompile(`(\d+\.\d+\.\d+\w\d+)`)
+	unityHubRe     = regexp.MustCompile(`(unityhub://(\d+\.\d+\.\d+\w\d+)/[0-9a-f]{12})`)
+	downloadRe     = regexp.MustCompile(`(https?://[\w/.-]+/[0-9a-f]{12}/)[\w/.-]+-(\d+\.\d+\.\d+\w\d+)(?:\.dmg|\.pkg)`)
+	versionRe      = regexp.MustCompile(`(\d+\.\d+\.\d+\w\d+)`)
 	revisionHashRe = regexp.MustCompile(`[0-9a-f]{12}`)
 )
 
@@ -39,13 +38,13 @@ func GetVersions() ([]CacheVersion, error) {
 		verStr := versionRe.FindString(match)
 		revisionHash := revisionHashRe.FindString(match)
 		verData := unity.ExtendedVersionData{
-			VersionData: unity.VersionDataFromString(verStr),
+			VersionData:  unity.VersionDataFromString(verStr),
 			RevisionHash: revisionHash,
 		}
 
 		if _, value := dupMap[verData.VersionData]; !value {
 			dupMap[verData.VersionData] = true
-			versions  = append(versions, CacheVersion{verData})
+			versions = append(versions, CacheVersion{verData})
 		}
 	}
 
