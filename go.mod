@@ -4,7 +4,9 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1
+	github.com/fatih/color v1.7.0 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect
+	github.com/smartystreets/goconvey v0.0.0-20190306220146-200a235640ff // indirect
 	gopkg.in/AlecAivazis/survey.v1 v1.8.2
 	gopkg.in/cheggaaa/pb.v1 v1.0.28
 	gopkg.in/ini.v1 v1.42.0
