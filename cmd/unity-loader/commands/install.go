@@ -105,9 +105,10 @@ func installVersion(version parsing.CacheVersion) error {
 
 		titles = append(titles, moduleString)
 
-		if value, ok := config.ModuleDefaults[module.Id]; ok {
-			if value {
+		for _, item := range config.ModuleDefaults {
+			if item == module.Id {
 				defaults = append(defaults, moduleString)
+				break
 			}
 		}
 	}
@@ -187,7 +188,7 @@ func installVersion(version parsing.CacheVersion) error {
 				return err
 			}
 		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".zip") {
-			if err := installZip(&modPath, baseUnityPath,  sudo); err != nil {
+			if err := installZip(&modPath, baseUnityPath, sudo); err != nil {
 				return err
 			}
 		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".dmg") {

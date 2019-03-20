@@ -104,20 +104,20 @@ func (v *CacheVersion) GetPkg() (Pkg, error) {
 			pkg.DownloadSize = int(iniData.Size)
 			pkg.InstalledSize = int(iniData.InstalledSize)
 			pkg.Checksum = iniData.Md5
-			pkg.Modules = make([]PkgModule, 0, len(sectionNames) - 1)
+			pkg.Modules = make([]PkgModule, 0, len(sectionNames)-1)
 		} else {
 			pkg.Modules = append(pkg.Modules, PkgModule{
-				Id: section,
-				Name: iniData.Title,
-				Description: iniData.Description,
-				DownloadUrl: currentUrl + iniData.Path,
-				Category: "Archive",
-				DownloadSize: int(iniData.Size),
+				Id:            section,
+				Name:          iniData.Title,
+				Description:   iniData.Description,
+				DownloadUrl:   currentUrl + iniData.Path,
+				Category:      "Archive",
+				DownloadSize:  int(iniData.Size),
 				InstalledSize: int(iniData.InstalledSize),
-				Checksum: iniData.Md5,
-				Destination: "{UNITY_PATH}",
-				Visible: !iniData.Hidden,
-				Selected: iniData.Install,
+				Checksum:      iniData.Md5,
+				Destination:   "{UNITY_PATH}",
+				Visible:       !iniData.Hidden,
+				Selected:      iniData.Install,
 			})
 		}
 	}
@@ -139,13 +139,12 @@ func (v *CacheVersion) UnmarshalJSON(data []byte) error {
 	split := strings.Split(dataString, ":")
 
 	v.ExtendedVersionData = unity.ExtendedVersionData{
-		VersionData: unity.VersionDataFromString(split[0]),
+		VersionData:  unity.VersionDataFromString(split[0]),
 		RevisionHash: split[1],
 	}
 
 	return nil
 }
-
 
 type CacheVersionSlice []CacheVersion
 
