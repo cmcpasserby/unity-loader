@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/cmd/unity-loader/commands"
 	"log"
@@ -40,11 +41,46 @@ func printHelp() {
 		`Tool for loading unity projects with their respective unity versions and installing the proper version if required
 
 usage:
-  unity-loader <command>, [project_path]
+  unity-loader <command> [flags] [project_path]
 
 commands are:`)
 
+	maxNameLen := 0
+	maxDescLen := 0
+
 	for _, key := range commands.CommandOrder {
-		fmt.Printf("  %-12s%s\n", commands.Commands[key].Name, commands.Commands[key].HelpText)
+		cmd := commands.Commands[key]
+		if len(cmd.Name) > maxNameLen {
+			maxNameLen = len(cmd.Name)
+		}
+
+		if len(cmd.HelpText) > maxDescLen {
+			maxDescLen = len(cmd.HelpText)
+		}
+	}
+
+	maxNameLen += 2
+	maxDescLen += 2
+
+	for _, key := range commands.CommandOrder {
+		cmd := commands.Commands[key]
+		fmt.Printf("  %-*s%-*sflags: [", maxNameLen, cmd.Name, maxDescLen, cmd.HelpText)
+
+		hasFlags := false
+
+		if cmd.Flags != nil {
+			cmd.Flags.VisitAll(func(flag *flag.Flag) {
+				fmt.Printf("--%s, ", flag.Name)
+				hasFlags = true
+			})
+		}
+
+		if hasFlags {
+			fmt.Printf("\033[2D]")
+		} else {
+			fmt.Printf("]")
+		}
+
+		fmt.Println()
 	}
 }
