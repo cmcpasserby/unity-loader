@@ -15,6 +15,7 @@ import (
 func run(args ...string) error {
 	flagSet := flag.NewFlagSet("run", flag.ExitOnError)
 	forceFlag := flagSet.Bool("force", false, "force a certain version to be used for running")
+	targetFlag := flagSet.String("buildTarget", "", "Allows the selection of an active build target before loading a project")
 
 	if err := flagSet.Parse(args); err != nil {
 		return err
@@ -71,16 +72,16 @@ func run(args ...string) error {
 		}
 	}
 
-	if err := runInstallVersion(appInstall, expandedPath); err != nil {
+	if err := runInstallVersion(appInstall, expandedPath, *targetFlag); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runInstallVersion(installInfo *unity.InstallInfo, projectPath string) error {
+func runInstallVersion(installInfo *unity.InstallInfo, projectPath, target string) error {
 	fmt.Printf("Opening project %q in version: %s\n", projectPath, installInfo.Version.String())
-	return installInfo.Run(projectPath)
+	return installInfo.RunWithTarget(projectPath, target)
 }
 
 func installAndGetInfo(version string) (*unity.InstallInfo, error) {

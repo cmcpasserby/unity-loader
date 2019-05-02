@@ -19,10 +19,21 @@ type InstallInfo struct {
 	Version VersionData
 }
 
-func (info *InstallInfo) Run(project string) error {
+func (info *InstallInfo) RunWithTarget(project, target string) error {
 	absProject, _ := filepath.Abs(project)
-	app := exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject)
+
+	var app *exec.Cmd
+	if target == "" {
+		app = exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject)
+	} else {
+		app = exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject, "-buildTarget", target)
+	}
+
 	return app.Run()
+}
+
+func (info *InstallInfo) Run(project string) error {
+	return info.RunWithTarget(project, "")
 }
 
 type appInfoDict struct {
