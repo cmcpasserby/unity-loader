@@ -68,7 +68,7 @@ func install(args ...string) error {
 			return details.String() == result
 		})
 
-		if err := installVersion(*selectedVersion); err != nil {
+		if err := installVersion(*selectedVersion, false); err != nil {
 			return err
 		}
 		return nil
@@ -77,7 +77,7 @@ func install(args ...string) error {
 	return nil
 }
 
-func installVersion(version parsing.CacheVersion) error {
+func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 	config, err := settings.ParseDotFile()
 	if err != nil {
 		return err
@@ -137,17 +137,31 @@ func installVersion(version parsing.CacheVersion) error {
 
 	defer cleanUp()
 
-	unityPath, err := downloadPkg(&installInfo)
-	if err != nil {
-		return err
-	}
+	var unityPath string
+	if !modulesOnly {
+		unityPath, err := downloadPkg(&installInfo)
+		if err != nil {
+			return err
+		}
 
-	isValid, err := validate(&installInfo, unityPath)
-	if err != nil {
-		return err
-	}
-	if !isValid {
-		return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
+		isValid, err := validate(&installInfo, unityPath)
+		if err != nil {
+			return err
+		}
+		if !isValid {
+			return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
+		}
+	} else {
+		install, err := unity.GetInstallFromVersion(version.String())
+		if err != nil {
+			return err
+		}
+
+		unityPath = "/Applications/Unity"
+
+		if err := os.Rename(install.Path, unityPath); err != nil {
+			return err
+		}
 	}
 
 	modulePaths := make([]downloadedModule, 0, len(selected))
@@ -177,7 +191,7 @@ func installVersion(version parsing.CacheVersion) error {
 
 	installedInfo, err := unity.GetInstallFromVersion(version.String())
 	if err != nil {
-		// TODO maybe make this error more user friendly  for this use case
+		// TODO maybe make this error more user friendly for this use case
 		return err
 	}
 	baseUnityPath := filepath.Dir(installedInfo.Path)

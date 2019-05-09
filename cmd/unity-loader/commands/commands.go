@@ -9,7 +9,7 @@ type Command struct {
 	Action   func(...string) error
 }
 
-var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair", "config"}
+var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair", "config", "platforms"}
 
 var Commands = map[string]Command{
 
@@ -78,5 +78,12 @@ var Commands = map[string]Command{
 		"open the config file",
 		nil,
 		config,
+	},
+
+	"platforms": {
+		"platforms",
+		"install additinal platforms",
+		nil,
+		platforms,
 	},
 }

@@ -108,7 +108,7 @@ func installAndGetInfo(version string) (*unity.InstallInfo, error) {
 		}
 
 		if installUnity {
-			if err := installVersion(*cacheVersion); err != nil {
+			if err := installVersion(*cacheVersion, false); err != nil {
 				return nil, err
 			}
 
