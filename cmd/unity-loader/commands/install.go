@@ -45,11 +45,24 @@ func install(args ...string) error {
 		}
 	}
 
-	if len(args) == 0 {
-		sort.Sort(sort.Reverse(cache.Releases))
+	currentInstalls, err := unity.GetInstalls()
+	if err != nil {
+		return err
+	}
 
-		versionStrs := make([]string, 0, len(cache.Releases))
-		for _, ver := range cache.Releases {
+	if len(args) == 0 {
+		releases := cache.Releases.Filter(func(cacheVersion parsing.CacheVersion) bool {
+			for _, install := range currentInstalls {
+				if install.Version.String() == cacheVersion.String() {
+					return false
+				}
+			}
+			return true
+		})
+		sort.Sort(sort.Reverse(releases))
+
+		versionStrs := make([]string, 0, len(releases))
+		for _, ver := range releases {
 			versionStrs = append(versionStrs, ver.String())
 		}
 
@@ -64,7 +77,7 @@ func install(args ...string) error {
 			return err
 		}
 
-		selectedVersion := cache.Releases.First(func(details parsing.CacheVersion) bool {
+		selectedVersion := releases.First(func(details parsing.CacheVersion) bool {
 			return details.String() == result
 		})
 
@@ -72,6 +85,8 @@ func install(args ...string) error {
 			return err
 		}
 		return nil
+	} else {
+		// TODO handle passed in version number
 	}
 
 	return nil
@@ -81,6 +96,10 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 	config, err := settings.ParseDotFile()
 	if err != nil {
 		return err
+	}
+
+	if _, err := unity.GetInstallFromVersion(version.String()); err == nil {
+		return errors.New("version is already installed") // TODO replace with proper error in future
 	}
 
 	sudo := new(sudoer.Sudoer)
