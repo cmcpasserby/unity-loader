@@ -98,8 +98,14 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 		return err
 	}
 
-	if _, err := unity.GetInstallFromVersion(version.String()); err == nil {
-		return errors.New("version is already installed") // TODO replace with proper error in future
+	if modulesOnly {
+		if _, err := unity.GetInstallFromVersion(version.String()); err != nil {
+			return err
+		}
+	} else {
+		if _, err := unity.GetInstallFromVersion(version.String()); err == nil {
+			return errors.New("version is already installed") // TODO replace with proper error in future
+		}
 	}
 
 	sudo := new(sudoer.Sudoer)
@@ -171,6 +177,7 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 			return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
 		}
 	} else {
+		// TODO this is flawed and is renaming from 1 level 2 deep
 		install, err := unity.GetInstallFromVersion(version.String())
 		if err != nil {
 			return err
