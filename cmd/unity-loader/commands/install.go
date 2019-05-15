@@ -177,15 +177,12 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 			return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
 		}
 	} else {
-		// TODO this is flawed and is renaming from 1 level 2 deep
 		install, err := unity.GetInstallFromVersion(version.String())
 		if err != nil {
 			return err
 		}
-
-		unityPath = "/Applications/Unity"
-
-		if err := os.Rename(install.Path, unityPath); err != nil {
+		
+		if err := unity.InstallToUnityDir(install); err != nil {
 			return err
 		}
 	}

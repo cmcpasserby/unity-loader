@@ -36,6 +36,10 @@ func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
 }
 
+func (info *InstallInfo) GetPlatforms() ([]string, error) {
+	return nil, errors.New("not implemented")
+}
+
 type appInfoDict struct {
 	CFBundleVersion string `plist:"CFBundleVersion"`
 }
@@ -148,6 +152,21 @@ func RepairInstallPath(install *InstallInfo) error {
 	}
 
 	fmt.Printf("moving %q to %q\n", oldPath, newPath)
+	if err := os.Rename(oldPath, newPath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func InstallToUnityDir(install *InstallInfo) error {
+	oldPath := filepath.Dir(install.Path)
+	newPath := "/Applications/Unity"
+
+	if oldPath == newPath {
+		return nil
+	}
+
 	if err := os.Rename(oldPath, newPath); err != nil {
 		return err
 	}
