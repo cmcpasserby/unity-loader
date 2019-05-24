@@ -9,7 +9,7 @@ type Command struct {
 	Action   func(...string) error
 }
 
-var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair", "config", "platforms"}
+var CommandOrder = [...]string{"run", "version", "list", "update", "install", "uninstall", "repair", "config", "platforms", "new"}
 
 var Commands = map[string]Command{
 
@@ -85,5 +85,12 @@ var Commands = map[string]Command{
 		"install additinal platforms",
 		nil,
 		platforms,
+	},
+
+	"new": {
+		"new",
+		"creates a new unity project",
+		nil,
+		newProject,
 	},
 }

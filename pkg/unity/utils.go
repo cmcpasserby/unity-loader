@@ -36,6 +36,13 @@ func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
 }
 
+func (info *InstallInfo) NewProject(projectName string) error {
+	projectPath, _ := filepath.Abs(projectName)
+	app := exec.Command("open", "-a", info.Path, "--args", "-createProject", projectPath)
+	fmt.Printf("Creating project at %s\n", projectPath)
+	return app.Run()
+}
+
 func (info *InstallInfo) GetPlatforms() ([]string, error) {
 	return nil, errors.New("not implemented")
 }
