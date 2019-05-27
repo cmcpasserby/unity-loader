@@ -44,7 +44,18 @@ func (info *InstallInfo) NewProject(projectName string) error {
 }
 
 func (info *InstallInfo) GetPlatforms() ([]string, error) {
-	return nil, errors.New("not implemented")
+	dirs, err := ioutil.ReadDir(filepath.Join(info.Path, "PlaybackEngines"))
+	if err != nil {
+		return nil, err
+	}
+
+	platforms := make([]string, 0, len(dirs))
+	for _, platform := range dirs {
+		name := strings.TrimSuffix(filepath.Dir(platform.Name()), "Support")
+		platforms = append(platforms, name)
+	}
+
+	return platforms, nil
 }
 
 type appInfoDict struct {
