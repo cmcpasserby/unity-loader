@@ -51,7 +51,7 @@ func (info *InstallInfo) GetPlatforms() ([]string, error) {
 
 	platforms := make([]string, 0, len(dirs))
 	for _, platform := range dirs {
-		name := strings.TrimSuffix(filepath.Dir(platform.Name()), "Support")
+		name := strings.TrimSuffix(filepath.Base(platform.Name()), "Support")
 		platforms = append(platforms, name)
 	}
 
