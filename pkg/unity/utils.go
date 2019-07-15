@@ -123,7 +123,7 @@ func GetInstalls() ([]*InstallInfo, error) {
 	}
 
 	sort.Slice(installs, func(i, j int) bool {
-		return !VersionLess(installs[i].Version, installs[j].Version)
+		return installs[i].Version.Compare(installs[j].Version) > 0
 	})
 
 	return installs, nil
@@ -182,7 +182,7 @@ func RepairInstallPath(install *InstallInfo) error {
 
 func InstallToUnityDir(install *InstallInfo) error {
 	oldPath := filepath.Dir(install.Path)
-	newPath := "/Applications/Unity"
+	newPath := "/Applications/Unity" // TODO switch out for unity-hub path
 
 	if oldPath == newPath {
 		return nil

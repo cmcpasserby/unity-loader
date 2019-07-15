@@ -153,7 +153,7 @@ func (s CacheVersionSlice) Len() int {
 }
 
 func (s CacheVersionSlice) Less(i, j int) bool {
-	return unity.VersionLess(s[i].VersionData, s[j].VersionData)
+	return s[i].VersionData.Compare(s[j].VersionData) < 0
 }
 
 func (s CacheVersionSlice) Swap(i, j int) {
