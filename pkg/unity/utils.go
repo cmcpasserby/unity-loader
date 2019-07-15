@@ -163,6 +163,7 @@ func GetInstallFromVersion(version string) (*InstallInfo, error) {
 }
 
 func RepairInstallPath(install *InstallInfo) error {
+	// TODO changes to make sure hub installs do not get overwritten
 	oldPath := filepath.Dir(install.Path)
 	newName := fmt.Sprintf("Unity %s", install.Version.String())
 	newPath := filepath.Join("/Applications/", newName)
