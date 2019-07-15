@@ -110,6 +110,8 @@ func GetVersionFromProject(path string) (string, error) {
 
 func GetInstalls() ([]*InstallInfo, error) {
 	unityPaths, _ := filepath.Glob("/Applications/**/Unity.app")
+	hubInstallPaths, _ := filepath.Glob("/Applications/Unity/Hub/Editor/**/Unity.app")
+	unityPaths = append(unityPaths, hubInstallPaths...)
 
 	installs := make([]*InstallInfo, 0, len(unityPaths))
 	for _, path := range unityPaths {
