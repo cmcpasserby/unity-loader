@@ -14,6 +14,12 @@ import (
 	"strings"
 )
 
+const (
+	baseUnityPath       = "/Applications/Unity"
+	unityInstallHubPath = baseUnityPath + "/Hub"
+	unityHubEditorPath  = unityInstallHubPath + "/Editor"
+)
+
 type InstallInfo struct {
 	Path    string
 	Version VersionData
@@ -163,18 +169,42 @@ func GetInstallFromVersion(version string) (*InstallInfo, error) {
 }
 
 func RepairInstallPath(install *InstallInfo) error {
-	// TODO changes to make sure hub installs do not get overwritten
 	oldPath := filepath.Dir(install.Path)
-	newName := fmt.Sprintf("Unity %s", install.Version.String())
-	newPath := filepath.Join("/Applications/", newName)
+	newName := fmt.Sprintf("%s", install.Version.String())
+	newPath := filepath.Join(unityHubEditorPath, newName)
 
 	if oldPath == newPath {
 		return nil
 	}
 
-	fmt.Printf("moving %q to %q\n", oldPath, newPath)
-	if err := os.Rename(oldPath, newPath); err != nil {
+	if _, err := os.Stat(newPath); os.IsNotExist(err) {
+		if err := os.Mkdir(newPath, 0755); err != nil {
+			return err
+		}
+	}
+
+	files, err := ioutil.ReadDir(oldPath)
+	if err != nil {
 		return err
+	}
+
+	for _, file := range files {
+		if file.Name() == "Hub" || file.Name() == ".DS_Store" {
+			continue
+		}
+
+		oldFilePath := filepath.Join(oldPath, file.Name())
+		newFilePath := filepath.Join(newPath, file.Name())
+
+		if err := os.Rename(oldFilePath, newFilePath); err != nil {
+			return err
+		}
+	}
+
+	if oldPath != baseUnityPath {
+		if err := os.RemoveAll(oldPath); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -182,13 +212,31 @@ func RepairInstallPath(install *InstallInfo) error {
 
 func InstallToUnityDir(install *InstallInfo) error {
 	oldPath := filepath.Dir(install.Path)
-	newPath := "/Applications/Unity" // TODO switch out for unity-hub path
+	newPath := baseUnityPath // TODO switch out for unity-hub path
 
 	if oldPath == newPath {
 		return nil
 	}
 
-	if err := os.Rename(oldPath, newPath); err != nil {
+	files, err := ioutil.ReadDir(oldPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.Name() == ".DS_Store" {
+			continue
+		}
+
+		oldFilePath := filepath.Join(oldPath, file.Name())
+		newFilePath := filepath.Join(newPath, file.Name())
+
+		if err := os.Rename(oldFilePath, newFilePath); err != nil {
+			return err
+		}
+	}
+
+	if err := os.RemoveAll(oldPath); err != nil {
 		return err
 	}
 

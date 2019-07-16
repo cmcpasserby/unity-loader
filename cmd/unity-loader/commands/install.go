@@ -3,6 +3,7 @@ package commands
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
@@ -21,6 +22,8 @@ import (
 	"strings"
 	"time"
 )
+
+const modulesFilename = "modules.json"
 
 var moduleIdRe = regexp.MustCompile(`{(.*?)}`)
 
@@ -150,15 +153,23 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 		return err
 	}
 
-	selected := installInfo.FilterModules(func(mod parsing.PkgModule) bool {
+	selectedModulesCount := 0
+	for _, mod := range installInfo.Modules {
+		matchFound := false
+
 		for _, resultStr := range results {
 			modId := moduleIdRe.FindStringSubmatch(resultStr)[1]
 			if modId == mod.Id {
-				return true
+				matchFound = true
+				mod.Selected = true
+				selectedModulesCount++
+				break
 			}
 		}
-		return false
-	})
+		if !matchFound {
+			mod.Selected = false
+		}
+	}
 
 	defer cleanUp()
 
@@ -181,15 +192,19 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 		if err != nil {
 			return err
 		}
-		
+
 		if err := unity.InstallToUnityDir(install); err != nil {
 			return err
 		}
 	}
 
-	modulePaths := make([]downloadedModule, 0, len(selected))
+	modulePaths := make([]downloadedModule, 0, selectedModulesCount)
 
-	for _, module := range selected {
+	for _, module := range installInfo.Modules {
+		if !module.Selected {
+			continue
+		}
+
 		modPath, err := downloadModule(&module)
 		if err != nil {
 			return err
@@ -236,6 +251,11 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 	}
 
 	time.Sleep(500 * time.Millisecond)
+
+	// TODO create modules list here and dump to json
+	if err := writeModulesFile(baseUnityPath, installInfo.Modules); err != nil {
+		return err
+	}
 
 	if installInfo, err := unity.GetInstallFromVersion(version.String()); err == nil {
 		if err := unity.RepairInstallPath(installInfo); err != nil {
@@ -441,6 +461,20 @@ func installOther(pkg *downloadedModule, unityPath string, sudo *sudoer.Sudoer) 
 	fmt.Print("\033[2K") // clears current line
 	fmt.Printf("\rInstalled %s %q\n", typeString, pkg.PkgName())
 	return nil
+}
+
+func writeModulesFile(baseUnityPath string, modules []parsing.PkgModule) error {
+	modsFilePath := filepath.Join(baseUnityPath, modulesFilename)
+	f, err := os.Create(modsFilePath)
+	if err != nil {
+		return err
+	}
+	defer closeFile(f)
+
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "    ")
+
+	return enc.Encode(modules)
 }
 
 func cleanUp() {
