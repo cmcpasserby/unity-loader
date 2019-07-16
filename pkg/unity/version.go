@@ -50,7 +50,7 @@ func (v VersionData) Compare(other VersionData) int {
 	return 0
 }
 
-func VersionDataFromString(input string) VersionData {
+func VersionFromString(input string) VersionData {
 	separated := strings.Split(input, ".")
 
 	major, _ := strconv.Atoi(separated[0])

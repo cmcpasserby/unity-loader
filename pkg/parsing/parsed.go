@@ -7,12 +7,14 @@ import (
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"gopkg.in/ini.v1"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
 const (
-	configName   = "unity-%s-osx.ini"
-	unitySection = "Unity"
+	configName        = "unity-%s-osx.ini"
+	unitySection      = "Unity"
+	unityPathFragment = "{UNITY_PATH}"
 )
 
 var (
@@ -28,6 +30,8 @@ var (
 		"VisualStudio",
 		"Mono",
 	}
+
+	firstVersionWithDocsCategory = unity.VersionFromString("2018.2.0a1")
 )
 
 type iniData struct {
@@ -99,7 +103,7 @@ func (v *CacheVersion) GetPkg() (Pkg, error) {
 
 		if section == unitySection {
 			pkg.Version = v.String()
-			pkg.Lts = false
+			pkg.Lts = v.Major == 4 // TODO might need to find a better way but will just check if its a x.4 release for now
 			pkg.DownloadUrl = currentUrl + iniData.Path
 			pkg.DownloadSize = int(iniData.Size)
 			pkg.InstalledSize = int(iniData.InstalledSize)
@@ -111,11 +115,11 @@ func (v *CacheVersion) GetPkg() (Pkg, error) {
 				Name:          iniData.Title,
 				Description:   iniData.Description,
 				DownloadUrl:   currentUrl + iniData.Path,
-				Category:      "Archive",
+				Category:      getCategory(section, v),
 				DownloadSize:  int(iniData.Size),
 				InstalledSize: int(iniData.InstalledSize),
 				Checksum:      iniData.Md5,
-				Destination:   "{UNITY_PATH}",
+				Destination:   getDestination(section),
 				Visible:       !iniData.Hidden,
 				Selected:      iniData.Install,
 			})
@@ -139,7 +143,7 @@ func (v *CacheVersion) UnmarshalJSON(data []byte) error {
 	split := strings.Split(dataString, ":")
 
 	v.ExtendedVersionData = unity.ExtendedVersionData{
-		VersionData:  unity.VersionDataFromString(split[0]),
+		VersionData:  unity.VersionFromString(split[0]),
 		RevisionHash: split[1],
 	}
 
@@ -186,4 +190,95 @@ func (s CacheVersionSlice) Any(f func(CacheVersion) bool) bool {
 		}
 	}
 	return false
+}
+
+func getDestination(componentId string) string {
+	switch componentId {
+	case "mono":
+	case "visualstudio":
+		return ""
+	case "monodevelop":
+	case "documentation":
+		return unityPathFragment
+	case "standardassets":
+		return filepath.Join(unityPathFragment, "Standard Assets")
+	case "exampleprojects":
+	case "example":
+		return "/Users/Shared/Unity"
+	case "android":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AndroidPlayer")
+	case "android-sdk-build-tools":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AndroidPlayer/SDK/build-tools")
+	case "android-sdk-platforms":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AndroidPlayer/SDK/platforms")
+	case "android-sdk-platform-tools":
+	case "android-sdk-ndk-tools":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AndroidPlayer/SDK")
+	case "android-ndk":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AndroidPlayer/NDK")
+	case "android-open-jdk":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AndroidPlayer/OpenJDK")
+	case "ios":
+		return filepath.Join(unityPathFragment, "PlaybackEngines")
+	case "tvos":
+	case "appletv":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/AppleTVSupport")
+	case "linux":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/LinuxStandaloneSupport")
+	case "mac":
+	case "mac-il2cpp":
+		return filepath.Join(unityPathFragment, "Unity.app/Contents/PlaybackEngines/MacStandaloneSupport")
+	case "samsungtv":
+	case "samsung-tv":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/STVPlayer")
+	case "tizen":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/TizenPlayer")
+	case "vuforia":
+	case "vuforia-ar":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/VuforiaSupport")
+	case "webgl":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/WebGLSupport")
+	case "windows":
+	case "windows-mono":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/WindowsStandaloneSupport")
+	case "facebook":
+	case "facebook-games":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/Facebook")
+	case "facebookgameroom":
+		return ""
+	case "lumin":
+		return filepath.Join(unityPathFragment, "PlaybackEngines/LuminSupport")
+	}
+
+	if strings.HasPrefix(componentId, "language-") {
+		return filepath.Join(unityPathFragment, "Unity.app/Contents/Localization")
+	}
+
+	return unityPathFragment
+}
+
+func getCategory(componentId string, version *CacheVersion) string {
+	switch componentId {
+	case "monodevelop":
+	case "visualstudio":
+		return "Dev tools"
+	case "mono":
+	case "visualstudioprofessionalunityworkload":
+	case "visualstudioenterpriseunityworkload":
+	case "facebookgameroom":
+		return "Plugins"
+
+	case "standardassets":
+	case "exampleprojects":
+	case "example":
+		return "Components"
+
+	case "documentation":
+		return "Components" // TODO fix for docs removed in later versions
+	}
+
+	if strings.HasPrefix(componentId, "language-") {
+		return "Language Packs (Preview)"
+	}
+	return "Platforms"
 }

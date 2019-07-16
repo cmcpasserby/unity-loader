@@ -221,7 +221,7 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 		modulePaths = append(modulePaths, downloadedModule{module, modPath})
 	}
 
-	if err := installPkg(&installInfo, unityPath, sudo); err != nil {
+	if err := installEditor(&installInfo, unityPath, sudo); err != nil {
 		return err
 	}
 
@@ -236,7 +236,7 @@ func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
 
 	for _, modPath := range modulePaths {
 		if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".pkg") {
-			if err := installPkg(&modPath, modPath.ModulePath, sudo); err != nil {
+			if err := installModule(&modPath, sudo); err != nil {
 				return err
 			}
 		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".zip") {
@@ -301,6 +301,7 @@ func download(url, name string, size int) (string, error) {
 	return downloadPath, nil
 }
 
+// TODO can combine these 2 to use the PkgGeneric
 func downloadPkg(pkg *parsing.Pkg) (string, error) {
 	downloadPath, err := download(pkg.DownloadUrl, pkg.Version, pkg.DownloadSize)
 	if err != nil {
@@ -399,19 +400,43 @@ func validate(pkg parsing.PkgGeneric, path string) (bool, error) {
 	return isValid, nil
 }
 
-func installPkg(pkg parsing.PkgGeneric, pkgPath string, sudo *sudoer.Sudoer) error {
-	if pkgPath == "" {
+func installEditor(pkg *parsing.Pkg, unityPath string, sudo *sudoer.Sudoer) error {
+	// TODO use xar and untar instead of running the installer package and apply needed copying
+
+	if unityPath == "" {
+		return errors.New("no downloaded package to install")
+	}
+
+	fmt.Printf("Installing Unity %q...", pkg.Version)
+
+	if err := sudo.RunAsRoot("installer", "-package", unityPath, "-target", "/"); err != nil {
+		return err
+	}
+
+	if err := os.Remove(unityPath); err != nil {
+		return err
+	}
+
+	fmt.Print("\033[2k") // clears current line
+	fmt.Printf("\rInstalled Unity %q\n", pkg.Version)
+	return nil
+}
+
+func installModule(pkg *downloadedModule, sudo *sudoer.Sudoer) error {
+	// TODO use xar and untar instead of running the installer package
+
+	if pkg.ModulePath == "" {
 		return errors.New("no downloaded package to install")
 	}
 
 	fmt.Printf("Installing Unity %q...", pkg.PkgName())
 
-	err := sudo.RunAsRoot("installer", "-package", pkgPath, "-target", "/")
+	err := sudo.RunAsRoot("installer", "-package", pkg.ModulePath, "-target", "/")
 	if err != nil {
 		return err
 	}
 
-	if err := os.Remove(pkgPath); err != nil {
+	if err := os.Remove(pkg.ModulePath); err != nil {
 		return err
 	}
 
