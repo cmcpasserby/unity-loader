@@ -32,13 +32,13 @@ jobs:
         release_name: ${{ github.ref }}
         prerelease: false
 
-#    - name: Upload Release Asset
-#      id: upload_release_asset
-#      uses: actions/upload-release-asset@v1
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        upload_url: ${{ steps.create_release.outputs.upload_url }}
-#        asset_path: unity-loader
-#        asset_name: unity-loader
-#        asset-content_type: application/zip
+    - name: Upload Release Asset
+      id: upload_release_asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: unity-loader
+        asset_name: unity-loader
+        asset-content_type: application/zip
