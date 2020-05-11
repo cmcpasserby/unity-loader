@@ -22,7 +22,7 @@ jobs:
     - name: Build
       run: |
         go build -o unity-loader cmd/unity-loader/main.go &&
-        tar -zcvf unity-loader-${{ github.ref }}.tar.gz dist/unity-loader README.md LICENSE
+        tar -zcvf unity-loader-${{ github.ref }}.tar.gz unity-loader README.md LICENSE
 
     - name: Create Release
       id: create_release
