@@ -4,11 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/pkg/parsing"
 	"github.com/cmcpasserby/unity-loader/pkg/settings"
-	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
 	"github.com/cmcpasserby/unity-loader/pkg/unity"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"gopkg.in/cheggaaa/pb.v1"
@@ -16,10 +14,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -96,176 +94,180 @@ func install(args ...string) error {
 }
 
 func installVersion(version parsing.CacheVersion, modulesOnly bool) error {
-	config, err := settings.ParseDotFile()
-	if err != nil {
-		return err
-	}
+	hubUrl := fmt.Sprintf("unityhub://%s/%s/", version.String(), version.RevisionHash)
+	app := exec.Command("open", hubUrl)
+	return app.Run()
 
-	if modulesOnly {
-		if _, err := unity.GetInstallFromVersion(version.String()); err != nil {
-			return err
-		}
-	} else {
-		if _, err := unity.GetInstallFromVersion(version.String()); err == nil {
-			return errors.New("version is already installed") // TODO replace with proper error in future
-		}
-	}
-
-	sudo := new(sudoer.Sudoer)
-	if err := sudo.AskPass(); err != nil {
-		return err
-	}
-
-	installInfo, err := version.GetPkg()
-	if err != nil {
-		return err
-	}
-
-	titles := make([]string, 0, len(installInfo.Modules))
-	defaults := make([]string, 0, len(installInfo.Modules))
-
-	for _, module := range installInfo.Modules {
-		if !module.Visible {
-			continue
-		}
-
-		moduleString := fmt.Sprintf("%s {%s}", module.Name, module.Id)
-
-		titles = append(titles, moduleString)
-
-		for _, item := range config.ModuleDefaults {
-			if item == module.Id {
-				defaults = append(defaults, moduleString)
-				break
-			}
-		}
-	}
-
-	prompt := &survey.MultiSelect{
-		Message:  "select modules to install",
-		Options:  titles,
-		Default:  defaults,
-		PageSize: 10,
-	}
-
-	var results []string
-	if err := survey.AskOne(prompt, &results, nil); err != nil {
-		return err
-	}
-
-	selectedModulesCount := 0
-	for _, mod := range installInfo.Modules {
-		matchFound := false
-
-		for _, resultStr := range results {
-			modId := moduleIdRe.FindStringSubmatch(resultStr)[1]
-			if modId == mod.Id {
-				matchFound = true
-				mod.Selected = true
-				selectedModulesCount++
-				break
-			}
-		}
-		if !matchFound {
-			mod.Selected = false
-		}
-	}
-
-	defer cleanUp()
-
-	var unityPath string
-	if !modulesOnly {
-		unityPath, err := downloadPkg(&installInfo)
-		if err != nil {
-			return err
-		}
-
-		isValid, err := validate(&installInfo, unityPath)
-		if err != nil {
-			return err
-		}
-		if !isValid {
-			return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
-		}
-	} else {
-		install, err := unity.GetInstallFromVersion(version.String())
-		if err != nil {
-			return err
-		}
-
-		if err := unity.InstallToUnityDir(install); err != nil {
-			return err
-		}
-	}
-
-	modulePaths := make([]downloadedModule, 0, selectedModulesCount)
-
-	for _, module := range installInfo.Modules {
-		if !module.Selected {
-			continue
-		}
-
-		modPath, err := downloadModule(&module)
-		if err != nil {
-			return err
-		}
-
-		isValid, err := validate(&module, modPath)
-		if err != nil {
-			return err
-		}
-
-		if !isValid {
-			return fmt.Errorf("%q was not a valid package, try installing again\n", module.Name)
-		}
-		modulePaths = append(modulePaths, downloadedModule{module, modPath})
-	}
-
-	if err := installEditor(&installInfo, unityPath, sudo); err != nil {
-		return err
-	}
-
-	time.Sleep(500 * time.Millisecond)
-
-	installedInfo, err := unity.GetInstallFromVersion(version.String())
-	if err != nil {
-		// TODO maybe make this error more user friendly for this use case
-		return err
-	}
-	baseUnityPath := filepath.Dir(installedInfo.Path)
-
-	for _, modPath := range modulePaths {
-		if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".pkg") {
-			if err := installModule(&modPath, sudo); err != nil {
-				return err
-			}
-		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".zip") {
-			if err := installZip(&modPath, baseUnityPath, sudo); err != nil {
-				return err
-			}
-		} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".dmg") {
-			if err := installDmg(&modPath, baseUnityPath, sudo); err != nil {
-				return err
-			}
-		}
-	}
-
-	time.Sleep(500 * time.Millisecond)
-
-	// TODO create modules list here and dump to json
-	if err := writeModulesFile(baseUnityPath, installInfo.Modules); err != nil {
-		return err
-	}
-
-	if installInfo, err := unity.GetInstallFromVersion(version.String()); err == nil {
-		if err := unity.RepairInstallPath(installInfo); err != nil {
-			return err
-		}
-	} else {
-		return err
-	}
-
-	return nil
+	// config, err := settings.ParseDotFile()
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// if modulesOnly {
+	// 	if _, err := unity.GetInstallFromVersion(version.String()); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	// 	if _, err := unity.GetInstallFromVersion(version.String()); err == nil {
+	// 		return errors.New("version is already installed") // TODO replace with proper error in future
+	// 	}
+	// }
+	//
+	// sudo := new(sudoer.Sudoer)
+	// if err := sudo.AskPass(); err != nil {
+	// 	return err
+	// }
+	//
+	// installInfo, err := version.GetPkg()
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// titles := make([]string, 0, len(installInfo.Modules))
+	// defaults := make([]string, 0, len(installInfo.Modules))
+	//
+	// for _, module := range installInfo.Modules {
+	// 	if !module.Visible {
+	// 		continue
+	// 	}
+	//
+	// 	moduleString := fmt.Sprintf("%s {%s}", module.Name, module.Id)
+	//
+	// 	titles = append(titles, moduleString)
+	//
+	// 	for _, item := range config.ModuleDefaults {
+	// 		if item == module.Id {
+	// 			defaults = append(defaults, moduleString)
+	// 			break
+	// 		}
+	// 	}
+	// }
+	//
+	// prompt := &survey.MultiSelect{
+	// 	Message:  "select modules to install",
+	// 	Options:  titles,
+	// 	Default:  defaults,
+	// 	PageSize: 10,
+	// }
+	//
+	// var results []string
+	// if err := survey.AskOne(prompt, &results, nil); err != nil {
+	// 	return err
+	// }
+	//
+	// selectedModulesCount := 0
+	// for _, mod := range installInfo.Modules {
+	// 	matchFound := false
+	//
+	// 	for _, resultStr := range results {
+	// 		modId := moduleIdRe.FindStringSubmatch(resultStr)[1]
+	// 		if modId == mod.Id {
+	// 			matchFound = true
+	// 			mod.Selected = true
+	// 			selectedModulesCount++
+	// 			break
+	// 		}
+	// 	}
+	// 	if !matchFound {
+	// 		mod.Selected = false
+	// 	}
+	// }
+	//
+	// defer cleanUp()
+	//
+	// var unityPath string
+	// if !modulesOnly {
+	// 	unityPath, err := downloadPkg(&installInfo)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	isValid, err := validate(&installInfo, unityPath)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !isValid {
+	// 		return fmt.Errorf("%q was not a valid package, try installing again\n", installInfo.Version)
+	// 	}
+	// } else {
+	// 	install, err := unity.GetInstallFromVersion(version.String())
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	if err := unity.InstallToUnityDir(install); err != nil {
+	// 		return err
+	// 	}
+	// }
+	//
+	// modulePaths := make([]downloadedModule, 0, selectedModulesCount)
+	//
+	// for _, module := range installInfo.Modules {
+	// 	if !module.Selected {
+	// 		continue
+	// 	}
+	//
+	// 	modPath, err := downloadModule(&module)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	isValid, err := validate(&module, modPath)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	if !isValid {
+	// 		return fmt.Errorf("%q was not a valid package, try installing again\n", module.Name)
+	// 	}
+	// 	modulePaths = append(modulePaths, downloadedModule{module, modPath})
+	// }
+	//
+	// if err := installEditor(&installInfo, unityPath, sudo); err != nil {
+	// 	return err
+	// }
+	//
+	// time.Sleep(500 * time.Millisecond)
+	//
+	// installedInfo, err := unity.GetInstallFromVersion(version.String())
+	// if err != nil {
+	// 	// TODO maybe make this error more user friendly for this use case
+	// 	return err
+	// }
+	// baseUnityPath := filepath.Dir(installedInfo.Path)
+	//
+	// for _, modPath := range modulePaths {
+	// 	if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".pkg") {
+	// 		if err := installModule(&modPath, sudo); err != nil {
+	// 			return err
+	// 		}
+	// 	} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".zip") {
+	// 		if err := installZip(&modPath, baseUnityPath, sudo); err != nil {
+	// 			return err
+	// 		}
+	// 	} else if strings.HasSuffix(strings.ToLower(modPath.DownloadUrl), ".dmg") {
+	// 		if err := installDmg(&modPath, baseUnityPath, sudo); err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// }
+	//
+	// time.Sleep(500 * time.Millisecond)
+	//
+	// // TODO create modules list here and dump to json
+	// if err := writeModulesFile(baseUnityPath, installInfo.Modules); err != nil {
+	// 	return err
+	// }
+	//
+	// if installInfo, err := unity.GetInstallFromVersion(version.String()); err == nil {
+	// 	if err := unity.RepairInstallPath(installInfo); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	// 	return err
+	// }
+	//
+	// return nil
 }
 
 func download(url, name string, size int) (string, error) {
