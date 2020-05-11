@@ -99,7 +99,7 @@ func (v *CacheVersion) GetPkg() (Pkg, error) {
 
 		if section == unitySection {
 			pkg.Version = v.String()
-			pkg.Lts = false
+			pkg.Lts = v.Major == 4 // TODO might need to find a better way but will just check if its a x.4 release for now
 			pkg.DownloadUrl = currentUrl + iniData.Path
 			pkg.DownloadSize = int(iniData.Size)
 			pkg.InstalledSize = int(iniData.InstalledSize)
@@ -111,11 +111,11 @@ func (v *CacheVersion) GetPkg() (Pkg, error) {
 				Name:          iniData.Title,
 				Description:   iniData.Description,
 				DownloadUrl:   currentUrl + iniData.Path,
-				Category:      "Archive",
+				Category:      getCategory(section, v),
 				DownloadSize:  int(iniData.Size),
 				InstalledSize: int(iniData.InstalledSize),
 				Checksum:      iniData.Md5,
-				Destination:   "{UNITY_PATH}",
+				Destination:   getDestination(section),
 				Visible:       !iniData.Hidden,
 				Selected:      iniData.Install,
 			})
@@ -139,7 +139,7 @@ func (v *CacheVersion) UnmarshalJSON(data []byte) error {
 	split := strings.Split(dataString, ":")
 
 	v.ExtendedVersionData = unity.ExtendedVersionData{
-		VersionData:  unity.VersionDataFromString(split[0]),
+		VersionData:  unity.VersionFromString(split[0]),
 		RevisionHash: split[1],
 	}
 
@@ -153,7 +153,7 @@ func (s CacheVersionSlice) Len() int {
 }
 
 func (s CacheVersionSlice) Less(i, j int) bool {
-	return unity.VersionLess(s[i].VersionData, s[j].VersionData)
+	return s[i].VersionData.Compare(s[j].VersionData) < 0
 }
 
 func (s CacheVersionSlice) Swap(i, j int) {

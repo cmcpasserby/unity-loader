@@ -38,7 +38,7 @@ func GetVersions() ([]CacheVersion, error) {
 		verStr := versionRe.FindString(match)
 		revisionHash := revisionHashRe.FindString(match)
 		verData := unity.ExtendedVersionData{
-			VersionData:  unity.VersionDataFromString(verStr),
+			VersionData:  unity.VersionFromString(verStr),
 			RevisionHash: revisionHash,
 		}
 

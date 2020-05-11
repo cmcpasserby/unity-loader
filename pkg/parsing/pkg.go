@@ -11,9 +11,9 @@ func (pkg PkgSlice) Len() int {
 }
 
 func (pkg PkgSlice) Less(i, j int) bool {
-	a := unity.VersionDataFromString(pkg[i].Version)
-	b := unity.VersionDataFromString(pkg[j].Version)
-	return unity.VersionLess(a, b)
+	a := unity.VersionFromString(pkg[i].Version)
+	b := unity.VersionFromString(pkg[j].Version)
+	return a.Compare(b) < 0
 }
 
 func (pkg PkgSlice) Swap(i, j int) {

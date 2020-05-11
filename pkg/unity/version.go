@@ -20,16 +20,37 @@ type VersionData struct {
 	Patch   int
 }
 
-type ExtendedVersionData struct {
-	VersionData
-	RevisionHash string
-}
-
 func (v *VersionData) String() string {
 	return fmt.Sprintf("%d.%d.%d%s%d", v.Major, v.Minor, v.Update, v.VerType, v.Patch)
 }
 
-func VersionDataFromString(input string) VersionData {
+func (v VersionData) Compare(other VersionData) int {
+	if v.Major != other.Major {
+		return v.Major - other.Major
+	}
+
+	if v.Minor != other.Minor {
+		return v.Minor - other.Minor
+	}
+
+	if v.Update != other.Update {
+		return v.Update - other.Update
+	}
+
+	aType := releaseTypeSort[v.VerType]
+	bType := releaseTypeSort[other.VerType]
+	if aType != bType {
+		return aType - bType
+	}
+
+	if v.Patch != other.Patch {
+		return v.Patch - v.Patch
+	}
+
+	return 0
+}
+
+func VersionFromString(input string) VersionData {
 	separated := strings.Split(input, ".")
 
 	major, _ := strconv.Atoi(separated[0])
@@ -44,6 +65,11 @@ func VersionDataFromString(input string) VersionData {
 	return VersionData{major, minor, update, verType, patch}
 }
 
+type ExtendedVersionData struct {
+	VersionData
+	RevisionHash string
+}
+
 // Version Sorting
 type ByVersionSorter []VersionData
 
@@ -52,35 +78,9 @@ func (s ByVersionSorter) Len() int {
 }
 
 func (s ByVersionSorter) Less(i, j int) bool {
-	return VersionLess(s[i], s[j])
+	return s[i].Compare(s[j]) < 0
 }
 
 func (s ByVersionSorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
-}
-
-func VersionLess(a, b VersionData) bool {
-	if a.Major != b.Major {
-		return a.Major < b.Major
-	}
-
-	if a.Minor != b.Minor {
-		return a.Minor < b.Minor
-	}
-
-	if a.Update != b.Update {
-		return a.Update < b.Update
-	}
-
-	aType := releaseTypeSort[a.VerType]
-	bType := releaseTypeSort[b.VerType]
-	if aType != bType {
-		return aType < bType
-	}
-
-	if a.Patch != b.Patch {
-		return a.Patch < b.Patch
-	}
-
-	return false
 }
