@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cmcpasserby/unity-loader/cmd/unity-loader/commands"
+	"github.com/cmcpasserby/unity-loader/oldcmd/unity-loader/commands"
 	"log"
 	"os"
 )

@@ -1,7 +1,7 @@
 package parsing
 
 import (
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"github.com/cmcpasserby/unity-loader/unity"
 )
 
 type PkgSlice []Pkg

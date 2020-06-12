@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"github.com/cmcpasserby/unity-loader/unity"
 	"gopkg.in/ini.v1"
 	"net/http"
 	"strings"

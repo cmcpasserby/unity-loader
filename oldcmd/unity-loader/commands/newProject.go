@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"github.com/cmcpasserby/unity-loader/unity"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"os"
 )
@@ -21,7 +21,6 @@ func newProject(args ...string) error {
 		projectName = os.Args[0]
 	}
 
-
 	installs, err := unity.GetInstalls()
 	if err != nil {
 		return err
@@ -33,8 +32,8 @@ func newProject(args ...string) error {
 	}
 
 	prompt := &survey.Select{
-		Message: "Select unity version to create project with",
-		Options: options,
+		Message:  "Select unity version to create project with",
+		Options:  options,
 		PageSize: 10,
 	}
 

@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/cmcpasserby/unity-loader/pkg/settings"
+	"github.com/cmcpasserby/unity-loader/settings"
 )
 
 func update(args ...string) error {

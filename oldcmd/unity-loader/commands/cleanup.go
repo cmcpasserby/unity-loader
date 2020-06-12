@@ -3,9 +3,9 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/cmcpasserby/unity-loader/pkg/settings"
-	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"github.com/cmcpasserby/unity-loader/settings"
+	"github.com/cmcpasserby/unity-loader/sudoer"
+	"github.com/cmcpasserby/unity-loader/unity"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"os"
 	"path/filepath"

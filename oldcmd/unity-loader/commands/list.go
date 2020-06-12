@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"github.com/cmcpasserby/unity-loader/unity"
 )
 
 func list(args ...string) error {

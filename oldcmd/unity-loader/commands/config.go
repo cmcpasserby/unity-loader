@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/cmcpasserby/unity-loader/pkg/settings"
+	"github.com/cmcpasserby/unity-loader/settings"
 	"os"
 	"os/exec"
 	"path"

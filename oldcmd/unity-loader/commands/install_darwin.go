@@ -3,8 +3,8 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/cmcpasserby/unity-loader/pkg/parsing"
-	"github.com/cmcpasserby/unity-loader/pkg/sudoer"
+	"github.com/cmcpasserby/unity-loader/parsing"
+	"github.com/cmcpasserby/unity-loader/sudoer"
 	"os"
 	"strings"
 )

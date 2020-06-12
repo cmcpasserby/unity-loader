@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"github.com/cmcpasserby/unity-loader/pkg/parsing"
-	"github.com/cmcpasserby/unity-loader/pkg/settings"
-	"github.com/cmcpasserby/unity-loader/pkg/unity"
+	"github.com/cmcpasserby/unity-loader/parsing"
+	"github.com/cmcpasserby/unity-loader/settings"
+	"github.com/cmcpasserby/unity-loader/unity"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
@@ -37,8 +37,8 @@ func platforms(args ...string) error {
 		}
 
 		prompt := &survey.Select{
-			Message: "select unity version to install modules on",
-			Options: options,
+			Message:  "select unity version to install modules on",
+			Options:  options,
 			PageSize: 10,
 		}
 

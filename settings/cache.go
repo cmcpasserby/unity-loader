@@ -2,7 +2,7 @@ package settings
 
 import (
 	"encoding/json"
-	"github.com/cmcpasserby/unity-loader/pkg/parsing"
+	"github.com/cmcpasserby/unity-loader/parsing"
 	"os"
 	"path"
 	"time"
