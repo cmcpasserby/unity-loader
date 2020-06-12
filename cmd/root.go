@@ -18,12 +18,13 @@ var rootCmd = &cobra.Command{
 func Execute() error {
 	// get config path stuff
 	var configPath string
-	rootCmd.PersistentFlags().StringVarP(&gFlagConfig, "config", "c", configPath, "sets teh active config for unity-loader")
+	rootCmd.PersistentFlags().StringVarP(&gFlagConfig, "config", "c", configPath, "sets the active config for unity-loader")
 	rootCmd.PersistentFlags().BoolVarP(&gFlagNoConfirm, "no-Confirm", "y", false, "removes confirmation prompts")
 
 	rootCmd.AddCommand(
 		createRunCmd(),
 		createVersionCmd(),
+		createListCmd(),
 	)
 
 	return rootCmd.Execute()
