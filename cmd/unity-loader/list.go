@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 func createListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list all installed unity versions",
-		Args:  cobra.ExactArgs(0),
+		Short: "List all installed unity versions",
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			installs, err := unity.GetInstalls()
 			if err != nil {

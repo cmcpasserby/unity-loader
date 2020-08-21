@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 func createVersionCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version [projectDirectory]",
-		Short: "check what version of unity a project is using",
+		Short: "Check what version of unity a project is using",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var path string

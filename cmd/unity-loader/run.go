@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ func createRunCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "run [projectDirectory]",
-		Short: "launches unity and opens the selected project",
+		Short: "Launches unity and opens the selected project",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var path string

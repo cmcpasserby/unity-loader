@@ -1,4 +1,4 @@
-package main
+package unity_loader
 
 import (
 	"flag"

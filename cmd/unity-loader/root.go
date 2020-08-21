@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"github.com/spf13/cobra"
@@ -15,7 +15,7 @@ var rootCmd = &cobra.Command{
 	Short:   "Tool for loading unity projects with their respective unity versions and installing the proper version if required",
 }
 
-func Execute() error {
+func execute() error {
 	// get config path stuff
 	var configPath string
 	rootCmd.PersistentFlags().StringVarP(&gFlagConfig, "config", "c", configPath, "sets the active config for unity-loader")
