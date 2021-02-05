@@ -20,9 +20,9 @@ func (info *InstallInfo) RunWithTarget(project, target string) error {
 
 	var app *exec.Cmd
 	if target == "" {
-		app = exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject)
+		app = exec.Command("open", "-a", info.Path, "-n", "--args", "-projectPath", absProject)
 	} else {
-		app = exec.Command("open", "-a", info.Path, "--args", "-projectPath", absProject, "-buildTarget", target)
+		app = exec.Command("open", "-a", info.Path, "-n", "--args", "-projectPath", absProject, "-buildTarget", target)
 	}
 
 	return app.Run()
