@@ -34,7 +34,7 @@ type appInfoDict struct {
 }
 
 func GetInstalls() ([]*InstallInfo, error) {
-	unityPaths, err := filepath.Glob("/Applications/Unity/Hub/Editor/**/Unity.app")
+	unityPaths, err := filepath.Glob("/Applications/Unity/Hub/Editor/**/Unity.app") // TODO should be user configurable
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,6 @@ func GetInstallFromPath(path string) (*InstallInfo, error) {
 	defer closeFile(file)
 
 	var appInfo appInfoDict
-
 	if err := plist.NewDecoder(file).Decode(&appInfo); err != nil {
 		return nil, err
 	}
