@@ -70,7 +70,7 @@ type ExtendedVersionData struct {
 	RevisionHash string
 }
 
-// Version Sorting
+// ByVersionSorter properly sorts versions numbers
 type ByVersionSorter []VersionData
 
 func (s ByVersionSorter) Len() int {

@@ -66,7 +66,7 @@ func createRunCmd() *cobra.Command {
 
 			appInstall, err := unity.GetInstallFromVersion(version)
 			if err != nil {
-				// TODO if VersionNotFoundError offer to install version
+				// TODO if versionNotFoundError offer to install version
 				return err
 			}
 
