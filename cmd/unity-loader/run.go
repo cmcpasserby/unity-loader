@@ -37,7 +37,7 @@ func createRunCmd() *cobra.Command {
 			var version string
 			var err error
 
-			if lFlagForceVersion {
+			if lFlagForceVersion { // TODO use this flow or direct version number
 				installs, err := unity.GetInstalls()
 				if err != nil {
 					return err
@@ -74,13 +74,13 @@ func createRunCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&lFlagForceVersion, "force", false, "force project to be opened with a specific Unity version")
+	cmd.Flags().BoolVar(&lFlagForceVersion, "force", false, "force project to be opened with a specific Unity version") // TODO should let version be passed into flag
 	cmd.Flags().StringVar(&lFlagBuildTarget, "buildTarget", "", "opens project with a specific build target set")
 
 	return cmd
 }
 
-func runInstalledVersion(installInfo *unity.InstallInfo, projectPath, target string) error {
+func runInstalledVersion(installInfo unity.InstallInfo, projectPath, target string) error {
 	fmt.Printf("Opening project %q in version %s\n", projectPath, installInfo.Version.String())
 	return installInfo.RunWithTarget(projectPath, target)
 }

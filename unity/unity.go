@@ -19,6 +19,10 @@ func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
 }
 
+func (info *InstallInfo) String() string {
+	return fmt.Sprintf("Version: %q Path: %q", info.Version.String(), info.Path)
+}
+
 func GetVersionFromProject(path string) (string, error) {
 	versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
 	if _, err := os.Stat(versionFile); os.IsNotExist(err) {
@@ -43,10 +47,10 @@ func GetVersionFromProject(path string) (string, error) {
 	return "", errors.New("invalid ProjectVersion.txt")
 }
 
-func GetInstallFromVersion(version string) (*InstallInfo, error) {
+func GetInstallFromVersion(version string) (InstallInfo, error) {
 	installs, err := GetInstalls()
 	if err != nil {
-		return nil, err
+		return InstallInfo{}, err
 	}
 
 	for _, install := range installs {
@@ -55,7 +59,7 @@ func GetInstallFromVersion(version string) (*InstallInfo, error) {
 		}
 	}
 
-	return nil, versionNotFoundError{version}
+	return InstallInfo{}, versionNotFoundError{version}
 }
 
 func closeFile(f *os.File) {

@@ -18,7 +18,7 @@ func createListCmd() *cobra.Command {
 			}
 
 			for _, data := range installs {
-				fmt.Printf("Version: %q Path: %q\n", data.Version.String(), data.Path)
+				fmt.Println(data.String())
 			}
 
 			return nil

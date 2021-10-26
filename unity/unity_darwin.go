@@ -33,13 +33,13 @@ type appInfoDict struct {
 	CFBundleVersion string `plist:"CFBundleVersion"`
 }
 
-func GetInstalls() ([]*InstallInfo, error) {
+func GetInstalls() ([]InstallInfo, error) {
 	unityPaths, err := filepath.Glob("/Applications/Unity/Hub/Editor/**/Unity.app") // TODO should be user configurable
 	if err != nil {
 		return nil, err
 	}
 
-	installs := make([]*InstallInfo, 0, len(unityPaths))
+	installs := make([]InstallInfo, 0, len(unityPaths))
 	for _, path := range unityPaths {
 		installData, err := GetInstallFromPath(path)
 		if err != nil {
@@ -55,19 +55,19 @@ func GetInstalls() ([]*InstallInfo, error) {
 	return installs, nil
 }
 
-func GetInstallFromPath(path string) (*InstallInfo, error) {
+func GetInstallFromPath(path string) (InstallInfo, error) {
 	plistPath := filepath.Join(path, "Contents/info.plist")
 	file, err := os.Open(plistPath)
 	if err != nil {
-		return nil, err
+		return InstallInfo{}, err
 	}
 	defer closeFile(file)
 
 	var appInfo appInfoDict
-	if err := plist.NewDecoder(file).Decode(&appInfo); err != nil {
-		return nil, err
+	if err = plist.NewDecoder(file).Decode(&appInfo); err != nil {
+		return InstallInfo{}, err
 	}
 
-	installData := InstallInfo{Version: VersionFromString(appInfo.CFBundleVersion), Path: path}
-	return &installData, nil
+	installData := InstallInfo{Path: path, Version: VersionFromString(appInfo.CFBundleVersion)}
+	return installData, nil
 }
