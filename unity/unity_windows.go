@@ -1,6 +1,7 @@
 package unity
 
 import (
+	"os/exec"
 	"path/filepath"
 	"sort"
 )
@@ -36,5 +37,10 @@ func GetInstalls() ([]InstallInfo, error) { // TODO might be able to make this n
 }
 
 func GetInstallFromPath(path string) (InstallInfo, error) {
-	panic("not implemented yet")
+	cmd := exec.Command(path, "-batchmode", "-version")
+	result, err := cmd.Output()
+	if err != nil {
+		return InstallInfo{}, err
+	}
+	return InstallInfo{Path: path, Version: VersionFromString(string(result))}, nil
 }

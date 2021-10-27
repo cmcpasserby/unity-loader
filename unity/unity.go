@@ -20,7 +20,7 @@ func (info *InstallInfo) Run(project string) error {
 }
 
 func (info *InstallInfo) String() string {
-	return fmt.Sprintf("Version: %q Path: %q", info.Version.String(), info.Path)
+	return fmt.Sprintf("Version: %s Path: \"%s\"", info.Version.String(), info.Path)
 }
 
 func GetVersionFromProject(path string) (string, error) {
