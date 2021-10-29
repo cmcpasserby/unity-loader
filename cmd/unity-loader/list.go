@@ -12,7 +12,12 @@ func createListCmd() *cobra.Command {
 		Short: "List all installed unity versions",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			installs, err := unity.GetInstalls()
+			config, err := GetConfig()
+			if err != nil {
+				return err
+			}
+
+			installs, err := unity.GetInstalls(config.SearchPaths...)
 			if err != nil {
 				return err
 			}

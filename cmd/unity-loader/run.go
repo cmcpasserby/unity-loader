@@ -20,6 +20,11 @@ func createRunCmd() *cobra.Command {
 		Short: "Launches unity and opens the selected project",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			config, err := GetConfig()
+			if err != nil {
+				return err
+			}
+
 			var path string
 
 			if len(args) > 0 {
@@ -35,10 +40,9 @@ func createRunCmd() *cobra.Command {
 			expandedPath, _ := filepath.Abs(path)
 
 			var version string
-			var err error
 
 			if lFlagForceVersion { // TODO use this flow or direct version number
-				installs, err := unity.GetInstalls()
+				installs, err := unity.GetInstalls(config.SearchPaths...)
 				if err != nil {
 					return err
 				}
@@ -64,9 +68,8 @@ func createRunCmd() *cobra.Command {
 				}
 			}
 
-			appInstall, err := unity.GetInstallFromVersion(version)
+			appInstall, err := unity.GetInstallFromVersion(version, config.SearchPaths...)
 			if err != nil {
-				// TODO if versionNotFoundError offer to install version
 				return err
 			}
 

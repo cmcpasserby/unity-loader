@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 )
 
 func (info *InstallInfo) RunWithTarget(project, target string) error {
@@ -33,26 +32,8 @@ type appInfoDict struct {
 	CFBundleVersion string `plist:"CFBundleVersion"`
 }
 
-func GetInstalls() ([]InstallInfo, error) {
-	unityPaths, err := filepath.Glob("/Applications/Unity/Hub/Editor/**/Unity.app") // TODO should be user configurable
-	if err != nil {
-		return nil, err
-	}
-
-	installs := make([]InstallInfo, 0, len(unityPaths))
-	for _, path := range unityPaths {
-		installData, err := GetInstallFromPath(path)
-		if err != nil {
-			return nil, err
-		}
-		installs = append(installs, installData)
-	}
-
-	sort.Slice(installs, func(i, j int) bool {
-		return installs[i].Version.Compare(installs[j].Version) > 0
-	})
-
-	return installs, nil
+func unityGlob(searchPath string) ([]string, error) {
+	return filepath.Glob(fmt.Sprintf("%s/**/Unity.app", searchPath))
 }
 
 func GetInstallFromPath(path string) (InstallInfo, error) {
