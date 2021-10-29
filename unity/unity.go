@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -18,6 +19,18 @@ type InstallInfo struct {
 
 func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
+}
+
+func (info *InstallInfo) RunWithTarget(project, target string) error {
+	absProject, _ := filepath.Abs(project)
+
+	var app *exec.Cmd
+	if target == "" {
+		app = command(info.Path, "-projectPath", absProject)
+	} else {
+		app = exec.Command(info.Path, "-projectPath", absProject, "-buildTarget", target)
+	}
+	return app.Run()
 }
 
 func (info *InstallInfo) String() string {

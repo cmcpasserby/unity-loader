@@ -1,22 +1,8 @@
 package unity
 
 import (
-	"fmt"
 	"os/exec"
-	"path/filepath"
 )
-
-func (info *InstallInfo) RunWithTarget(project, target string) error {
-	panic("not implemented yet")
-}
-
-func (info *InstallInfo) NewProject(projectName string) error {
-	panic("not implemented yet")
-}
-
-func unityGlob(searchPath string) ([]string, error) {
-	return filepath.Glob(fmt.Sprintf("%s/**/Editor/Unity.exe"))
-}
 
 func GetInstallFromPath(path string) (InstallInfo, error) {
 	cmd := exec.Command(path, "-batchmode", "-version")
@@ -25,4 +11,13 @@ func GetInstallFromPath(path string) (InstallInfo, error) {
 		return InstallInfo{}, err
 	}
 	return InstallInfo{Path: path, Version: VersionFromString(string(result))}, nil
+}
+
+func unityGlob(searchPath string) ([]string, error) {
+	return filepath.Glob(fmt.Sprintf("%s/**/Editor/Unity.exe"))
+}
+
+func command(path string, args ...string) *exec.Cmd {
+	newArgs := append([]string{"", path}, args...)
+	return exec.Command("start", newArgs...)
 }
