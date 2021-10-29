@@ -1,1 +1,7 @@
-search_paths = ["C:/Program Files/Unity/Hub/Editor"]
+# unity-loader config
+#
+# Multiple search paths can be define, by defualt it search the defualt install path Unity-Hub provides
+
+search_paths = [
+    "C:/Program Files/Unity/Hub/Editor",
+]
