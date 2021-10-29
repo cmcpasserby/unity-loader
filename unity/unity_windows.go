@@ -1,7 +1,9 @@
 package unity
 
 import (
+	"fmt"
 	"os/exec"
+	"path/filepath"
 )
 
 func GetInstallFromPath(path string) (InstallInfo, error) {
@@ -14,7 +16,7 @@ func GetInstallFromPath(path string) (InstallInfo, error) {
 }
 
 func unityGlob(searchPath string) ([]string, error) {
-	return filepath.Glob(fmt.Sprintf("%s/**/Editor/Unity.exe"))
+	return filepath.Glob(fmt.Sprintf("%s/**/Editor/Unity.exe", searchPath))
 }
 
 func command(path string, args ...string) *exec.Cmd {

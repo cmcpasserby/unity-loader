@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/BurntSushi/toml"
 	"os"
 	"os/user"
@@ -24,6 +25,7 @@ func GetConfig() (*Config, error) {
 		if err := os.WriteFile(path, configContents, 0644); err != nil {
 			return nil, err
 		}
+		fmt.Printf("writing default config to \"%s\"\n", path)
 	} else if err != nil {
 		return nil, err
 	}
