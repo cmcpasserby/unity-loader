@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func GetInstallFromPath(path string) (InstallInfo, error) {
@@ -12,7 +13,8 @@ func GetInstallFromPath(path string) (InstallInfo, error) {
 	if err != nil {
 		return InstallInfo{}, err
 	}
-	return InstallInfo{Path: path, Version: VersionFromString(string(result))}, nil
+	verString := strings.TrimSpace(string(result))
+	return InstallInfo{Path: path, Version: VersionFromString(verString)}, nil
 }
 
 func unityGlob(searchPath string) ([]string, error) {
@@ -20,6 +22,5 @@ func unityGlob(searchPath string) ([]string, error) {
 }
 
 func command(path string, args ...string) *exec.Cmd {
-	newArgs := append([]string{"", path}, args...)
-	return exec.Command("start", newArgs...)
+	return exec.Command(path, args...)
 }

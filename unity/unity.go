@@ -30,7 +30,7 @@ func (info *InstallInfo) RunWithTarget(project, target string) error {
 	} else {
 		app = exec.Command(info.Path, "-projectPath", absProject, "-buildTarget", target)
 	}
-	return app.Run()
+	return app.Start()
 }
 
 func (info *InstallInfo) String() string {

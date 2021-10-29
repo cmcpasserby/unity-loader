@@ -29,7 +29,12 @@ func createVersionCmd() *cobra.Command {
 				return err
 			}
 
-			_, err = unity.GetInstallFromVersion(version)
+			config, err := GetConfig()
+			if err != nil {
+				return err
+			}
+
+			_, err = unity.GetInstallFromVersion(version, config.SearchPaths...)
 			fmt.Printf("version: %q installed: %t\n", version, err == nil)
 
 			return nil

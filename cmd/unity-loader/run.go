@@ -84,6 +84,6 @@ func createRunCmd() *cobra.Command {
 }
 
 func runInstalledVersion(installInfo unity.InstallInfo, projectPath, target string) error {
-	fmt.Printf("Opening project %q in version %s\n", projectPath, installInfo.Version.String())
+	fmt.Printf("Opening project \"%s\" in version %s\n", projectPath, installInfo.Version.String())
 	return installInfo.RunWithTarget(projectPath, target)
 }
