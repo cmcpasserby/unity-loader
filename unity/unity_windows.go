@@ -3,6 +3,7 @@ package unity
 import (
 	"fmt"
 	"github.com/gonutz/w32/v2"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -11,12 +12,12 @@ import (
 func GetInstallFromPath(path string) (InstallInfo, error) {
 	size := w32.GetFileVersionInfoSize(path)
 	if size <= 0 {
-		return InstallInfo{}, fmt.Errorf("GetFUleVersionInfoSIzeFiaed")
+		return InstallInfo{}, fmt.Errorf("GetFileVersionInfoSize failed")
 	}
 
 	info := make([]byte, size)
-	if ok := w32.GetFileVersionInfo(path, info); !ok{
-		return InstallInfo{}, fmt.Errorf("GetFileVersionInfo Failed")
+	if ok := w32.GetFileVersionInfo(path, info); !ok {
+		return InstallInfo{}, fmt.Errorf("GetFileVersionInfo failed")
 	}
 
 	translations, ok := w32.VerQueryValueTranslations(info)
@@ -41,7 +42,17 @@ func GetInstallFromPath(path string) (InstallInfo, error) {
 }
 
 func unityGlob(searchPath string) ([]string, error) {
-	return filepath.Glob(fmt.Sprintf("%s/**/Editor/Unity.exe", searchPath))
+	items, err := filepath.Glob(filepath.Join(searchPath, "**/Editor/Unity.exe"))
+	if err != nil {
+		return nil, err
+	}
+
+	directPath := filepath.Join(searchPath, "Editor/Unity.exe")
+	if _, err = os.Stat(directPath); err == nil {
+		items = append(items, directPath)
+	}
+
+	return items, nil
 }
 
 func command(path string, args ...string) *exec.Cmd {
