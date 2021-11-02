@@ -1,7 +1,6 @@
 package unity
 
 import (
-	"fmt"
 	"howett.net/plist"
 	"os"
 	"os/exec"
@@ -30,7 +29,7 @@ func GetInstallFromPath(path string) (InstallInfo, error) {
 }
 
 func unityGlob(searchPath string) ([]string, error) {
-	return filepath.Glob(fmt.Sprintf("%s/**/Unity.app", searchPath))
+	return filepath.Glob(filepath.Join(searchPath, "**/Unity.app"))
 }
 
 func command(path string, args ...string) *exec.Cmd {
