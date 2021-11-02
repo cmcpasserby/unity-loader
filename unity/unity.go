@@ -40,7 +40,7 @@ func (info *InstallInfo) String() string {
 func GetVersionFromProject(path string) (string, error) {
 	versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
 	if _, err := os.Stat(versionFile); os.IsNotExist(err) {
-		return "", fmt.Errorf("%q is not a valid unity project\n", path)
+		return "", fmt.Errorf("\"%s\" is not a valid unity project\n", path)
 	}
 
 	file, err := os.Open(versionFile)

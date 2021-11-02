@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/BurntSushi/toml v0.4.1
+	github.com/gonutz/w32/v2 v2.2.2
 	github.com/spf13/cobra v1.2.1
 	howett.net/plist v0.0.0-20201203080718-1454fab16a06
 )
