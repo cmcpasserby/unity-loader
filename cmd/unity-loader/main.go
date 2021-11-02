@@ -5,18 +5,12 @@ import (
 	"os"
 )
 
-var ( // Global Flags
-	gFlagNoConfirm bool
-)
-
 func main() {
 	cmd := &cobra.Command{
 		Use:     "unity-loader",
 		Version: "3.0.0",
 		Short:   "Tool for loading unity projects with their respective unity versions and installing the proper version if required",
 	}
-
-	cmd.PersistentFlags().BoolVarP(&gFlagNoConfirm, "no-Confirm", "y", false, "removes confirmation prompts")
 
 	cmd.AddCommand(
 		createRunCmd(),
