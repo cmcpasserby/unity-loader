@@ -22,7 +22,6 @@ func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
 }
 
-
 // RunWithTarget launches this unity install with the given project and target
 func (info *InstallInfo) RunWithTarget(project, target string) error {
 	absProject, _ := filepath.Abs(project)

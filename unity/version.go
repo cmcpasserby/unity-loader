@@ -12,6 +12,7 @@ var (
 	releaseTypeSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
 )
 
+// VersionData represents a Unity version in a comparable format
 type VersionData struct {
 	Major   int
 	Minor   int
@@ -20,10 +21,12 @@ type VersionData struct {
 	Patch   int
 }
 
+// String outputs version in string format(major.minor.update verType patch)
 func (v *VersionData) String() string {
 	return fmt.Sprintf("%d.%d.%d%s%d", v.Major, v.Minor, v.Update, v.VerType, v.Patch)
 }
 
+// Compare comparison function for versions
 func (v VersionData) Compare(other VersionData) int {
 	if v.Major != other.Major {
 		return v.Major - other.Major
@@ -50,6 +53,7 @@ func (v VersionData) Compare(other VersionData) int {
 	return 0
 }
 
+// VersionFromString parses a string and returns a VersionData
 func VersionFromString(input string) VersionData {
 	separated := strings.Split(input, ".")
 
@@ -65,6 +69,7 @@ func VersionFromString(input string) VersionData {
 	return VersionData{major, minor, update, verType, patch}
 }
 
+// ExtendedVersionData extends VersionData with a RevisionHash
 type ExtendedVersionData struct {
 	VersionData
 	RevisionHash string
