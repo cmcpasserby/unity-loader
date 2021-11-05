@@ -5,10 +5,12 @@ import (
 	"os"
 )
 
+var version = "3.0.0" // left as a var so it can be updated via ldflags
+
 func main() {
 	cmd := &cobra.Command{
 		Use:     "unity-loader",
-		Version: "3.0.0",
+		Version: version,
 		Short:   "Tool for loading unity projects with their respective unity versions and installing the proper version if required",
 	}
 
