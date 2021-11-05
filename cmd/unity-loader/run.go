@@ -19,7 +19,7 @@ func createRunCmd() *cobra.Command {
 		Short: "Launches unity and opens the selected project",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			config, err := GetConfig()
+			config, err := getConfig()
 			if err != nil {
 				return err
 			}

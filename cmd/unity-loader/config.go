@@ -10,11 +10,11 @@ import (
 
 const configName = ".unity-loader"
 
-type Config struct {
+type config struct {
 	SearchPaths []string `toml:"search_paths"`
 }
 
-func GetConfig() (*Config, error) {
+func getConfig() (*config, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func GetConfig() (*Config, error) {
 	}
 	defer f.Close()
 
-	var config Config
+	var config config
 	if _, err := toml.DecodeReader(f, &config); err != nil {
 		return nil, err
 	}

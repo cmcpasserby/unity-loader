@@ -2,13 +2,13 @@ package unity
 
 import (
 	"fmt"
-	"github.com/gonutz/w32/v2"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
+// GetInstallFromPath returns an InstallInfo for a given path
 func GetInstallFromPath(path string) (InstallInfo, error) {
 	size := w32.GetFileVersionInfoSize(path)
 	if size <= 0 {

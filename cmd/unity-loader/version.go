@@ -29,7 +29,7 @@ func createVersionCmd() *cobra.Command {
 				return err
 			}
 
-			config, err := GetConfig()
+			config, err := getConfig()
 			if err != nil {
 				return err
 			}

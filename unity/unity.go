@@ -17,10 +17,13 @@ type InstallInfo struct {
 	Version VersionData
 }
 
+// Run launches this Unity install with a given project
 func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
 }
 
+
+// RunWithTarget launches this unity install with the given project and target
 func (info *InstallInfo) RunWithTarget(project, target string) error {
 	absProject, _ := filepath.Abs(project)
 
@@ -33,14 +36,16 @@ func (info *InstallInfo) RunWithTarget(project, target string) error {
 	return app.Start()
 }
 
+// String prints version and path for this InstallInfo
 func (info *InstallInfo) String() string {
 	return fmt.Sprintf("Version: %s Path: \"%s\"", info.Version.String(), info.Path)
 }
 
-func GetVersionFromProject(path string) (string, error) {
-	versionFile := filepath.Join(path, "ProjectSettings", "ProjectVersion.txt")
+// GetVersionFromProject finds the Unity version used in a given project path
+func GetVersionFromProject(projectPath string) (string, error) {
+	versionFile := filepath.Join(projectPath, "ProjectSettings", "ProjectVersion.txt")
 	if _, err := os.Stat(versionFile); os.IsNotExist(err) {
-		return "", fmt.Errorf("\"%s\" is not a valid unity project\n", path)
+		return "", fmt.Errorf("\"%s\" is not a valid unity project\n", projectPath)
 	}
 
 	file, err := os.Open(versionFile)
@@ -61,6 +66,7 @@ func GetVersionFromProject(path string) (string, error) {
 	return "", errors.New("invalid ProjectVersion.txt")
 }
 
+// GetInstalls lists all found Unity installs for a given set of search paths
 func GetInstalls(searchPaths ...string) ([]InstallInfo, error) {
 	installPaths := make([]string, 0)
 	for _, path := range searchPaths {
@@ -87,6 +93,7 @@ func GetInstalls(searchPaths ...string) ([]InstallInfo, error) {
 	return installs, nil
 }
 
+// GetInstallFromVersion tries to find the appropriate Unity install for a given version
 func GetInstallFromVersion(version string, searchPaths ...string) (InstallInfo, error) {
 	installs, err := GetInstalls(searchPaths...)
 	if err != nil {

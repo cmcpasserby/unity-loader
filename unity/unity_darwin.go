@@ -11,6 +11,7 @@ type appInfoDict struct {
 	CFBundleVersion string `plist:"CFBundleVersion"`
 }
 
+// GetInstallFromPath returns an InstallInfo for a given path
 func GetInstallFromPath(path string) (InstallInfo, error) {
 	plistPath := filepath.Join(path, "Contents/info.plist")
 	file, err := os.Open(plistPath)
