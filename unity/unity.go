@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// InstallInfo represents a runnable unity install
 type InstallInfo struct {
 	Path    string
 	Version VersionData
