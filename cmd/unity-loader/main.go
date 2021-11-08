@@ -11,7 +11,7 @@ func main() {
 	cmd := &cobra.Command{
 		Use:     "unity-loader",
 		Version: version,
-		Short:   "Tool for loading unity projects with their respective unity versions and installing the proper version if required",
+		Short:   "Tool for loading unity projects with their respective unity versions",
 	}
 
 	cmd.AddCommand(
