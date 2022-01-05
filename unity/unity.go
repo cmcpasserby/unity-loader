@@ -31,7 +31,7 @@ func (info *InstallInfo) RunWithTarget(project, target string) error {
 	if target == "" {
 		app = command(info.Path, "-projectPath", absProject)
 	} else {
-		app = exec.Command(info.Path, "-projectPath", absProject, "-buildTarget", target)
+		app = command(info.Path, "-projectPath", absProject, "-buildTarget", target)
 	}
 	return app.Start()
 }
