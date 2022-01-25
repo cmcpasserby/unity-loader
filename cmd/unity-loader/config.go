@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"io/fs"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -21,7 +23,7 @@ func getConfig() (*config, error) {
 	}
 
 	path := filepath.Join(usr.HomeDir, configName)
-	if _, err = os.Stat(path); os.IsNotExist(err) {
+	if _, err = os.Stat(path); errors.Is(err, fs.ErrNotExist) {
 		if err := os.WriteFile(path, configContents, 0644); err != nil {
 			return nil, err
 		}

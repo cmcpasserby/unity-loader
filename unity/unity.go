@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -44,7 +45,7 @@ func (info *InstallInfo) String() string {
 // GetVersionFromProject finds the Unity version used in a given project path
 func GetVersionFromProject(projectPath string) (string, error) {
 	versionFile := filepath.Join(projectPath, "ProjectSettings", "ProjectVersion.txt")
-	if _, err := os.Stat(versionFile); os.IsNotExist(err) {
+	if _, err := os.Stat(versionFile); errors.Is(err, fs.ErrNotExist) {
 		return "", fmt.Errorf("\"%s\" is not a valid unity project\n", projectPath)
 	}
 
