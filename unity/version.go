@@ -74,18 +74,3 @@ type ExtendedVersionData struct {
 	VersionData
 	RevisionHash string
 }
-
-// ByVersionSorter properly sorts versions numbers
-type ByVersionSorter []VersionData
-
-func (s ByVersionSorter) Len() int {
-	return len(s)
-}
-
-func (s ByVersionSorter) Less(i, j int) bool {
-	return s[i].Compare(s[j]) < 0
-}
-
-func (s ByVersionSorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}

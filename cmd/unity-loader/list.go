@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/spf13/cobra"
+	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
-func createListCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List all installed unity versions",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+func createListCmd() *ffcli.Command {
+	return &ffcli.Command{
+		Name:       "list",
+		ShortUsage: "list",
+		ShortHelp:  "List all installed unity versions",
+		LongHelp:   "List all installed unity versions",
+		Exec: func(ctx context.Context, args []string) error {
 			config, err := getConfig()
 			if err != nil {
 				return err
@@ -29,5 +31,4 @@ func createListCmd() *cobra.Command {
 			return nil
 		},
 	}
-	return cmd
 }

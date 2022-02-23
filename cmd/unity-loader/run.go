@@ -1,24 +1,31 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/spf13/cobra"
+	"github.com/peterbourgon/ff/v3/ffcli"
 	"os"
 	"path/filepath"
 )
 
-func createRunCmd() *cobra.Command {
-	var ( // local flags
-		lFlagForceVersion string
-		lFlagBuildTarget  string
-	)
+func createRunCmd() *ffcli.Command {
+	fs := flag.NewFlagSet("run", flag.ExitOnError)
+	forceVersionFlag := fs.String("force", "", "force project to be opened with a specific Unity version")
+	buildTargetFlag := fs.String("buildTarget", "", "opens project with a specific build target set")
 
-	cmd := &cobra.Command{
-		Use:   "run [projectDirectory]",
-		Short: "Launches unity and opens the selected project",
-		Args:  cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+	return &ffcli.Command{
+		Name:       "run",
+		ShortUsage: "unity-loader run [projectDirectory]",
+		ShortHelp:  "Launches unity and opens the selected project",
+		LongHelp:   "Launches unity and opens the selected project",
+		FlagSet:    fs,
+		Exec: func(ctx context.Context, args []string) error {
+			if len(args) > 1 {
+				return fmt.Errorf("accepts at most %d args(s), received %d", 1, len(args))
+			}
+
 			config, err := getConfig()
 			if err != nil {
 				return err
@@ -40,8 +47,8 @@ func createRunCmd() *cobra.Command {
 
 			var version string
 
-			if lFlagForceVersion != "" {
-				version = lFlagForceVersion
+			if *forceVersionFlag != "" {
+				version = *forceVersionFlag
 			} else {
 				version, err = unity.GetVersionFromProject(path)
 				if err != nil {
@@ -54,14 +61,9 @@ func createRunCmd() *cobra.Command {
 				return err
 			}
 
-			return runInstalledVersion(appInstall, expandedPath, lFlagBuildTarget)
+			return runInstalledVersion(appInstall, expandedPath, *buildTargetFlag)
 		},
 	}
-
-	cmd.Flags().StringVar(&lFlagForceVersion, "force", "", "force project to be opened with a specific Unity version")
-	cmd.Flags().StringVar(&lFlagBuildTarget, "buildTarget", "", "opens project with a specific build target set")
-
-	return cmd
 }
 
 func runInstalledVersion(installInfo unity.InstallInfo, projectPath, target string) error {

@@ -1,18 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/spf13/cobra"
+	"github.com/peterbourgon/ff/v3/ffcli"
 	"os"
 )
 
-func createVersionCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "version [projectDirectory]",
-		Short: "Check what version of unity a project is using",
-		Args:  cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+func createVersionCmd() *ffcli.Command {
+	return &ffcli.Command{
+		Name:       "version",
+		ShortUsage: "version [projectDirectory]",
+		ShortHelp:  "Check what version of unity a project is using",
+		LongHelp:   "Check what version of unity a project is using",
+		Exec: func(ctx context.Context, args []string) error {
 			var path string
 			if len(args) > 0 {
 				path = args[0]
@@ -40,5 +42,4 @@ func createVersionCmd() *cobra.Command {
 			return nil
 		},
 	}
-	return cmd
 }
