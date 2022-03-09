@@ -43,12 +43,15 @@ func createRunCmd() *ffcli.Command {
 				path = wd
 			}
 
-			expandedPath, _ := filepath.Abs(path)
+			expandedPath, err := filepath.Abs(path)
+			if err != nil {
+				return err
+			}
 
-			var version string
+			var version unity.VersionData
 
 			if *forceVersionFlag != "" {
-				version = *forceVersionFlag
+				version = unity.VersionFromString(*forceVersionFlag)
 			} else {
 				version, err = unity.GetVersionFromProject(path)
 				if err != nil {

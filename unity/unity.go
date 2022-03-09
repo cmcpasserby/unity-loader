@@ -1,7 +1,6 @@
 package unity
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -10,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 // InstallInfo represents a runnable unity install
@@ -19,7 +17,7 @@ type InstallInfo struct {
 	Version VersionData
 }
 
-// Run launches this Unity install with a given project
+// Run launches this Unity installs with a given project
 func (info *InstallInfo) Run(project string) error {
 	return info.RunWithTarget(project, "")
 }
@@ -43,28 +41,22 @@ func (info *InstallInfo) String() string {
 }
 
 // GetVersionFromProject finds the Unity version used in a given project path
-func GetVersionFromProject(projectPath string) (string, error) {
+func GetVersionFromProject(projectPath string) (VersionData, error) {
 	versionFile := filepath.Join(projectPath, "ProjectSettings", "ProjectVersion.txt")
-	if _, err := os.Stat(versionFile); errors.Is(err, fs.ErrNotExist) {
-		return "", fmt.Errorf("\"%s\" is not a valid unity project\n", projectPath)
-	}
-
 	file, err := os.Open(versionFile)
 	if err != nil {
-		return "", err
+		if errors.Is(err, fs.ErrNotExist) {
+			return VersionData{}, fmt.Errorf("\"%s\" is not a valid unity project\n", projectPath)
+		}
+		return VersionData{}, err
 	}
 	defer closeFile(file)
 
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
-
-	for scanner.Scan() {
-		text := scanner.Text()
-		if strings.HasPrefix(text, "m_EditorVersion:") {
-			return strings.TrimSpace(strings.Split(text, ":")[1]), nil
-		}
+	versionData, err := readProjectVersion(file)
+	if err != nil {
+		return VersionData{}, err
 	}
-	return "", errors.New("invalid ProjectVersion.txt")
+	return versionData, nil
 }
 
 // GetInstalls lists all found Unity installs for a given set of search paths
@@ -95,14 +87,14 @@ func GetInstalls(searchPaths ...string) ([]InstallInfo, error) {
 }
 
 // GetInstallFromVersion tries to find the appropriate Unity install for a given version
-func GetInstallFromVersion(version string, searchPaths ...string) (InstallInfo, error) {
+func GetInstallFromVersion(version VersionData, searchPaths ...string) (InstallInfo, error) {
 	installs, err := GetInstalls(searchPaths...)
 	if err != nil {
 		return InstallInfo{}, err
 	}
 
 	for _, install := range installs {
-		if version == install.Version.String() {
+		if install.Version.Compare(version) == 0 {
 			return install, nil
 		}
 	}

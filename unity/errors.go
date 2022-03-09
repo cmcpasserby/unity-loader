@@ -6,7 +6,7 @@ import (
 )
 
 type versionNotFoundError struct {
-	version string
+	version VersionData
 }
 
 func (err versionNotFoundError) Error() string {

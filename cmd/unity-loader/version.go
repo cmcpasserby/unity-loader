@@ -26,7 +26,7 @@ func createVersionCmd() *ffcli.Command {
 				path = wd
 			}
 
-			version, err := unity.GetVersionFromProject(path)
+			projectVersion, err := unity.GetVersionFromProject(path)
 			if err != nil {
 				return err
 			}
@@ -36,8 +36,8 @@ func createVersionCmd() *ffcli.Command {
 				return err
 			}
 
-			_, err = unity.GetInstallFromVersion(version, config.SearchPaths...)
-			fmt.Printf("version: %q installed: %t\n", version, err == nil)
+			_, err = unity.GetInstallFromVersion(projectVersion, config.SearchPaths...)
+			fmt.Printf("projectVersion: %q installed: %t\n", projectVersion, err == nil)
 
 			return nil
 		},

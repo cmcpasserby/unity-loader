@@ -1,32 +1,42 @@
 package unity
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 var (
-	verTypeRe       = regexp.MustCompile(`[pfba]`)
-	releaseTypeSort = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
+	verTypeRe               = regexp.MustCompile(`[pfba]`)
+	editorVersionRe         = regexp.MustCompile(`(\d+\.\d+\.\d+[pfba]\d+)`)
+	editorVersionRevisionRe = regexp.MustCompile(`(\d+\.\d+\.\d+[pfba]\d+) \(([0-9a-f]{12})\)`)
+	releaseTypeSort         = map[string]int{"p": 4, "f": 3, "b": 2, "a": 1}
 )
 
 // VersionData represents a Unity version in a comparable format
 type VersionData struct {
-	Major   int
-	Minor   int
-	Update  int
-	VerType string
-	Patch   int
+	Major        int
+	Minor        int
+	Update       int
+	VerType      string
+	Patch        int
+	RevisionHash string
 }
 
-// String outputs version in string format(major.minor.update verType patch)
-func (v *VersionData) String() string {
+func (v VersionData) HasRevisionHash() bool {
+	return v.RevisionHash != ""
+}
+
+// String outputs version in string format "major.minor.update verType patch"
+func (v VersionData) String() string {
 	return fmt.Sprintf("%d.%d.%d%s%d", v.Major, v.Minor, v.Update, v.VerType, v.Patch)
 }
 
-// Compare comparison function for versions
+// Compare comparison function for versions, ignores RevisionHash
 func (v VersionData) Compare(other VersionData) int {
 	if v.Major != other.Major {
 		return v.Major - other.Major
@@ -66,11 +76,32 @@ func VersionFromString(input string) VersionData {
 	verType := verTypeRe.FindString(separated[2])
 	patch, _ := strconv.Atoi(final[1])
 
-	return VersionData{major, minor, update, verType, patch}
+	return VersionData{Major: major, Minor: minor, Update: update, VerType: verType, Patch: patch}
 }
 
-// ExtendedVersionData extends VersionData with a RevisionHash
-type ExtendedVersionData struct {
-	VersionData
-	RevisionHash string
+func readProjectVersion(reader io.Reader) (VersionData, error) {
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanLines)
+
+	versionData := VersionData{}
+	found := false
+
+	for scanner.Scan() {
+		text := scanner.Text()
+		if strings.HasPrefix(text, "m_EditorVersion:") {
+			versionStr := editorVersionRe.FindString(text)
+			versionData = VersionFromString(versionStr)
+			found = true
+		} else if strings.HasPrefix(text, "m_EditorVersionWithRevision:") {
+			groups := editorVersionRevisionRe.FindStringSubmatch(text)
+			versionData = VersionFromString(groups[1])
+			versionData.RevisionHash = groups[2]
+			found = true
+		}
+	}
+
+	if !found {
+		return VersionData{}, errors.New("invalid ProjectVersion.txt")
+	}
+	return versionData, nil
 }
