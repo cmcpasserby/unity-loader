@@ -26,7 +26,7 @@ func createRunCmd() *ffcli.Command {
 				return fmt.Errorf("accepts at most %d args(s), received %d", 1, len(args))
 			}
 
-			config, err := getConfig()
+			cfg, err := getConfig()
 			if err != nil {
 				return err
 			}
@@ -48,18 +48,21 @@ func createRunCmd() *ffcli.Command {
 				return err
 			}
 
-			var version unity.VersionData
+			var ver unity.VersionData
 
 			if *forceVersionFlag != "" {
-				version = unity.VersionFromString(*forceVersionFlag)
+				ver, err = unity.VersionFromString(*forceVersionFlag)
+				if err != nil {
+					return err
+				}
 			} else {
-				version, err = unity.GetVersionFromProject(path)
+				ver, err = unity.GetVersionFromProject(path)
 				if err != nil {
 					return err
 				}
 			}
 
-			appInstall, err := unity.GetInstallFromVersion(version, config.SearchPaths...)
+			appInstall, err := unity.GetInstallFromVersion(ver, cfg.SearchPaths...)
 			if err != nil {
 				return err
 			}

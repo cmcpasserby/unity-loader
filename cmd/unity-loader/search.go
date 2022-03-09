@@ -14,6 +14,11 @@ func createSearchCmd() *ffcli.Command {
 		ShortHelp:  "Searches for a unity version on the archive site",
 		LongHelp:   "Search for a unity version on the archive site, partial numbers can be listed and all matches will be returned",
 		Exec: func(ctx context.Context, args []string) error {
+			argc := len(args)
+			if argc == 0 || argc > 1 {
+				return fmt.Errorf("search expected 1 argumenet got %d", argc)
+			}
+
 			results, err := unity.SearchArchive(args[0])
 			if err != nil {
 				return err

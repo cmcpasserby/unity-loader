@@ -25,7 +25,12 @@ func GetInstallFromPath(path string) (InstallInfo, error) {
 		return InstallInfo{}, err
 	}
 
-	installData := InstallInfo{Path: path, Version: VersionFromString(appInfo.CFBundleVersion)}
+	ver, err := VersionFromString(appInfo.CFBundleVersion)
+	if err != nil {
+		return InstallInfo{}, err
+	}
+
+	installData := InstallInfo{Path: path, Version: ver}
 	return installData, nil
 }
 

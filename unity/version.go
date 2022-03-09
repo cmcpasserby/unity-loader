@@ -63,20 +63,36 @@ func (v VersionData) Compare(other VersionData) int {
 	return 0
 }
 
+func convertSegments(parts ...string) ([]int, error) {
+	result := make([]int, len(parts))
+	for i, str := range parts {
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = num
+	}
+	return result, nil
+}
+
 // VersionFromString parses a string and returns a VersionData
-func VersionFromString(input string) VersionData {
+func VersionFromString(input string) (VersionData, error) {
 	separated := strings.Split(input, ".")
 
-	major, _ := strconv.Atoi(separated[0])
-	minor, _ := strconv.Atoi(separated[1])
+	majorMinor, err := convertSegments(separated[:2]...)
+	if err != nil {
+		return VersionData{}, fmt.Errorf("invalid version number format: %w", err)
+	}
 
 	final := verTypeRe.Split(separated[2], -1)
-
-	update, _ := strconv.Atoi(final[0])
 	verType := verTypeRe.FindString(separated[2])
-	patch, _ := strconv.Atoi(final[1])
 
-	return VersionData{Major: major, Minor: minor, Update: update, VerType: verType, Patch: patch}
+	updatePatch, err := convertSegments(final...)
+	if err != nil {
+		return VersionData{}, fmt.Errorf("invalid version number format: %w", err)
+	}
+
+	return VersionData{Major: majorMinor[0], Minor: majorMinor[1], Update: updatePatch[0], VerType: verType, Patch: updatePatch[1]}, nil
 }
 
 func readProjectVersion(reader io.Reader) (VersionData, error) {
@@ -84,17 +100,24 @@ func readProjectVersion(reader io.Reader) (VersionData, error) {
 	scanner.Split(bufio.ScanLines)
 
 	versionData := VersionData{}
+	var err error
 	found := false
 
 	for scanner.Scan() {
 		text := scanner.Text()
 		if strings.HasPrefix(text, "m_EditorVersion:") {
 			versionStr := editorVersionRe.FindString(text)
-			versionData = VersionFromString(versionStr)
+			versionData, err = VersionFromString(versionStr)
+			if err != nil {
+				return VersionData{}, err
+			}
 			found = true
 		} else if strings.HasPrefix(text, "m_EditorVersionWithRevision:") {
 			groups := editorVersionRevisionRe.FindStringSubmatch(text)
-			versionData = VersionFromString(groups[1])
+			versionData, err = VersionFromString(groups[1])
+			if err != nil {
+				return VersionData{}, err
+			}
 			versionData.RevisionHash = groups[2]
 			found = true
 		}

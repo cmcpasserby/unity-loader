@@ -27,7 +27,10 @@ func GetAllVersions() ([]VersionData, error) {
 	versions := make([]VersionData, len(matches))
 
 	for i, m := range matches {
-		versions[i] = VersionFromString(string(m[1]))
+		versions[i], err = VersionFromString(string(m[1]))
+		if err != nil {
+			return nil, err
+		}
 		versions[i].RevisionHash = string(m[2])
 	}
 
@@ -49,6 +52,3 @@ func SearchArchive(partialVersion string) ([]VersionData, error) {
 
 	return results, nil
 }
-
-// func InstallUnity(data VersionData) (InstallInfo, error) {
-// }
