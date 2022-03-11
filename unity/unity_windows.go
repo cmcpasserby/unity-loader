@@ -9,8 +9,7 @@ import (
 	"strings"
 )
 
-// GetInstallFromPath returns an InstallInfo for a given path
-func GetInstallFromPath(path string) (InstallInfo, error) {
+func getFromInstallPathInternal(path string) (InstallInfo, error) {
 	size := w32.GetFileVersionInfoSize(path)
 	if size <= 0 {
 		return InstallInfo{}, fmt.Errorf("GetFileVersionInfoSize failed")
@@ -58,4 +57,8 @@ func unityGlob(searchPath string) ([]string, error) {
 
 func command(path string, args ...string) *exec.Cmd {
 	return exec.Command(path, args...)
+}
+
+func binFromApp(path string) (string, error) {
+	return path, nil
 }

@@ -57,7 +57,7 @@ func (v VersionData) Compare(other VersionData) int {
 	}
 
 	if v.Patch != other.Patch {
-		return v.Patch - v.Patch
+		return v.Patch - other.Patch
 	}
 
 	return 0

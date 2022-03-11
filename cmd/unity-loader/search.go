@@ -25,7 +25,7 @@ func createSearchCmd() *ffcli.Command {
 			}
 
 			for _, ver := range results {
-				fmt.Printf("%s, (%s)\n", ver.String(), ver.RevisionHash)
+				fmt.Printf("%s (%s)\n", ver.String(), ver.RevisionHash)
 			}
 			return nil
 		},

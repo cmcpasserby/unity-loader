@@ -40,13 +40,18 @@ func (info *InstallInfo) String() string {
 	return fmt.Sprintf("Version: %s Path: \"%s\"", info.Version.String(), info.Path)
 }
 
+// GetInstallFromPath returns an InstallInfo for a given path
+func GetInstallFromPath(path string) (InstallInfo, error) {
+	return getFromInstallPathInternal(path)
+}
+
 // GetVersionFromProject finds the Unity version used in a given project path
 func GetVersionFromProject(projectPath string) (VersionData, error) {
 	versionFile := filepath.Join(projectPath, "ProjectSettings", "ProjectVersion.txt")
 	file, err := os.Open(versionFile)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return VersionData{}, fmt.Errorf("\"%s\" is not a valid unity project\n", projectPath)
+			return VersionData{}, fmt.Errorf("\"%s\" is not a valid unity project", projectPath)
 		}
 		return VersionData{}, err
 	}

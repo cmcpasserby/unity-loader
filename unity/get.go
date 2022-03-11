@@ -3,16 +3,18 @@ package unity
 import (
 	"io"
 	"net/http"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 )
 
-const archiveUrl = "https://unity3d.com/get-unity/download/archive"
+const archiveURL = "https://unity3d.com/get-unity/download/archive"
 
-var hubUrlRe = regexp.MustCompile(`unityhub://(\d+\.\d+\.\d+[pfba]\d+)/([0-9a-f]{12})`)
+var hubURLRe = regexp.MustCompile(`unityhub://(\d+\.\d+\.\d+[pfba]\d+)/([0-9a-f]{12})`)
 
 func GetAllVersions() ([]VersionData, error) {
-	resp, err := http.Get(archiveUrl)
+	resp, err := http.Get(archiveURL)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +25,7 @@ func GetAllVersions() ([]VersionData, error) {
 		return nil, err
 	}
 
-	matches := hubUrlRe.FindAllSubmatch(body, -1)
+	matches := hubURLRe.FindAllSubmatch(body, -1)
 	versions := make([]VersionData, len(matches))
 
 	for i, m := range matches {
@@ -51,4 +53,26 @@ func SearchArchive(partialVersion string) ([]VersionData, error) {
 	}
 
 	return results, nil
+}
+
+func InstallFromArchive(ver VersionData, hubPath string, modules, searchPaths []string) (InstallInfo, error) {
+	hubPath, err := binFromApp(hubPath) // TODO: only needed for macos
+	if err != nil {
+		return InstallInfo{}, err
+	}
+
+	args := []string{"--", "--headless", "-v", ver.String(), "--changeset", ver.RevisionHash}
+	for _, mod := range modules {
+		args = append(args, "-m", mod)
+	}
+
+	cmd := exec.Command(hubPath, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err = cmd.Run(); err != nil {
+		return InstallInfo{}, err
+	}
+
+	return GetInstallFromVersion(ver, searchPaths...)
 }

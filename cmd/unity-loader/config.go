@@ -19,8 +19,9 @@ const (
 )
 
 type config struct {
-	UnityHubPath string   `toml:"unity_hub_path"`
-	SearchPaths  []string `toml:"search_paths"`
+	UnityHubPath   string   `toml:"unity_hub_path"`
+	SearchPaths    []string `toml:"search_paths"`
+	DefaultModules []string `toml:"default_modules"`
 }
 
 func getConfig() (*config, error) {
@@ -35,9 +36,8 @@ func getConfig() (*config, error) {
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return createConfig(path)
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 	defer f.Close()
 
@@ -60,8 +60,7 @@ func createConfig(path string) (*config, error) {
 		return nil, err
 	}
 
-	_, _ = fmt.Fprintln(f, configComment)
-	_, _ = fmt.Fprintln(f)
+	_, _ = fmt.Fprintf(f, "%s\n\n", configComment)
 
 	err = toml.NewEncoder(f).Encode(*defaultConfig)
 	if err != nil {

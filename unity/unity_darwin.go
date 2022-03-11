@@ -8,12 +8,12 @@ import (
 )
 
 type appInfoDict struct {
-	CFBundleVersion string `plist:"CFBundleVersion"`
+	CFBundleExecutable string `plist:"CFBundleExecutable"`
+	CFBundleVersion    string `plist:"CFBundleVersion"`
 }
 
-// GetInstallFromPath returns an InstallInfo for a given path
-func GetInstallFromPath(path string) (InstallInfo, error) {
-	plistPath := filepath.Join(path, "Contents/info.plist")
+func getFromInstallPathInternal(path string) (InstallInfo, error) {
+	plistPath := filepath.Join(path, "Contents", "Info.plist")
 	file, err := os.Open(plistPath)
 	if err != nil {
 		return InstallInfo{}, err
@@ -39,6 +39,22 @@ func unityGlob(searchPath string) ([]string, error) {
 }
 
 func command(path string, args ...string) *exec.Cmd {
-	newArgs := append([]string{"-a", path, "-n", "--args"}, args...)
+	newArgs := append([]string{path, "-W", "-n", "--args"}, args...)
 	return exec.Command("open", newArgs...)
+}
+
+func binFromApp(path string) (string, error) {
+	plistPath := filepath.Join(path, "Contents", "Info.plist")
+	file, err := os.Open(plistPath)
+	if err != nil {
+		return "", err
+	}
+	defer closeFile(file)
+
+	var appInfo appInfoDict
+	if err = plist.NewDecoder(file).Decode(&appInfo); err != nil {
+		return "", err
+	}
+
+	return filepath.Join(path, "Contents", "MacOS", appInfo.CFBundleExecutable), nil
 }
