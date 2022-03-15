@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
@@ -12,11 +13,11 @@ import (
 )
 
 const (
-	configName    = ".unity-loader"
-	configComment = `# unity-loader config
-#
-# Multiple search paths can be defined, will search unity hubs default path if not defined`
+	configName = ".unity-loader"
 )
+
+//go:embed config_header.toml
+var configHeader string
 
 type config struct {
 	UnityHubPath   string   `toml:"unity_hub_path"`
@@ -60,7 +61,7 @@ func createConfig(path string) (*config, error) {
 		return nil, err
 	}
 
-	_, _ = fmt.Fprintf(f, "%s\n\n", configComment)
+	_, _ = fmt.Fprintf(f, "%s\n", configHeader)
 
 	err = toml.NewEncoder(f).Encode(*defaultConfig)
 	if err != nil {

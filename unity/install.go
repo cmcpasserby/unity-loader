@@ -56,7 +56,7 @@ func SearchArchive(partialVersion string) ([]VersionData, error) {
 }
 
 func InstallFromArchive(ver VersionData, hubPath string, modules, searchPaths []string) (InstallInfo, error) {
-	hubPath, err := binFromApp(hubPath) // TODO: only needed for macos
+	hubPath, err := binFromApp(hubPath)
 	if err != nil {
 		return InstallInfo{}, err
 	}

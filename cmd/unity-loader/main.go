@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var version = "3.0.0" // left as a var so it can be updated via ldflags
+var version = "3.0.1" // left as a var so it can be updated via ldflags when built from action
 
 func main() {
 	fs := flag.NewFlagSet("root", flag.ExitOnError)
