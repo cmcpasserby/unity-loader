@@ -5,11 +5,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/cmcpasserby/verinfo"
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"os"
 )
-
-var version = "3.0.1" // left as a var so it can be updated via ldflags when built from action
 
 func main() {
 	fs := flag.NewFlagSet("root", flag.ExitOnError)
@@ -33,7 +32,12 @@ func main() {
 				return flag.ErrHelp
 			}
 
-			fmt.Printf("unity-loader version %s\n", version)
+			info, err := verinfo.Get()
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("unity-loader version %s (%s)\n", info.Version, info.Revision)
 			return nil
 		},
 	}
