@@ -35,10 +35,15 @@ func getFromInstallPathInternal(path string) (InstallInfo, error) {
 		return InstallInfo{}, fmt.Errorf("cannot get company name")
 	}
 
-	ver := strings.Split(productVersion, "_")[0]
-	ver = strings.TrimSpace(ver)
+	verString := strings.Split(productVersion, "_")[0]
+	verString = strings.TrimSpace(verString)
 
-	return InstallInfo{Path: path, Version: VersionFromString(ver)}, nil
+	ver, err := VersionFromString(verString)
+	if err != nil {
+		return InstallInfo{}, err
+	}
+
+	return InstallInfo{Path: path, Version: ver}, nil
 }
 
 func unityGlob(searchPath string) ([]string, error) {
