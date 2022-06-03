@@ -7,13 +7,12 @@ import (
 	"github.com/BurntSushi/toml"
 	"io/fs"
 	"os"
-	"os/user"
 	"path/filepath"
 	"runtime"
 )
 
 const (
-	configName = ".unity-loader"
+	configName = "config.toml"
 )
 
 //go:embed config_header.toml
@@ -26,12 +25,12 @@ type config struct {
 }
 
 func getConfig() (*config, error) {
-	usr, err := user.Current()
+	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return nil, err
 	}
 
-	path := filepath.Join(usr.HomeDir, configName)
+	path := filepath.Join(configDir, "unity-loader", configName)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -43,7 +42,7 @@ func getConfig() (*config, error) {
 	defer f.Close()
 
 	var config config
-	if _, err := toml.DecodeReader(f, &config); err != nil {
+	if _, err := toml.NewDecoder(f).Decode(&config); err != nil {
 		return nil, err
 	}
 
@@ -53,6 +52,10 @@ func getConfig() (*config, error) {
 func createConfig(path string) (*config, error) {
 	defaultConfig, err := getDefault()
 	if err != nil {
+		return nil, err
+	}
+
+	if err = os.MkdirAll(filepath.Dir(path), 0750); err != nil {
 		return nil, err
 	}
 
