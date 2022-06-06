@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	configName = "config.toml"
+	configFolderName = "unity-loader"
+	configFileName   = "config.toml"
 )
 
 //go:embed config_header.toml
@@ -30,7 +31,7 @@ func getConfig() (*config, error) {
 		return nil, err
 	}
 
-	path := filepath.Join(configDir, "unity-loader", configName)
+	path := filepath.Join(configDir, configFolderName, configFileName)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -50,6 +51,8 @@ func getConfig() (*config, error) {
 }
 
 func createConfig(path string) (*config, error) {
+	fmt.Printf("no config found, creating default config in \"%s\"\n", path)
+
 	defaultConfig, err := getDefault()
 	if err != nil {
 		return nil, err
