@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 )
@@ -26,13 +25,12 @@ func (info *InstallInfo) Run(project string) error {
 func (info *InstallInfo) RunWithTarget(project, target string) error {
 	absProject, _ := filepath.Abs(project)
 
-	var app *exec.Cmd
-	if target == "" {
-		app = command(info.Path, "-projectPath", absProject)
-	} else {
-		app = command(info.Path, "-projectPath", absProject, "-buildTarget", target)
+	args := []string{"-projectPath", absProject}
+	if target != "" {
+		args = append(args, "-buildTarget", target)
 	}
-	return app.Start()
+
+	return command(info.Path, args...).Start()
 }
 
 // String prints version and path for this InstallInfo
