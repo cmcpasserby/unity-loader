@@ -24,8 +24,8 @@ func main() {
 			createRunCmd(),
 			createVersionCmd(),
 			createListCmd(),
-			createSearchCmd(),
-			createInstallCmd(),
+			// createSearchCmd(),
+			// createInstallCmd(),
 		},
 		Exec: func(ctx context.Context, args []string) error {
 			if !*versionFlag {
