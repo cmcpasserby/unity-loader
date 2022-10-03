@@ -5,8 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/verinfo"
-	"github.com/peterbourgon/ff/v3/ffcli"
 	"os"
 )
 
@@ -14,13 +14,13 @@ func main() {
 	fs := flag.NewFlagSet("root", flag.ExitOnError)
 	versionFlag := fs.Bool("v", false, "prints unity-loader's version")
 
-	cmd := &ffcli.Command{
-		Name:       "unity-loader",
-		ShortUsage: "unity-loader <subcommand>",
-		ShortHelp:  "Tool for loading unity projects with their respective unity versions",
-		LongHelp:   "Tool for loading unity projects with their respective unity versions",
-		FlagSet:    fs,
-		Subcommands: []*ffcli.Command{
+	cmd := &scli.Command{
+		Usage:         "unity-loader <subcommand>",
+		ShortHelp:     "Tool for loading unity projects with their respective unity versions",
+		LongHelp:      "Tool for loading unity projects with their respective unity versions",
+		FlagSet:       fs,
+		ArgsValidator: scli.NoArgs,
+		Subcommands: []*scli.Command{
 			createRunCmd(),
 			createVersionCmd(),
 			createListCmd(),

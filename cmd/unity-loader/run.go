@@ -4,28 +4,24 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/peterbourgon/ff/v3/ffcli"
 	"os"
 	"path/filepath"
 )
 
-func createRunCmd() *ffcli.Command {
+func createRunCmd() *scli.Command {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	forceVersionFlag := fs.String("force", "", "force project to be opened with a specific Unity version")
 	buildTargetFlag := fs.String("buildTarget", "", "opens project with a specific build target set")
 
-	return &ffcli.Command{
-		Name:       "run",
-		ShortUsage: "unity-loader run [projectDirectory]",
-		ShortHelp:  "Launches unity and opens the selected project",
-		LongHelp:   "Launches unity and opens the selected project",
-		FlagSet:    fs,
+	return &scli.Command{
+		Usage:         "run [projectDirectory]",
+		ShortHelp:     "Launches unity and opens the selected project",
+		LongHelp:      "Launches unity and opens the selected project",
+		FlagSet:       fs,
+		ArgsValidator: scli.MaxArgs(1),
 		Exec: func(ctx context.Context, args []string) error {
-			if len(args) > 1 {
-				return fmt.Errorf("accepts at most %d args(s), received %d", 1, len(args))
-			}
-
 			cfg, err := getConfig()
 			if err != nil {
 				return err

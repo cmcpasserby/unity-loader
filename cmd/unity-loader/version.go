@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/peterbourgon/ff/v3/ffcli"
 	"os"
 )
 
-func createVersionCmd() *ffcli.Command {
-	return &ffcli.Command{
-		Name:       "version",
-		ShortUsage: "version [projectDirectory]",
-		ShortHelp:  "Check what version of unity a project is using",
-		LongHelp:   "Check what version of unity a project is using",
+func createVersionCmd() *scli.Command {
+	return &scli.Command{
+		Usage:         "version [projectDirectory]",
+		ShortHelp:     "Check what version of unity a project is using",
+		LongHelp:      "Check what version of unity a project is using",
+		ArgsValidator: scli.MaxArgs(1),
 		Exec: func(ctx context.Context, args []string) error {
 			var path string
 			if len(args) > 0 {

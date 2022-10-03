@@ -4,27 +4,22 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/peterbourgon/ff/v3/ffcli"
 	"strings"
 )
 
-func createInstallCmd() *ffcli.Command {
+func createInstallCmd() *scli.Command {
 	fs := flag.NewFlagSet("install", flag.ExitOnError)
 	modulesFlag := fs.String("modules", "", "module overrides")
 
-	return &ffcli.Command{
-		Name:       "install",
-		ShortUsage: "unity-loader install [version] [versionHash]",
-		ShortHelp:  "Installs a Unity version.",
-		LongHelp:   "Installs a Unity version.",
-		FlagSet:    fs,
+	return &scli.Command{
+		Usage:         "unity-loader install [version] [versionHash]",
+		ShortHelp:     "Installs a Unity version.",
+		LongHelp:      "Installs a Unity version.",
+		FlagSet:       fs,
+		ArgsValidator: scli.RangeArgs(1, 2),
 		Exec: func(ctx context.Context, args []string) error {
-			argc := len(args)
-			if argc == 0 || argc > 2 {
-				return fmt.Errorf("install expected 1 or 2 arguments got %d", argc)
-			}
-
 			cfg, err := getConfig()
 			if err != nil {
 				return err
@@ -32,7 +27,7 @@ func createInstallCmd() *ffcli.Command {
 
 			var ver unity.VersionData
 
-			if argc == 2 {
+			if len(args) == 2 {
 				ver, err = unity.VersionFromString(args[0])
 				if err != nil {
 					return err

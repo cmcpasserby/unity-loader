@@ -3,22 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
-func createSearchCmd() *ffcli.Command {
-	return &ffcli.Command{
-		Name:       "search",
-		ShortUsage: "unity-loader search [partialVersion]",
-		ShortHelp:  "Searches for a unity version on the archive site",
-		LongHelp:   "Search for a unity version on the archive site, partial numbers can be listed and all matches will be returned",
+func createSearchCmd() *scli.Command {
+	return &scli.Command{
+		Usage:         "unity-loader search [partialVersion]",
+		ShortHelp:     "Searches for a unity version on the archive site",
+		LongHelp:      "Search for a unity version on the archive site, partial numbers can be listed and all matches will be returned",
+		ArgsValidator: scli.ExactArgs(1),
 		Exec: func(ctx context.Context, args []string) error {
-			argc := len(args)
-			if argc == 0 || argc > 1 {
-				return fmt.Errorf("search expected 1 argumenet got %d", argc)
-			}
-
 			results, err := unity.SearchArchive(args[0])
 			if err != nil {
 				return err

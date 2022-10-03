@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
-func createListCmd() *ffcli.Command {
-	return &ffcli.Command{
-		Name:       "list",
-		ShortUsage: "list",
-		ShortHelp:  "List all installed unity versions",
-		LongHelp:   "List all installed unity versions",
+func createListCmd() *scli.Command {
+	return &scli.Command{
+		Usage:         "list",
+		ShortHelp:     "List all installed unity versions",
+		LongHelp:      "List all installed unity versions",
+		ArgsValidator: scli.NoArgs,
 		Exec: func(ctx context.Context, args []string) error {
 			config, err := getConfig()
 			if err != nil {
