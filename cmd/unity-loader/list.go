@@ -12,7 +12,7 @@ func createListCmd() *scli.Command {
 		Usage:         "list",
 		ShortHelp:     "List all installed unity versions",
 		LongHelp:      "List all installed unity versions",
-		ArgsValidator: scli.NoArgs,
+		ArgsValidator: scli.NoArgs(),
 		Exec: func(ctx context.Context, args []string) error {
 			config, err := getConfig()
 			if err != nil {

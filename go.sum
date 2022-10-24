@@ -6,6 +6,8 @@ github.com/cmcpasserby/scli v0.1.0 h1:61Tq5QUrDowcYumklx2Ehi0VOLun8enjYFVVNj3AWz
 github.com/cmcpasserby/scli v0.1.0/go.mod h1:jxUstNDqmFe8lXasSiRoxD2XCekJqCswsuM+RV7N3mY=
 github.com/cmcpasserby/scli v0.1.2 h1:jRlUZj7qJWnmpR+nob01SdKYEuxFHF4VVwH+n0PcEmg=
 github.com/cmcpasserby/scli v0.1.2/go.mod h1:jxUstNDqmFe8lXasSiRoxD2XCekJqCswsuM+RV7N3mY=
+github.com/cmcpasserby/scli v0.2.0 h1:Bcu/ierVT+jTbU6BsFA/BicB/GsXXLig4/+cCosbJgU=
+github.com/cmcpasserby/scli v0.2.0/go.mod h1:jxUstNDqmFe8lXasSiRoxD2XCekJqCswsuM+RV7N3mY=
 github.com/cmcpasserby/verinfo v1.0.0 h1:JchOew03E+h1IgL83iM0mQg9tmcxuakwlGNW1ci7PzY=
 github.com/cmcpasserby/verinfo v1.0.0/go.mod h1:LIpNiIv7K4LgRJ5vLEJ7TS8l5Vx+uJsnQ51CAvOCQsU=
 github.com/gonutz/w32/v2 v2.5.0 h1:jrVn1waNTiYzbbbJIu8+CCl87t6LkTvRTJ5wAe5wwPg=

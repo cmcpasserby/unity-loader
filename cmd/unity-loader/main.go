@@ -19,7 +19,7 @@ func main() {
 		ShortHelp:     "Tool for loading unity projects with their respective unity versions",
 		LongHelp:      "Tool for loading unity projects with their respective unity versions",
 		FlagSet:       fs,
-		ArgsValidator: scli.NoArgs,
+		ArgsValidator: scli.NoArgs(),
 		Subcommands: []*scli.Command{
 			createRunCmd(),
 			createVersionCmd(),
