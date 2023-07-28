@@ -32,7 +32,7 @@ func (info *InstallInfo) RunWithTarget(project, target string) error {
 	}
 
 	err := godotenv.Load()
-	if err != nil {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 
