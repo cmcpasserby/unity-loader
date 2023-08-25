@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
+	"github.com/joho/godotenv"
 	"os"
 	"path/filepath"
 )
@@ -14,6 +16,8 @@ func createRunCmd() *scli.Command {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	forceVersionFlag := fs.String("force", "", "force project to be opened with a specific Unity version")
 	buildTargetFlag := fs.String("buildTarget", "", "opens project with a specific build target set")
+	overloadEnvFlag := fs.Bool("overloadEnv", false, "should pre-existing env vars be overwritten but dotenv file")
+	noEnvFlag := fs.Bool("noEnv", false, "prevents loading or overloading of dotenv file and applying it to the environment")
 
 	return &scli.Command{
 		Usage:         "run [projectDirectory]",
@@ -63,9 +67,28 @@ func createRunCmd() *scli.Command {
 				return err
 			}
 
+			if !*noEnvFlag {
+				if err = loadEnv(*overloadEnvFlag); err != nil {
+					return err
+				}
+			}
+
 			return runInstalledVersion(appInstall, expandedPath, *buildTargetFlag)
 		},
 	}
+}
+
+func loadEnv(overload bool) error {
+	f := godotenv.Load
+	if overload {
+		f = godotenv.Overload
+	}
+
+	if err := f(); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	return nil
 }
 
 func runInstalledVersion(installInfo unity.InstallInfo, projectPath, target string) error {

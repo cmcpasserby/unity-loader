@@ -3,7 +3,6 @@ package unity
 import (
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
 	"io/fs"
 	"log"
 	"os"
@@ -29,11 +28,6 @@ func (info *InstallInfo) RunWithTarget(project, target string) error {
 	args := []string{"-projectPath", absProject}
 	if target != "" {
 		args = append(args, "-buildTarget", target)
-	}
-
-	err := godotenv.Load()
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return err
 	}
 
 	return command(info.Path, args...).Start()
