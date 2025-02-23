@@ -11,12 +11,12 @@ func binFromApp(path string) (string, error) {
 }
 
 func unityGlob(searchPath string) ([]string, error) {
-	items, err := filepath.Glob(filepath.Join(searchPath, "**/Editor/Unity.exe"))
+	items, err := filepath.Glob(filepath.Join(searchPath, "**/Editor/Unity"))
 	if err != nil {
 		return nil, err
 	}
 
-	directPath := filepath.Join(searchPath, "Editor/Unity.exe")
+	directPath := filepath.Join(searchPath, "Editor/Unity")
 	if _, err = os.Stat(directPath); err == nil {
 		items = append(items, directPath)
 	}

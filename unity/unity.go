@@ -1,6 +1,7 @@
 package unity
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -40,7 +41,21 @@ func (info *InstallInfo) String() string {
 
 // GetInstallFromPath returns an InstallInfo for a given path
 func GetInstallFromPath(path string) (InstallInfo, error) {
-	return getFromInstallPathInternal(path)
+	cmd := command(path, "-version")
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return InstallInfo{}, err
+	}
+
+	output = bytes.TrimSpace(output)
+
+	ver, err := VersionFromString(string(output))
+	if err != nil {
+		return InstallInfo{}, err
+	}
+
+	return InstallInfo{Path: path, Version: ver}, nil
 }
 
 // GetVersionFromProject finds the Unity version used in a given project path

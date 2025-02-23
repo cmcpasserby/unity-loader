@@ -1,21 +1,3 @@
 # unity-loader config
 #
 # Multiple search paths can be defined, will search unity hubs default path if not defined.
-# Modules options:
-#     Android Build Support: android
-#     Android SDK & NDK Tools: android-sdk-ndk-tools
-#     OpenJDK: android-open-jdk
-#     Visual Studio for Mac: visualstudio
-#     iOS Build Support: ios
-#     tvOS Build Support: appletv
-#     Linux Build Support: linux
-#     Linux Build Support (Mono): linux-mono
-#     Linux Build Support (IL2CPP): linux-il2cpp
-#     Mac Build Support (IL2CPP): mac-il2cpp
-#     Windows Build Support (Mono): windows-mono
-#     WebGL Build Support: webgl
-#     Lumin OS (Magic Leap) Build Support: lumin
-#     Facebook Gameroom Build Support: facebook-games
-#     Vuforia Augmented Reality Support: vuforia-ar
-#     Documentation: documentation
-#     Language packs: language-ja, language-ko, language-zh-cn, language-zh-hant, language-zh-hans

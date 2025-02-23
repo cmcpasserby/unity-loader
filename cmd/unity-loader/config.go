@@ -89,6 +89,16 @@ func getDefault() (*config, error) {
 			UnityHubPath: "C:/Program Files/Unity Hub/Unity Hub.exe",
 			SearchPaths:  []string{"C:/Program Files/Unity/Hub/Editor"},
 		}, nil
+	case "linux":
+		homePath, err := os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+
+		return &config{
+			UnityHubPath: "/usr/bin/unityhub",
+			SearchPaths:  []string{filepath.Join(homePath, "Unity", "Hub", "Editor")},
+		}, nil
 	default:
 		return nil, fmt.Errorf("no default config for GOOS: %s", runtime.GOOS)
 	}
