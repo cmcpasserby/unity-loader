@@ -5,9 +5,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/verinfo"
-	"os"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 			createRunCmd(),
 			createVersionCmd(),
 			createListCmd(),
+			createServeCmd(),
 			// createSearchCmd(),
 			// createInstallCmd(),
 		},
