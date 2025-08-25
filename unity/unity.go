@@ -19,19 +19,20 @@ type InstallInfo struct {
 
 // Run launches this Unity installs with a given project
 func (info *InstallInfo) Run(project string) error {
-	return info.RunWithTarget(project, "")
+	absProject, _ := filepath.Abs(project)
+	return command(info.Path, "-projectPath", absProject).Start()
 }
 
 // RunWithTarget launches this unity install with the given project and target
-func (info *InstallInfo) RunWithTarget(project, target string) error {
+func (info *InstallInfo) RunWithTarget(project, buildTarget string) error {
 	absProject, _ := filepath.Abs(project)
+	return command(info.Path, "-projectPath", absProject, "-buildTarget", buildTarget).Start()
+}
 
-	args := []string{"-projectPath", absProject}
-	if target != "" {
-		args = append(args, "-buildTarget", target)
-	}
-
-	return command(info.Path, args...).Start()
+// RunWithProfile launches this unity install with the given project and build profile
+func (info *InstallInfo) RunWithProfile(project, buildProfile string) error {
+	absProject, _ := filepath.Abs(project)
+	return command(info.Path, "-projectPath", absProject, "-activeBuildProfile", buildProfile).Start()
 }
 
 // String prints version and path for this InstallInfo

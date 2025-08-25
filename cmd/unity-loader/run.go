@@ -17,6 +17,7 @@ func createRunCmd() *scli.Command {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	forceVersionFlag := fs.String("force", "", "force project to be opened with a specific Unity version")
 	buildTargetFlag := fs.String("buildTarget", "", "opens project with a specific build target set")
+	buildProfileFlag := fs.String("buildProfile", "", "opens project with a specific build profile set")
 	overloadEnvFlag := fs.Bool("overloadEnv", false, "should pre-existing env vars be overwritten but dotenv file")
 	noEnvFlag := fs.Bool("noEnv", false, "prevents loading or overloading of dotenv file and applying it to the environment")
 
@@ -74,7 +75,19 @@ func createRunCmd() *scli.Command {
 				}
 			}
 
-			return runInstalledVersion(appInstall, expandedPath, *buildTargetFlag)
+			if *buildProfileFlag != "" {
+				fmt.Printf("Opening project \"%s\" in version %s\n", expandedPath, appInstall.Version.String())
+				buildProfilePath := buildProfileNameToPath(*buildProfileFlag)
+				return appInstall.RunWithProfile(expandedPath, buildProfilePath)
+			}
+
+			if *buildTargetFlag != "" {
+				fmt.Printf("Opening project \"%s\" in version %s\n", expandedPath, appInstall.Version.String())
+				return appInstall.RunWithTarget(expandedPath, *buildTargetFlag)
+			}
+
+			fmt.Printf("Opening project \"%s\" in version %s\n", expandedPath, appInstall.Version.String())
+			return appInstall.Run(expandedPath)
 		},
 	}
 }
@@ -92,7 +105,8 @@ func loadEnv(overload bool) error {
 	return nil
 }
 
-func runInstalledVersion(installInfo unity.InstallInfo, projectPath, target string) error {
-	fmt.Printf("Opening project \"%s\" in version %s\n", projectPath, installInfo.Version.String())
-	return installInfo.RunWithTarget(projectPath, target)
+func buildProfileNameToPath(profileName string) string {
+	const profilesPathRelative = "Assets/Settings/Build Profiles"
+	profilePath := filepath.Join(profilesPathRelative, fmt.Sprintf("%s.asset", profileName))
+	return profilePath
 }
