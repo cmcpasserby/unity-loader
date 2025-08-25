@@ -4,9 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"strings"
+
 	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
-	"strings"
 )
 
 func createInstallCmd() *scli.Command {

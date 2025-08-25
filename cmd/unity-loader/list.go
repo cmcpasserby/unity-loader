@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
 )

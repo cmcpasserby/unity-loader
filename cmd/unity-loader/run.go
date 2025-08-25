@@ -5,11 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/unity-loader/unity"
 	"github.com/joho/godotenv"
-	"os"
-	"path/filepath"
 )
 
 func createRunCmd() *scli.Command {

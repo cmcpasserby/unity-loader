@@ -5,9 +5,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/cmcpasserby/scli"
 	"github.com/cmcpasserby/verinfo"
-	"os"
 )
 
 func main() {
