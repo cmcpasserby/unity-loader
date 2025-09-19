@@ -1,9 +1,33 @@
 package unity
 
 import (
+	"os"
 	"os/exec"
 	"path/filepath"
+
+	"howett.net/plist"
 )
+
+type appInfoDict struct {
+	CFBundleExecutable string `plist:"CFBundleExecutable"`
+	CFBundleVersion    string `plist:"CFBundleVersion"`
+}
+
+func unmarshalAppInfo(path string) (appInfoDict, error) {
+	plistPath := filepath.Join(path, "Contents", "Info.plist")
+	f, err := os.Open(plistPath)
+	if err != nil {
+		return appInfoDict{}, err
+	}
+	defer closeFile(f)
+
+	var appInfo appInfoDict
+	if err = plist.NewDecoder(f).Decode(&appInfo); err != nil {
+		return appInfoDict{}, err
+	}
+
+	return appInfo, nil
+}
 
 func binFromApp(path string) (string, error) {
 	appInfo, err := unmarshalAppInfo(path)

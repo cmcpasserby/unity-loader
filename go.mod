@@ -8,3 +8,5 @@ require (
 	github.com/cmcpasserby/verinfo v1.0.0
 	github.com/joho/godotenv v1.5.1
 )
+
+require howett.net/plist v1.0.1
