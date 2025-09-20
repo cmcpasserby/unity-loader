@@ -42,7 +42,10 @@ func unityGlob(searchPath string) ([]string, error) {
 	return filepath.Glob(filepath.Join(searchPath, "**/Unity.app"))
 }
 
-func command(path string, args ...string) *exec.Cmd {
-	newArgs := append([]string{path, "-W", "-n", "--args"}, args...)
-	return exec.Command("open", newArgs...)
+func command(path string, args ...string) (*exec.Cmd, error) {
+	executablePath, err := binFromApp(path)
+	if err != nil {
+		return nil, err
+	}
+	return exec.Command(executablePath, args...), nil
 }

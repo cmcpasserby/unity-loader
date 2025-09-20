@@ -20,19 +20,31 @@ type InstallInfo struct {
 // Run launches this Unity installs with a given project
 func (info *InstallInfo) Run(project string) error {
 	absProject, _ := filepath.Abs(project)
-	return command(info.Path, "-projectPath", absProject).Start()
+	cmd, err := command(info.Path, "projectPath", absProject)
+	if err != nil {
+		return err
+	}
+	return cmd.Start()
 }
 
 // RunWithTarget launches this unity install with the given project and target
 func (info *InstallInfo) RunWithTarget(project, buildTarget string) error {
 	absProject, _ := filepath.Abs(project)
-	return command(info.Path, "-projectPath", absProject, "-buildTarget", buildTarget).Start()
+	cmd, err := command(info.Path, "-projectPath", absProject, "-buildTarget", buildTarget)
+	if err != nil {
+		return err
+	}
+	return cmd.Start()
 }
 
 // RunWithProfile launches this unity install with the given project and build profile
 func (info *InstallInfo) RunWithProfile(project, buildProfile string) error {
 	absProject, _ := filepath.Abs(project)
-	return command(info.Path, "-projectPath", absProject, "-activeBuildProfile", buildProfile).Start()
+	cmd, err := command(info.Path, "-projectPath", absProject, "activeBuildProfile", buildProfile)
+	if err != nil {
+		return err
+	}
+	return cmd.Start()
 }
 
 // String prints version and path for this InstallInfo
@@ -42,7 +54,10 @@ func (info *InstallInfo) String() string {
 
 // GetInstallFromPath returns an InstallInfo for a given path
 func GetInstallFromPath(path string) (InstallInfo, error) {
-	cmd := command(path, "-version")
+	cmd, err := command(path, "-version")
+	if err != nil {
+		return InstallInfo{}, err
+	}
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

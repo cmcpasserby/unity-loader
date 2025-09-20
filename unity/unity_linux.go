@@ -24,6 +24,6 @@ func unityGlob(searchPath string) ([]string, error) {
 	return items, nil
 }
 
-func command(path string, args ...string) *exec.Cmd {
-	return exec.Command(path, args...)
+func command(path string, args ...string) (*exec.Cmd, error) {
+	return exec.Command(path, args...), nil
 }
