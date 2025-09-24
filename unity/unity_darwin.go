@@ -43,9 +43,16 @@ func unityGlob(searchPath string) ([]string, error) {
 }
 
 func command(path string, args ...string) (*exec.Cmd, error) {
-	executablePath, err := binFromApp(path)
-	if err != nil {
-		return nil, err
+	// uses direct call to binary when only getting the version from unity
+	if args[0] == "-version" {
+		execPath, err := binFromApp(path)
+		if err != nil {
+			return nil, err
+		}
+		return exec.Command(execPath, args...), nil
 	}
-	return exec.Command(executablePath, args...), nil
+
+	// otherwise, use open to launch the app, so app permissions are handled properly
+	newArgs := append([]string{path, "-W", "-n", "--args"}, args...)
+	return exec.Command("open", newArgs...), nil
 }
