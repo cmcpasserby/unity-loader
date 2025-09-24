@@ -20,7 +20,7 @@ type InstallInfo struct {
 // Run launches this Unity installs with a given project
 func (info *InstallInfo) Run(project string) error {
 	absProject, _ := filepath.Abs(project)
-	cmd, err := command(info.Path, "projectPath", absProject)
+	cmd, err := command(info.Path, "-projectPath", absProject)
 	if err != nil {
 		return err
 	}
