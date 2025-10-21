@@ -17,7 +17,7 @@ type InstallInfo struct {
 	Version VersionData
 }
 
-// Run launches this Unity installs with a given project
+// Run launches this Unity Installs with a given project
 func (info *InstallInfo) Run(project string) error {
 	absProject, _ := filepath.Abs(project)
 	cmd, err := command(info.Path, "-projectPath", absProject)
@@ -27,7 +27,7 @@ func (info *InstallInfo) Run(project string) error {
 	return cmd.Start()
 }
 
-// RunWithTarget launches this unity install with the given project and target
+// RunWithTarget launches this unity Install with the given project and target
 func (info *InstallInfo) RunWithTarget(project, buildTarget string) error {
 	absProject, _ := filepath.Abs(project)
 	cmd, err := command(info.Path, "-projectPath", absProject, "-buildTarget", buildTarget)
@@ -37,10 +37,10 @@ func (info *InstallInfo) RunWithTarget(project, buildTarget string) error {
 	return cmd.Start()
 }
 
-// RunWithProfile launches this unity install with the given project and build profile
+// RunWithProfile launches this unity Install with the given project and build profile
 func (info *InstallInfo) RunWithProfile(project, buildProfile string) error {
 	absProject, _ := filepath.Abs(project)
-	cmd, err := command(info.Path, "-projectPath", absProject, "activeBuildProfile", buildProfile)
+	cmd, err := command(info.Path, "-projectPath", absProject, "-activeBuildProfile", buildProfile)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func GetVersionFromProject(projectPath string) (VersionData, error) {
 	return versionData, nil
 }
 
-// GetInstalls lists all found Unity installs for a given set of search paths
+// GetInstalls lists all found Unity Installs for a given set of search paths
 func GetInstalls(searchPaths ...string) ([]InstallInfo, error) {
 	installPaths := make([]string, 0)
 	for _, path := range searchPaths {
@@ -120,7 +120,7 @@ func GetInstalls(searchPaths ...string) ([]InstallInfo, error) {
 	return installs, nil
 }
 
-// GetInstallFromVersion tries to find the appropriate Unity install for a given version
+// GetInstallFromVersion tries to find the appropriate Unity Install for a given version
 func GetInstallFromVersion(version VersionData, searchPaths ...string) (InstallInfo, error) {
 	installs, err := GetInstalls(searchPaths...)
 	if err != nil {
