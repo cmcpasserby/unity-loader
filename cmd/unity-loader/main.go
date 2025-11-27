@@ -26,6 +26,7 @@ func main() {
 			createVersionCmd(),
 			createListCmd(),
 			createBuildProfilesCmd(),
+			createServeCmd(),
 			// createSearchCmd(),
 			// createInstallCmd(),
 		},
