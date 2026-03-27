@@ -16,6 +16,7 @@ func createServeCmd() *scli.Command {
 
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	portFlag := fs.Int("port", defaultPort, "port to serve on")
+	queryArgsFlag := fs.String("queryArgs", "", "query args to append to the url")
 
 	return &scli.Command{
 		Usage:         "serve [targetDirectory]",
@@ -35,7 +36,7 @@ func createServeCmd() *scli.Command {
 				return err
 			}
 
-			return serve.Serve(absPath, port)
+			return serve.Serve(absPath, port, *queryArgsFlag)
 		},
 	}
 }

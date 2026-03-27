@@ -13,12 +13,17 @@ const (
 	enableWasmMultithreading = false
 )
 
-func Serve(path string, port int) error {
+func Serve(path string, port int, queryArgs string) error {
 	fileServer := http.FileServer(http.Dir(path))
 	handler := webGlHandler(fileServer)
 	addr := fmt.Sprintf(":%d", port)
 
-	log.Printf("Serving %s on http://localhost%s\n", path, addr)
+	if queryArgs == "" {
+		log.Printf("Serving %s on http://localhost%s/\n", path, addr)
+	} else {
+		log.Printf("Serving %s on http://localhost%s/%s\n", path, addr, queryArgs)
+	}
+
 	return http.ListenAndServe(addr, handler)
 }
 
