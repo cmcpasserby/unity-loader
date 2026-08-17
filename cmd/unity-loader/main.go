@@ -15,6 +15,8 @@ func main() {
 	fs := flag.NewFlagSet("root", flag.ExitOnError)
 	versionFlag := fs.Bool("v", false, "prints unity-loader's version")
 
+	openCmd := createOpenCmd()
+
 	cmd := &scli.Command{
 		Usage:         "unity-loader <subcommand>",
 		ShortHelp:     "Tool for loading unity projects with their respective unity versions",
@@ -22,7 +24,7 @@ func main() {
 		FlagSet:       fs,
 		ArgsValidator: scli.NoArgs(),
 		Subcommands: []*scli.Command{
-			createRunCmd(),
+			openCmd,
 			createVersionCmd(),
 			createListCmd(),
 			createBuildProfilesCmd(),
@@ -32,7 +34,7 @@ func main() {
 		},
 		Exec: func(ctx context.Context, args []string) error {
 			if !*versionFlag {
-				return flag.ErrHelp
+				return openCmd.Exec(ctx, args)
 			}
 
 			info, err := verinfo.Get()

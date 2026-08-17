@@ -13,8 +13,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func createRunCmd() *scli.Command {
-	fs := flag.NewFlagSet("run", flag.ExitOnError)
+func createOpenCmd() *scli.Command {
+	fs := flag.NewFlagSet("open", flag.ExitOnError)
 	forceVersionFlag := fs.String("force", "", "force project to be opened with a specific Unity version")
 	buildTargetFlag := fs.String("buildTarget", "", "opens project with a specific build target set")
 	buildProfileFlag := fs.String("buildProfile", "", "opens project with a specific build profile set")
@@ -22,7 +22,8 @@ func createRunCmd() *scli.Command {
 	noEnvFlag := fs.Bool("noEnv", false, "prevents loading or overloading of dotenv file and applying it to the environment")
 
 	return &scli.Command{
-		Usage:         "run [projectDirectory]",
+		Usage:         "open [projectDirectory]",
+		Aliases:       []string{"run"},
 		ShortHelp:     "Launches unity and opens the selected project",
 		LongHelp:      "Launches unity and opens the selected project",
 		FlagSet:       fs,
